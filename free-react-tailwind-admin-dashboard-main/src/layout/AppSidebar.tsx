@@ -6,7 +6,6 @@ import {
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-  ListIcon,
   PlugInIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
@@ -23,11 +22,6 @@ const navItems: NavItem[] = [
     icon: <GridIcon />,
     name: "Dashboard",
     path: "/",
-  },
-  {
-    name: "input",
-    icon: <ListIcon />,
-    path: "/input",
   },
 ];
 
