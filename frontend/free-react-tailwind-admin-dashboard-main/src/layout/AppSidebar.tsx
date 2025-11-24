@@ -18,13 +18,17 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/",
-  },
+    {
+        icon: <GridIcon />,
+        name: "Dashboard",
+        path: "/",
+    },
+    {
+        icon: <GridIcon />,
+        name: "Products Management",
+        path: "/products",
+    },
 ];
-
 const othersItems: NavItem[] = [
   {
     icon: <PlugInIcon />,

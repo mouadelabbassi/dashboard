@@ -6,7 +6,7 @@ import UserProfiles from "./pages/UserProfiles";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
-import ProductsPage from "./pages/Dashboard/ProductsPage"; // NEW
+import ProductsPage from "./pages/Dashboard/ProductsPage";
 
 export default function App() {
     return (
@@ -14,18 +14,15 @@ export default function App() {
             <Router>
                 <ScrollToTop />
                 <Routes>
-                    {/* Dashboard Layout */}
+                    {/* Dashboard Layout - Uses AppLayout with theme support */}
                     <Route element={<AppLayout />}>
                         <Route index path="/" element={<Home />} />
-
-                        {/* NEW: Products Page */}
+                        <Route path="/dashboard" element={<Home />} />
                         <Route path="/products" element={<ProductsPage />} />
-
-                        {/* Others Page */}
                         <Route path="/profile" element={<UserProfiles />} />
                     </Route>
 
-                    {/* Auth Layout */}
+                    {/* Auth Pages */}
                     <Route path="/signin" element={<SignIn />} />
                     <Route path="/signup" element={<SignUp />} />
 

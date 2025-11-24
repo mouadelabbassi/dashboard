@@ -1,64 +1,90 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getTopProducts, Product } from "../../service/api";
 
-export default function TopProductsTable() {
+const TopProductTable: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
+        const fetchTopProducts = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                const data = await getTopProducts(10);
+                setProducts(data);
+            } catch (err: any) {
+                console.error("Error fetching top products:", err);
+                setError(err.message || "Failed to load products");
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchTopProducts();
     }, []);
 
-    const fetchTopProducts = async () => {
-        try {
-            const data = await getTopProducts(10);
-            setProducts(data);
-        } catch (error) {
-            console.error("Error fetching top products:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     if (loading) {
         return (
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] animate-pulse">
-                <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-4"></div>
-                <div className="space-y-3">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    ))}
+            <div className="rounded-lg border border-stroke bg-white dark:bg-gray-900 px-7.5 py-6 shadow-default dark:border-gray-800">
+                <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-xl font-bold text-black dark:text-white flex items-center">
+                        🏆 Top 10 Best Sellers
+                    </h4>
+                </div>
+                <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="rounded-lg border border-stroke bg-white dark:bg-gray-900 px-7.5 py-6 shadow-default dark:border-gray-800">
+                <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-xl font-bold text-black dark:text-white flex items-center">
+                        🏆 Top 10 Best Sellers
+                    </h4>
+                </div>
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                    <p className="text-red-600 dark:text-red-400">{error}</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-            <h3 className="mb-5 text-lg font-semibold text-gray-800 dark:text-white/90">
-                🏆 Top 10 Best Sellers
-            </h3>
+        <div className="rounded-lg border border-stroke bg-white dark:bg-gray-900 px-7.5 py-6 shadow-default dark:border-gray-800">
+            <div className="flex items-center justify-between mb-4">
+                <h4 className="text-xl font-bold text-black dark:text-white flex items-center">
+                    🏆 Top 10 Best Sellers
+                </h4>
+            </div>
 
             <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full table-auto">
                     <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-800">
-                        <th className="pb-3 text-left text-sm font-medium text-gray-700 dark:text-gray-400">
+                    <tr className="bg-gray-50 dark:bg-gray-800 text-left">
+                        <th className="min-w-[50px] px-4 py-4 font-medium text-black dark:text-white">
                             Rank
                         </th>
-                        <th className="pb-3 text-left text-sm font-medium text-gray-700 dark:text-gray-400">
+                        <th className="min-w-[200px] px-4 py-4 font-medium text-black dark:text-white">
+                            Product Name
+                        </th>
+                        <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
                             ASIN
                         </th>
-                        <th className="pb-3 text-left text-sm font-medium text-gray-700 dark:text-gray-400">
+                        <th className="min-w-[150px] px-4 py-4 font-medium text-black dark:text-white">
                             Category
                         </th>
-                        <th className="pb-3 text-left text-sm font-medium text-gray-700 dark:text-gray-400">
+                        <th className="min-w-[100px] px-4 py-4 font-medium text-black dark:text-white">
                             Price
                         </th>
-                        <th className="pb-3 text-left text-sm font-medium text-gray-700 dark:text-gray-400">
+                        <th className="min-w-[100px] px-4 py-4 font-medium text-black dark:text-white">
                             Rating
                         </th>
-                        <th className="pb-3 text-left text-sm font-medium text-gray-700 dark:text-gray-400">
+                        <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
                             Reviews
                         </th>
                     </tr>
@@ -66,41 +92,78 @@ export default function TopProductsTable() {
                     <tbody>
                     {products.map((product) => (
                         <tr
-                            key={product.id}
-                            className="border-b border-gray-200 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-white/[0.02]"
+                            key={product.asin}
+                            className="border-b border-stroke dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
                         >
-                            <td className="py-4">
-                  <span className="inline-flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-3 py-1 text-sm font-bold text-blue-600 dark:text-blue-400">
-                    #{product.rank}
-                  </span>
+                            <td className="px-4 py-4">
+                                    <span className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-sm font-bold ${
+                                        product.rank === 1
+                                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                            : product.rank === 2
+                                                ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                                                : product.rank === 3
+                                                    ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                                                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                    }`}>
+                                        #{product.rank}
+                                    </span>
                             </td>
-                            <td className="py-4 font-mono text-sm text-gray-800 dark:text-white/90">
-                                {product.asin}
-                            </td>
-                            <td className="py-4">
-                  <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-800 px-3 py-1 text-xs font-medium text-gray-700 dark:text-gray-400">
-                    {product.category}
-                  </span>
-                            </td>
-                            <td className="py-4 font-semibold text-green-600 dark:text-green-400">
-                                ${product.price}
-                            </td>
-                            <td className="py-4">
-                                <div className="flex items-center gap-1">
-                                    <span className="text-yellow-500">⭐</span>
-                                    <span className="text-sm font-medium text-gray-800 dark:text-white/90">
-                      {product.rating}
-                    </span>
+                            <td className="px-4 py-4">
+                                <div className="flex items-center gap-3">
+                                    {product.imageUrl && (
+                                        <img
+                                            src={product.imageUrl}
+                                            alt={product.productName}
+                                            className="h-12 w-12 rounded object-cover border border-gray-200 dark:border-gray-700"
+                                            onError={(e) => {
+                                                e.currentTarget.src = 'https://via.placeholder.com/50';
+                                            }}
+                                        />
+                                    )}
+                                    <p className="text-sm text-black dark:text-white font-medium line-clamp-2">
+                                        {product.productName}
+                                    </p>
                                 </div>
                             </td>
-                            <td className="py-4 text-sm text-gray-600 dark:text-gray-400">
-                                {product.reviewsCount}
+                            <td className="px-4 py-4">
+                                <p className="text-sm text-blue-600 dark:text-blue-400 font-mono">{product.asin}</p>
+                            </td>
+                            <td className="px-4 py-4">
+                                    <span className="inline-flex rounded-full bg-blue-100 dark:bg-blue-900/30 px-3 py-1 text-xs font-medium text-blue-800 dark:text-blue-300">
+                                        {product.category}
+                                    </span>
+                            </td>
+                            <td className="px-4 py-4">
+                                <p className="text-sm font-semibold text-green-600 dark:text-green-400">
+                                    ${product.price?.toFixed(2) || '0.00'}
+                                </p>
+                            </td>
+                            <td className="px-4 py-4">
+                                <div className="flex items-center gap-1">
+                                    <span className="text-yellow-400">⭐</span>
+                                    <p className="text-sm text-black dark:text-white">
+                                        {product.rating?.toFixed(1) || 'N/A'}
+                                    </p>
+                                </div>
+                            </td>
+                            <td className="px-4 py-4">
+                                <p className="text-sm text-black dark:text-white">
+                                    {product.reviewsCount?.toLocaleString() || '0'}
+                                </p>
                             </td>
                         </tr>
                     ))}
                     </tbody>
                 </table>
             </div>
+
+            {products.length === 0 && (
+                <div className="py-12 text-center">
+                    <p className="text-gray-500 dark:text-gray-400">No products found</p>
+                </div>
+            )}
         </div>
     );
-}
+};
+
+export default TopProductTable;

@@ -1,41 +1,52 @@
-import EcommerceMetrics from "../../components/ecommerce/EcommerceMetrics";
-import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
-import StatisticsChart from "../../components/ecommerce/StatisticsChart";
-import MonthlyTarget from "../../components/ecommerce/MonthlyTarget";
-import PageMeta from "../../components/common/PageMeta";
-import TopProductsTable from "../../components/ecommerce/TopProductTable"; // NEW COMPONENT
+import React from 'react';
+import PageMeta from '../../components/common/PageMeta';
+import EcommerceMetrics from '../../components/ecommerce/EcommerceMetrics';
+import MonthlySalesChart from '../../components/ecommerce/MonthlySalesChart';
+import MonthlyTarget from '../../components/ecommerce/MonthlyTarget';
+import StatisticsChart from '../../components/ecommerce/StatisticsChart';
+import TopProductTable from '../../components/ecommerce/TopProductTable';
 
-export default function Home() {
+const Home: React.FC = () => {
     return (
         <>
             <PageMeta
-                title="Amazon Best Sellers Analytics - Dashboard"
-                description="Real-time analytics for Amazon Best Sellers products"
+                title="Dashboard - TailAdmin"
+                description="Amazon Sales Analytics Dashboard"
             />
-            <div className="grid grid-cols-12 gap-4 md:gap-6">
-                {/* Top Metrics - Connected to Backend */}
-                <div className="col-span-12">
+
+            <div className="p-4 sm:p-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
+                <div className="mb-6">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                        Dashboard
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-400">
+                        Welcome to your Amazon Sales Analytics Dashboard
+                    </p>
+                </div>
+
+                {/* Metrics Cards */}
+                <div className="mb-6">
                     <EcommerceMetrics />
                 </div>
 
-                {/* Charts Section */}
-                <div className="col-span-12 space-y-6 xl:col-span-7">
+                {/* Charts Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <MonthlySalesChart />
-                </div>
-
-                <div className="col-span-12 xl:col-span-5">
                     <MonthlyTarget />
                 </div>
 
-                <div className="col-span-12">
+                {/* Statistics Chart */}
+                <div className="mb-6">
                     <StatisticsChart />
                 </div>
 
-                {/* NEW: Top Products from Backend */}
-                <div className="col-span-12">
-                    <TopProductsTable />
+                {/* Top Products Table */}
+                <div>
+                    <TopProductTable />
                 </div>
             </div>
         </>
     );
-}
+};
+
+export default Home;
