@@ -34,7 +34,13 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
-    private Role role = Role.USER;
+    private Role role = Role.BUYER;
+
+    @Column(name = "security_question", length = 500)
+    private String securityQuestion;
+
+    @Column(name = "security_answer", length = 255)
+    private String securityAnswer;
 
     @Column(name = "is_active")
     @Builder.Default
@@ -53,6 +59,18 @@ public class User {
     private List<Sale> sales = new ArrayList<>();
 
     public enum Role {
-        USER, ADMIN, ANALYST
+        BUYER("Regular Buyer - Can view products and make purchases"),
+        ANALYST("Data Analyst - Can view analytics and reports"),
+        ADMIN("Administrator - Full access to all features");
+
+        private final String description;
+
+        Role(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
     }
 }

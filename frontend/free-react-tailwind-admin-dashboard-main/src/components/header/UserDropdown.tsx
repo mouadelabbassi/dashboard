@@ -68,7 +68,7 @@ export default function UserDropdown() {
             {user?.email || ''}
           </span>
                     <span className="mt-1 inline-block px-2 py-0.5 text-xs rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900 dark:text-brand-300">
-            {user?.role || 'USER'}
+            {user?.role || 'ADMIN'}
           </span>
                 </div>
 

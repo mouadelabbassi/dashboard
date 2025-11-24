@@ -25,7 +25,8 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
             "OR LOWER(p.asin) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<Product> searchProducts(@Param("query") String query, Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE p.ranking <= :n ORDER BY p.ranking ASC")
+    // FIXED: Added LEFT JOIN FETCH to load category data
+    @Query("SELECT p FROM Product p LEFT JOIN FETCH p.category WHERE p.ranking <= :n ORDER BY p.ranking ASC")
     List<Product> findTopNProducts(@Param("n") Integer n);
 
     @Query("SELECT p FROM Product p WHERE p.isBestseller = true ORDER BY p.ranking ASC")
