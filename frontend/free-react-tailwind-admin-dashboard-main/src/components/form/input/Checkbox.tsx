@@ -10,14 +10,12 @@ const Checkbox: React.FC<CheckboxProps> = ({
   label,
   checked,
   onChange,
-  className = "",
-  disabled = false,
   ...props
 }) => {
   return (
     <label
       className={`flex items-center space-x-3 group cursor-pointer ${
-        disabled ? "cursor-not-allowed opacity-60" : ""
+        props.disabled ? "cursor-not-allowed opacity-60" : ""
       }`}
     >
       <div className="relative w-5 h-5">
@@ -25,10 +23,9 @@ const Checkbox: React.FC<CheckboxProps> = ({
           {...props}
           type="checkbox"
           className={`w-5 h-5 appearance-none cursor-pointer dark:border-gray-700 border border-gray-300 checked:border-transparent rounded-md checked:bg-brand-500 disabled:opacity-60 
-          ${className}`}
+          ${props.className || ""}`}
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
-          disabled={disabled}
         />
         {checked && (
           <svg
@@ -48,7 +45,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
             />
           </svg>
         )}
-        {disabled && (
+        {props.disabled && (
           <svg
             className="absolute transform -translate-x-1/2 -translate-y-1/2 pointer-events-none top-1/2 left-1/2"
             xmlns="http://www.w3.org/2000/svg"

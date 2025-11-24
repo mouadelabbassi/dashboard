@@ -5,7 +5,7 @@ interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
   children: ReactNode;
 }
 
-const Form: FC<FormProps> = ({ onSubmit, children, className = "", ...props }) => {
+const Form: FC<FormProps> = ({ onSubmit, children, ...props }) => {
   return (
     <form
       {...props}
@@ -13,7 +13,7 @@ const Form: FC<FormProps> = ({ onSubmit, children, className = "", ...props }) =
         event.preventDefault(); // Prevent default form submission
         onSubmit(event);
       }}
-      className={` ${className}`} // Default spacing between form fields
+      className={` ${props.className || ""}`} // Default spacing between form fields
     >
       {children}
     </form>

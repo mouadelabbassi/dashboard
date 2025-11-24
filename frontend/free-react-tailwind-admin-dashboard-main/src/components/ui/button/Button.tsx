@@ -14,8 +14,6 @@ const Button: React.FC<ButtonProps> = ({
   variant = "primary",
   startIcon,
   endIcon,
-  className = "",
-  disabled = false,
   ...props
 }) => {
   // Size Classes
@@ -35,12 +33,11 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       {...props}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg transition ${className} ${
+      className={`inline-flex items-center justify-center gap-2 rounded-lg transition ${props.className || ""} ${
         sizeClasses[size]
       } ${variantClasses[variant]} ${
-        disabled ? "cursor-not-allowed opacity-50" : ""
+        props.disabled ? "cursor-not-allowed opacity-50" : ""
       }`}
-      disabled={disabled}
     >
       {startIcon && <span className="flex items-center">{startIcon}</span>}
       {children}

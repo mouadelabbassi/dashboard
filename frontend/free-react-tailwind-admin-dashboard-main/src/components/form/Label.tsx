@@ -6,14 +6,14 @@ interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
   children: ReactNode;
 }
 
-const Label: FC<LabelProps> = ({ children, className = "", ...props }) => {
+const Label: FC<LabelProps> = ({ children, ...props }) => {
   return (
     <label
       {...props}
       className={clsx(
         twMerge(
           "mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400",
-          className,
+          props.className,
         ),
       )}
     >
