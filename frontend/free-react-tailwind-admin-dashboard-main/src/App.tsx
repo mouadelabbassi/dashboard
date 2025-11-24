@@ -7,29 +7,35 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import ProductsPage from "./pages/Dashboard/ProductsPage";
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 export default function App() {
     return (
-        <>
+        <AuthProvider>
             <Router>
                 <ScrollToTop />
                 <Routes>
-                    {/* Dashboard Layout - Uses AppLayout with theme support */}
-                    <Route element={<AppLayout />}>
+                    {/* Public Routes - Auth Pages */}
+                    <Route path="/signin" element={<SignIn />} />
+                    <Route path="/signup" element={<SignUp />} />
+
+                    {/* Protected Routes - Dashboard Layout */}
+                    <Route element={
+                        <ProtectedRoute>
+                            <AppLayout />
+                        </ProtectedRoute>
+                    }>
                         <Route index path="/" element={<Home />} />
                         <Route path="/dashboard" element={<Home />} />
                         <Route path="/products" element={<ProductsPage />} />
                         <Route path="/profile" element={<UserProfiles />} />
                     </Route>
 
-                    {/* Auth Pages */}
-                    <Route path="/signin" element={<SignIn />} />
-                    <Route path="/signup" element={<SignUp />} />
-
                     {/* Fallback Route */}
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </Router>
-        </>
+        </AuthProvider>
     );
 }

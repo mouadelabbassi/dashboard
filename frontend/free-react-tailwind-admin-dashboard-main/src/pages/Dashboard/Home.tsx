@@ -5,22 +5,26 @@ import MonthlySalesChart from '../../components/ecommerce/MonthlySalesChart';
 import MonthlyTarget from '../../components/ecommerce/MonthlyTarget';
 import StatisticsChart from '../../components/ecommerce/StatisticsChart';
 import TopProductTable from '../../components/ecommerce/TopProductTable';
+import CategoryDistributionChart from '../../components/ecommerce/CategoryDistributionChart';
+import { useAuth } from '../../context/AuthContext';
 
 const Home: React.FC = () => {
+    const { user } = useAuth();
+
     return (
         <>
             <PageMeta
-                title="Dashboard - TailAdmin"
+                title="Dashboard - Amazon Sales Analytics"
                 description="Amazon Sales Analytics Dashboard"
             />
 
             <div className="p-4 sm:p-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
                 <div className="mb-6">
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                        Dashboard
+                        Welcome back, {user?.fullName?.split(' ')[0] || 'User'}! 👋
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400">
-                        Welcome to your Amazon Sales Analytics Dashboard
+                        Here's what's happening with your Amazon sales today
                     </p>
                 </div>
 
@@ -29,14 +33,15 @@ const Home: React.FC = () => {
                     <EcommerceMetrics />
                 </div>
 
-                {/* Charts Row */}
+                {/* Charts Row - Monthly Sales & Monthly Target */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <MonthlySalesChart />
                     <MonthlyTarget />
                 </div>
 
-                {/* Statistics Chart */}
-                <div className="mb-6">
+                {/* Category Distribution & Statistics */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <CategoryDistributionChart />
                     <StatisticsChart />
                 </div>
 
