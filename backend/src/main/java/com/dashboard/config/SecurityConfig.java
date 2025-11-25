@@ -62,36 +62,37 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/api-docs/**").permitAll()
                         .requestMatchers("/swagger-resources/**", "/webjars/**").permitAll()
 
-                        // Public endpoints - All dashboard and data endpoints (for testing/demo)
+                        // Public endpoints - Read operations
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/dashboard/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/sales/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/product/**").permitAll()
 
-                        // Public endpoint - Generate sample sales data (for demo)
+                        // Public endpoint - Generate sample data
                         .requestMatchers(HttpMethod.POST, "/api/sales/generate-sample").permitAll()
 
-                        // Protected endpoints - Import (Admin only)
-                        .requestMatchers("/api/import/**").hasRole("ADMIN")
+                        // Protected endpoints - Reviews (Buyers only)
+                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").authenticated()
+                        .requestMatchers("/api/reviews/my-reviews").authenticated()
 
-                        // Protected endpoints - Export (Allow all for demo)
-                        .requestMatchers("/api/export/**").permitAll()
-
-                        // Protected endpoints - User Profile (Authenticated users only)
+                        // Protected endpoints - User profile
                         .requestMatchers("/api/users/**").authenticated()
 
-                        // Protected endpoints - Create/Update/Delete operations
-                        .requestMatchers(HttpMethod.POST, "/api/products/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
+                        // Protected endpoints - Admin/Analyst operations
+                        .requestMatchers("/api/import/**").hasRole("ADMIN")
+                        .requestMatchers("/api/export/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/categories/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/categories/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/categories/**").authenticated()
+                        // Protected endpoints - Product management (Admin only)
+                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasAnyRole("ADMIN", "ANALYST")
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAnyRole("ADMIN", "ANALYST")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/sales/**").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/sales/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/sales/**").authenticated()
+                        // Protected endpoints - Category management
+                        .requestMatchers(HttpMethod.POST, "/api/categories/**").hasAnyRole("ADMIN", "ANALYST")
+                        .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasAnyRole("ADMIN", "ANALYST")
+                        .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
 
                         // All other requests require authentication
                         .anyRequest().authenticated()

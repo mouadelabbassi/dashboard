@@ -41,7 +41,8 @@ public class Product {
     private BigDecimal rating;
 
     @Column(name = "reviews_count")
-    private Integer reviewsCount;
+    @Builder.Default
+    private Integer reviewsCount = 0;
 
     @Column(name = "ranking")
     private Integer ranking;
@@ -63,6 +64,14 @@ public class Product {
     @Builder.Default
     private Boolean isBestseller = false;
 
+    @Column(name = "likes_count")
+    @Builder.Default
+    private Integer likesCount = 0;
+
+    @Column(name = "dislikes_count")
+    @Builder.Default
+    private Integer dislikesCount = 0;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -74,6 +83,10 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Sale> sales = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ProductReview> reviews = new ArrayList<>();
 
     @PrePersist
     @PreUpdate

@@ -63,7 +63,7 @@ const TopCategoriesRevenueChart: React.FC = () => {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
-                        📊 Revenue by Category
+                        Revenue by Category
                     </h4>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Estimated revenue based on engagement

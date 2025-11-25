@@ -76,7 +76,7 @@ const RatingDistributionChart: React.FC = () => {
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
-                        ⭐ Rating Distribution
+                        Rating Distribution
                     </h4>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Products by customer rating
