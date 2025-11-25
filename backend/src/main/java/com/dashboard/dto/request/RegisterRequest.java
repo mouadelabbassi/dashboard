@@ -25,5 +25,12 @@ public class RegisterRequest {
     @NotBlank(message = "Full name is required")
     private String fullName;
 
-    private String role = "USER";
+    @Builder.Default
+    private String role = "BUYER";
+
+    @NotBlank(message = "Security question is required")
+    private String securityQuestion;
+
+    @NotBlank(message = "Security answer is required")
+    private String securityAnswer;
 }

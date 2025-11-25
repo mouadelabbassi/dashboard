@@ -6,6 +6,8 @@ interface User {
     email: string;
     fullName: string;
     role: string;
+    phone?: string;
+    bio?: string;
 }
 
 interface AuthContextType {
@@ -14,6 +16,8 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, password: string, fullName: string, role: string, securityQuestion: string, securityAnswer: string) => Promise<void>;
     logout: () => void;
+    updateUserProfile: (fullName: string, phone?: string, bio?: string) => Promise<void>;
+    refreshUserData: () => Promise<void>;
     isAuthenticated: boolean;
     isLoading: boolean;
 }
@@ -33,7 +37,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (storedToken && storedUser) {
             setToken(storedToken);
             setUser(JSON.parse(storedUser));
-            // Set axios default header
             axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
         }
         setIsLoading(false);
@@ -54,11 +57,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setToken(authToken);
                 setUser(userData);
 
-                // Store in localStorage
                 localStorage.setItem('token', authToken);
                 localStorage.setItem('user', JSON.stringify(userData));
-
-                // Set axios default header
                 axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
             } else {
                 throw new Error(response.data.message || 'Login failed');
@@ -95,11 +95,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setToken(authToken);
                 setUser(userData);
 
-                // Store in localStorage
                 localStorage.setItem('token', authToken);
                 localStorage.setItem('user', JSON.stringify(userData));
-
-                // Set axios default header
                 axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
             } else {
                 throw new Error(response.data.message || 'Registration failed');
@@ -107,6 +104,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (error: any) {
             console.error('Registration error:', error);
             throw new Error(error.response?.data?.message || 'Registration failed');
+        }
+    };
+
+    const updateUserProfile = async (fullName: string, phone?: string, bio?: string) => {
+        try {
+            const response = await axios.put('http://localhost:8080/api/users/profile', {
+                fullName,
+                phone,
+                bio
+            });
+
+            if (response.data.success) {
+                const updatedUser = response.data.data;
+                const userData: User = {
+                    id: updatedUser.id,
+                    email: updatedUser.email,
+                    fullName: updatedUser.fullName,
+                    role: updatedUser.role,
+                    phone: updatedUser.phone,
+                    bio: updatedUser.bio
+                };
+
+                setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
+            } else {
+                throw new Error(response.data.message || 'Update failed');
+            }
+        } catch (error: any) {
+            console.error('Update profile error:', error);
+            throw new Error(error.response?.data?.message || 'Update failed');
+        }
+    };
+
+    const refreshUserData = async () => {
+        try {
+            const response = await axios.get('http://localhost:8080/api/users/profile');
+
+            if (response.data.success) {
+                const updatedUser = response.data.data;
+                const userData: User = {
+                    id: updatedUser.id,
+                    email: updatedUser.email,
+                    fullName: updatedUser.fullName,
+                    role: updatedUser.role,
+                    phone: updatedUser.phone,
+                    bio: updatedUser.bio
+                };
+
+                setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
+            }
+        } catch (error: any) {
+            console.error('Refresh user data error:', error);
         }
     };
 
@@ -124,6 +174,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         register,
         logout,
+        updateUserProfile,
+        refreshUserData,
         isAuthenticated: !!token,
         isLoading
     };

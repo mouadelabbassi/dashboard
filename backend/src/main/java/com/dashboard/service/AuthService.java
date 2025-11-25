@@ -18,6 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,7 +43,8 @@ public class AuthService {
         try {
             role = User.Role.valueOf(request.getRole().toUpperCase());
         } catch (IllegalArgumentException e) {
-            role = User.Role.USER;
+            // Default to BUYER instead of USER (which doesn't exist)
+            role = User.Role.BUYER;
         }
 
         User user = User.builder()
@@ -48,6 +52,8 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
                 .role(role)
+                .securityQuestion(request.getSecurityQuestion())
+                .securityAnswer(passwordEncoder.encode(request.getSecurityAnswer()))
                 .isActive(true)
                 .build();
 
@@ -92,6 +98,57 @@ public class AuthService {
                 .fullName(user.getFullName())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    /**
+     * Get security question for password reset
+     */
+    public Map<String, String> getSecurityQuestion(String email) {
+        log.info("Getting security question for email: {}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User not found with email: " + email));
+
+        if (user.getSecurityQuestion() == null || user.getSecurityQuestion().isEmpty()) {
+            throw new BadRequestException("No security question set for this account");
+        }
+
+        Map<String, String> response = new HashMap<>();
+        response.put("email", user.getEmail());
+        response.put("securityQuestion", user.getSecurityQuestion());
+
+        return response;
+    }
+
+    /**
+     * Reset password after verifying security answer
+     */
+    @Transactional
+    public void resetPassword(String email, String securityAnswer, String newPassword) {
+        log.info("Password reset attempt for email: {}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User not found with email: " + email));
+
+        if (user.getSecurityAnswer() == null) {
+            throw new BadRequestException("No security answer set for this account");
+        }
+
+        // Verify security answer
+        if (!passwordEncoder.matches(securityAnswer, user.getSecurityAnswer())) {
+            throw new BadRequestException("Incorrect security answer");
+        }
+
+        // Validate new password
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new BadRequestException("Password must be at least 6 characters long");
+        }
+
+        // Update password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        log.info("Password reset successfully for user: {}", email);
     }
 
     public AuthResponse refreshToken() {

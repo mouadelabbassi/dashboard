@@ -1,5 +1,6 @@
 package com.dashboard.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -25,11 +26,18 @@ public class User {
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false, length = 255)
     private String password;
 
     @Column(name = "full_name", length = 255)
     private String fullName;
+
+    @Column(length = 20)
+    private String phone;
+
+    @Column(length = 500)
+    private String bio;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -39,6 +47,7 @@ public class User {
     @Column(name = "security_question", length = 500)
     private String securityQuestion;
 
+    @JsonIgnore
     @Column(name = "security_answer", length = 255)
     private String securityAnswer;
 
@@ -54,14 +63,15 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Sale> sales = new ArrayList<>();
 
     public enum Role {
-        BUYER("Regular Buyer - Can view products and make purchases"),
-        ANALYST("Data Analyst - Can view analytics and reports"),
-        ADMIN("Administrator - Full access to all features");
+        BUYER("Regular Buyer "),
+        ANALYST("Data Analyst "),
+        ADMIN("Administrator ");
 
         private final String description;
 

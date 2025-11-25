@@ -10,7 +10,15 @@ const api = axios.create({
     },
 });
 
-// Add response interceptor for better error handling
+// Add auth token to requests
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 api.interceptors.response.use(
     (response) => response,
     (error) => {
@@ -37,8 +45,6 @@ export interface DashboardStats {
 
 export interface Product {
     asin: string;
-    ranking?: number;
-    rank?: number;
     productName: string;
     description?: string;
     price: number;
@@ -47,14 +53,57 @@ export interface Product {
     imageUrl?: string;
     productLink?: string;
     noOfSellers?: number;
-    // Backend returns these fields:
+    ranking?: number;
+    rank?: number;
     categoryId?: number;
     categoryName?: string;
-    // Keep this for backward compatibility:
     category?: string;
     isBestseller?: boolean;
     createdAt?: string;
     updatedAt?: string;
+}
+
+export interface ProductCreateRequest {
+    asin: string;
+    productName: string;
+    description?: string;
+    price: number;
+    imageUrl?: string;
+    productLink?: string;
+    categoryId: number;
+}
+
+export interface ProductUpdateRequest {
+    productName?: string;
+    description?: string;
+    price?: number;
+    imageUrl?: string;
+    productLink?: string;
+    categoryId?: number;
+}
+
+export interface Category {
+    id: number;
+    name: string;
+    description?: string;
+    productCount: number;
+}
+
+export interface CategoryRevenue {
+    name: string;
+    productCount: number;
+    estimatedRevenue: number;
+    avgPrice: number;
+}
+
+export interface CorrelationPoint {
+    asin: string;
+    name: string;
+    reviews: number;
+    ranking: number;
+    rating: number;
+    price: number;
+    category: string;
 }
 
 export interface SearchFilters {
@@ -87,8 +136,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
         return response.data.data;
     } catch (error) {
         console.error('Error fetching dashboard stats:', error);
-        // @ts-ignore
-        return ;
+        throw error;
     }
 };
 
@@ -116,38 +164,50 @@ export const getAllProducts = async (page: number = 0, size: number = 1000): Pro
     }
 };
 
+// Get single product by ASIN
+export const getProductByAsin = async (asin: string): Promise<Product | null> => {
+    try {
+        const response = await api.get<ApiResponse<Product>>(`/products/${asin}`);
+        return response.data.data;
+    } catch (error) {
+        console.error('Error fetching product:', error);
+        return null;
+    }
+};
+
+// Create Product
+export const createProduct = async (product: ProductCreateRequest): Promise<Product> => {
+    const response = await api.post<ApiResponse<Product>>('/products', product);
+    return response.data.data;
+};
+
+// Update Product
+export const updateProduct = async (asin: string, product: ProductUpdateRequest): Promise<Product> => {
+    const response = await api.put<ApiResponse<Product>>(`/products/${asin}`, product);
+    return response.data.data;
+};
+
 // Search and Filter Products
 export const searchProducts = async (filters: SearchFilters, page: number = 0, size: number = 1000): Promise<Product[]> => {
     try {
-        // If there's a search query, use the /search endpoint
         if (filters.query && filters.query.trim()) {
             const response = await api.get('/products/search', {
                 params: { q: filters.query, page, size }
             });
-
-            if (response.data && response.data.data && response.data.data.content) {
+            if (response.data?.data?.content) {
                 return response.data.data.content;
             }
             return [];
         }
 
-        // Otherwise use the /filter endpoint
-        const params: any = {
-            page,
-            size,
-            sortBy: 'ranking'
-        };
-
-        if (filters.category) params.categoryName = filters.category;  // CHANGED: categoryName instead of category
+        const params: any = { page, size, sortBy: 'ranking' };
+        if (filters.category) params.categoryName = filters.category;
         if (filters.minPrice) params.minPrice = filters.minPrice;
         if (filters.maxPrice) params.maxPrice = filters.maxPrice;
         if (filters.minRating) params.minRating = filters.minRating;
 
-        const response = await api.get('/products/filter', {
-            params
-        });
-
-        if (response.data && response.data.data && response.data.data.content) {
+        const response = await api.get('/products/filter', { params });
+        if (response.data?.data?.content) {
             return response.data.data.content;
         }
         return [];
@@ -156,62 +216,51 @@ export const searchProducts = async (filters: SearchFilters, page: number = 0, s
         return [];
     }
 };
+
 // Delete Product
 export const deleteProduct = async (asin: string): Promise<void> => {
+    await api.delete(`/products/${asin}`);
+};
+
+// Get all categories
+export const getCategories = async (): Promise<Category[]> => {
     try {
-        await api.delete(`/products/${asin}`);
+        const response = await api.get<ApiResponse<Category[]>>('/categories');
+        return response.data.data;
     } catch (error) {
-        console.error('Error deleting product:', error);
-        throw error;
+        console.error('Error fetching categories:', error);
+        return [];
     }
+};
+
+// Dashboard API
+export const dashboardAPI = {
+    getStats: async () => api.get('/dashboard/stats'),
+    getPriceDistribution: async () => api.get('/dashboard/price-distribution'),
+    getRatingDistribution: async () => api.get('/dashboard/rating-distribution'),
+    getCategoryDistribution: async () => api.get('/dashboard/category-distribution'),
+    getCategoryRevenue: async () => api.get<ApiResponse<CategoryRevenue[]>>('/dashboard/category-revenue'),
+    getBestsellers: async () => api.get<ApiResponse<Product[]>>('/dashboard/bestsellers'),
+    getCorrelationData: async () => api.get<ApiResponse<CorrelationPoint[]>>('/dashboard/reviews-ranking-correlation'),
+    getTrends: async () => api.get('/dashboard/trends'),
 };
 
 // Sales API
 export const salesAPI = {
     getMonthly: async (year: number) => {
         try {
-            const response = await api.get(`/sales/monthly?year=${year}`);
-            return response;
+            return await api.get(`/sales/monthly?year=${year}`);
         } catch (error) {
             console.error('Error fetching monthly sales:', error);
-            return {
-                data: {
-                    success: false,
-                    data: {}
-                }
-            };
+            return { data: { success: false, data: {} } };
         }
     },
     getRevenue: async () => {
         try {
-            const response = await api.get('/sales/revenue');
-            return response;
+            return await api.get('/sales/revenue');
         } catch (error) {
             console.error('Error fetching revenue:', error);
-            return {
-                data: {
-                    success: false,
-                    data: 0
-                }
-            };
-        }
-    },
-};
-
-// Dashboard API
-export const dashboardAPI = {
-    getPriceDistribution: async () => {
-        try {
-            const response = await api.get('/dashboard/price-distribution');
-            return response;
-        } catch (error) {
-            console.error('Error fetching price distribution:', error);
-            return {
-                data: {
-                    success: false,
-                    data: {}
-                }
-            };
+            return { data: { success: false, data: 0 } };
         }
     },
 };

@@ -77,6 +77,9 @@ public class SecurityConfig {
                         // Protected endpoints - Export (Allow all for demo)
                         .requestMatchers("/api/export/**").permitAll()
 
+                        // Protected endpoints - User Profile (Authenticated users only)
+                        .requestMatchers("/api/users/**").authenticated()
+
                         // Protected endpoints - Create/Update/Delete operations
                         .requestMatchers(HttpMethod.POST, "/api/products/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()

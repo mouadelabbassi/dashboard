@@ -38,20 +38,17 @@ export default function SignUpForm() {
         {
             value: "BUYER",
             label: "Buyer",
-            description: "Regular buyer - View products and make purchases",
-            icon: "🛍️"
+            icon: ""
         },
         {
             value: "ANALYST",
             label: "Analyst",
-            description: "Data analyst - View analytics and reports",
-            icon: "📊"
+            icon: ""
         },
         {
             value: "ADMIN",
             label: "Admin",
-            description: "Administrator - Full access to all features",
-            icon: "👑"
+            icon: ""
         }
     ];
 
@@ -216,9 +213,6 @@ export default function SignUpForm() {
                                                             {role.label}
                                                         </span>
                                                     </div>
-                                                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                        {role.description}
-                                                    </p>
                                                 </div>
                                             </label>
                                         ))}

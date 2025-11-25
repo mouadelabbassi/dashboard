@@ -1,11 +1,13 @@
 import React from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import EcommerceMetrics from '../../components/ecommerce/EcommerceMetrics';
-import MonthlySalesChart from '../../components/ecommerce/MonthlySalesChart';
-import MonthlyTarget from '../../components/ecommerce/MonthlyTarget';
-import StatisticsChart from '../../components/ecommerce/StatisticsChart';
 import TopProductTable from '../../components/ecommerce/TopProductTable';
 import CategoryDistributionChart from '../../components/ecommerce/CategoryDistributionChart';
+import BestsellerCards from '../../components/ecommerce/BestsellerCards';
+import PriceDistributionChart from '../../components/ecommerce/PriceDistributionChart';
+import RatingDistributionChart from '../../components/ecommerce/RatingDistributionChart';
+import TopCategoriesRevenueChart from '../../components/ecommerce/TopCategoriesRevenueChart';
+import ReviewsCorrelationChart from '../../components/ecommerce/ReviewsCorrelationChart';
 import { useAuth } from '../../context/AuthContext';
 
 const Home: React.FC = () => {
@@ -33,18 +35,25 @@ const Home: React.FC = () => {
                     <EcommerceMetrics />
                 </div>
 
-                {/* Charts Row - Monthly Sales & Monthly Target */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <MonthlySalesChart />
-                    <MonthlyTarget />
-                </div>
+                {/* Top 3 Bestseller Cards */}
+                <BestsellerCards />
 
-                {/* Category Distribution & Statistics */}
+                {/* Category Distribution & Price Distribution */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     <CategoryDistributionChart />
-                    <StatisticsChart />
+                    <PriceDistributionChart />
                 </div>
 
+                {/* Revenue by Category & Rating Distribution */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <TopCategoriesRevenueChart />
+                    <RatingDistributionChart />
+                </div>
+
+                {/* Reviews vs Ranking Correlation - Full Width */}
+                <div className="mb-6">
+                    <ReviewsCorrelationChart />
+                </div>
                 {/* Top Products Table */}
                 <div>
                     <TopProductTable />

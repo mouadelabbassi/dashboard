@@ -3,6 +3,7 @@ package com.dashboard.controller;
 import com.dashboard.dto.response.ApiResponse;
 import com.dashboard.dto.response.DashboardResponse;
 import com.dashboard.dto.response.DashboardStatsResponse;
+import com.dashboard.dto.response.ProductResponse;
 import com.dashboard.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -57,14 +59,31 @@ public class DashboardController {
         return ResponseEntity.ok(ApiResponse.success("Rating distribution retrieved successfully", distribution));
     }
 
+    @GetMapping("/category-revenue")
+    @Operation(summary = "Get revenue by category", description = "Returns estimated revenue per category")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getCategoryRevenue() {
+        List<Map<String, Object>> revenue = dashboardService.getCategoryRevenue();
+        return ResponseEntity.ok(ApiResponse.success("Category revenue retrieved successfully", revenue));
+    }
+
+    @GetMapping("/bestsellers")
+    @Operation(summary = "Get top 3 bestsellers", description = "Returns top 3 bestselling products")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getTopBestsellers() {
+        List<ProductResponse> bestsellers = dashboardService.getTopBestsellers(3);
+        return ResponseEntity.ok(ApiResponse.success("Bestsellers retrieved successfully", bestsellers));
+    }
+
+    @GetMapping("/reviews-ranking-correlation")
+    @Operation(summary = "Get reviews vs ranking data", description = "Returns data for scatter plot correlation")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getReviewsRankingCorrelation() {
+        List<Map<String, Object>> data = dashboardService.getReviewsRankingCorrelation();
+        return ResponseEntity.ok(ApiResponse.success("Correlation data retrieved successfully", data));
+    }
+
     @GetMapping("/trends")
     @Operation(summary = "Get sales trends", description = "Returns sales trends and analytics")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getTrends() {
-        // This can be expanded with more complex trend analysis
-        Map<String, Object> trends = Map.of(
-                "message", "Trends analysis coming soon",
-                "status", "placeholder"
-        );
+        Map<String, Object> trends = dashboardService.getSalesTrends();
         return ResponseEntity.ok(ApiResponse.success("Trends retrieved successfully", trends));
     }
 }
