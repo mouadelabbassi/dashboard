@@ -123,6 +123,64 @@ export interface PagedResponse<T> {
     number: number;
 }
 
+// Order Types
+export interface OrderItemRequest {
+    productAsin: string;
+    quantity: number;
+}
+
+export interface OrderRequest {
+    items: OrderItemRequest[];
+    notes?: string;
+}
+
+export interface OrderItemResponse {
+    id: number;
+    productAsin: string;
+    productName: string;
+    productImage: string;
+    quantity: number;
+    unitPrice: number;
+    subtotal: number;
+}
+
+export interface OrderResponse {
+    id: number;
+    orderNumber: string;
+    userId: number;
+    userName: string;
+    userEmail: string;
+    status: string;
+    statusDescription: string;
+    totalAmount: number;
+    totalItems: number;
+    orderDate: string;
+    confirmedAt: string | null;
+    cancelledAt: string | null;
+    notes: string | null;
+    items: OrderItemResponse[];
+    createdAt: string;
+}
+
+// Notification Types
+export interface NotificationResponse {
+    id: number;
+    type: string;
+    typeDescription: string;
+    title: string;
+    message: string;
+    referenceId: number;
+    referenceType: string;
+    buyerName: string;
+    buyerEmail: string;
+    orderTotal: string;
+    itemsCount: number;
+    isRead: boolean;
+    readAt: string | null;
+    createdAt: string;
+}
+
+
 export interface ApiResponse<T> {
     success: boolean;
     message: string;
@@ -175,6 +233,50 @@ export const getProductByAsin = async (asin: string): Promise<Product | null> =>
     }
 };
 
+export const createOrder = async (order: OrderRequest): Promise<OrderResponse> => {
+    const response = await api.post<ApiResponse<OrderResponse>>('/orders', order);
+    return response.data. data;
+};
+
+// Confirm Order
+export const confirmOrder = async (orderId: number): Promise<OrderResponse> => {
+    const response = await api. post<ApiResponse<OrderResponse>>(`/orders/${orderId}/confirm`);
+    return response.data.data;
+};
+
+// Cancel Order
+export const cancelOrder = async (orderId: number): Promise<OrderResponse> => {
+    const response = await api.post<ApiResponse<OrderResponse>>(`/orders/${orderId}/cancel`);
+    return response.data.data;
+};
+
+// Get My Orders
+export const getMyOrders = async (): Promise<OrderResponse[]> => {
+    const response = await api.get<ApiResponse<OrderResponse[]>>('/orders/my-orders');
+    return response.data.data;
+};
+
+// Get Order by ID
+export const getOrderById = async (orderId: number): Promise<OrderResponse> => {
+    const response = await api.get<ApiResponse<OrderResponse>>(`/orders/${orderId}`);
+    return response. data.data;
+};
+
+// Get All Orders (Admin)
+export const getAllOrders = async (page: number = 0, size: number = 20): Promise<PagedResponse<OrderResponse>> => {
+    const response = await api. get<ApiResponse<PagedResponse<OrderResponse>>>('/orders', {
+        params: { page, size }
+    });
+    return response. data.data;
+};
+
+// Get Recent Orders (Admin)
+export const getRecentOrders = async (limit: number = 10): Promise<OrderResponse[]> => {
+    const response = await api.get<ApiResponse<OrderResponse[]>>('/orders/recent', {
+        params: { limit }
+    });
+    return response.data.data;
+};
 // Create Product
 export const createProduct = async (product: ProductCreateRequest): Promise<Product> => {
     const response = await api.post<ApiResponse<Product>>('/products', product);
@@ -231,6 +333,39 @@ export const getCategories = async (): Promise<Category[]> => {
         console.error('Error fetching categories:', error);
         return [];
     }
+};
+
+export const getNotifications = async (): Promise<NotificationResponse[]> => {
+    const response = await api.get<ApiResponse<NotificationResponse[]>>('/notifications');
+    return response.data.data;
+};
+
+// Get Unread Notifications
+export const getUnreadNotifications = async (): Promise<NotificationResponse[]> => {
+    const response = await api.get<ApiResponse<NotificationResponse[]>>('/notifications/unread');
+    return response.data. data;
+};
+
+// Get Unread Count
+export const getUnreadNotificationCount = async (): Promise<number> => {
+    const response = await api.get<ApiResponse<{ count: number }>>('/notifications/unread/count');
+    return response.data.data.count;
+};
+
+// Mark Notification as Read
+export const markNotificationAsRead = async (notificationId: number): Promise<NotificationResponse> => {
+    const response = await api.patch<ApiResponse<NotificationResponse>>(`/notifications/${notificationId}/read`);
+    return response.data.data;
+};
+
+// Mark All as Read
+export const markAllNotificationsAsRead = async (): Promise<void> => {
+    await api.patch('/notifications/read-all');
+};
+
+// Delete Notification
+export const deleteNotification = async (notificationId: number): Promise<void> => {
+    await api.delete(`/notifications/${notificationId}`);
 };
 
 // Dashboard API

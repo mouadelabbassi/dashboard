@@ -1,21 +1,22 @@
-package com.dashboard.entity;
+package com.dashboard. entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate. annotations.CreationTimestamp;
+import org.hibernate.annotations. UpdateTimestamp;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.math. BigDecimal;
+import java.time. LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
+import java. util.List;
 
 @Entity
 @Table(name = "products", indexes = {
         @Index(name = "idx_product_name", columnList = "product_name"),
         @Index(name = "idx_category", columnList = "category_id"),
         @Index(name = "idx_ranking", columnList = "ranking"),
-        @Index(name = "idx_rating", columnList = "rating")
+        @Index(name = "idx_rating", columnList = "rating"),
+        @Index(name = "idx_sales_count", columnList = "sales_count")
 })
 @Getter
 @Setter
@@ -56,12 +57,12 @@ public class Product {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType. LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
     @Column(name = "is_bestseller")
-    @Builder.Default
+    @Builder. Default
     private Boolean isBestseller = false;
 
     @Column(name = "likes_count")
@@ -69,8 +70,13 @@ public class Product {
     private Integer likesCount = 0;
 
     @Column(name = "dislikes_count")
-    @Builder.Default
+    @Builder. Default
     private Integer dislikesCount = 0;
+
+    // NEW: Track total sales for ranking
+    @Column(name = "sales_count")
+    @Builder.Default
+    private Integer salesCount = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -88,9 +94,20 @@ public class Product {
     @Builder.Default
     private List<ProductReview> reviews = new ArrayList<>();
 
+    // Increment sales count
+    public void incrementSalesCount(int quantity) {
+        if (this.salesCount == null) {
+            this.salesCount = 0;
+        }
+        this.salesCount += quantity;
+    }
+
     @PrePersist
     @PreUpdate
     public void updateBestsellerStatus() {
-        this.isBestseller = this.ranking != null && this.ranking <= 10;
+        // Consider both ranking and sales for bestseller status
+        boolean highRanking = this.ranking != null && this.ranking <= 10;
+        boolean highSales = this. salesCount != null && this.salesCount >= 50;
+        this.isBestseller = highRanking || highSales;
     }
 }
