@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
@@ -11,10 +11,12 @@ const CheckoutPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    if (items.length === 0) {
-        navigate('/cart');
-        return null;
-    }
+    // Redirect if cart is empty
+    useEffect(() => {
+        if (items.length === 0) {
+            navigate('/cart');
+        }
+    }, [items.length, navigate]);
 
     const handleConfirmOrder = async () => {
         try {

@@ -19,6 +19,17 @@ const ShopPage: React.FC = () => {
     const [toastMessage, setToastMessage] = useState('');
     const [quantities, setQuantities] = useState<Record<string, number>>({});
 
+    // Cleanup toast timeout on unmount
+    useEffect(() => {
+        let timeoutId: NodeJS.Timeout;
+        if (showToast) {
+            timeoutId = setTimeout(() => setShowToast(false), 3000);
+        }
+        return () => {
+            if (timeoutId) clearTimeout(timeoutId);
+        };
+    }, [showToast]);
+
     useEffect(() => {
         fetchCategories();
     }, []);
@@ -98,7 +109,6 @@ const ShopPage: React.FC = () => {
         addToCart(product, quantity);
         setToastMessage(`Added ${product.productName} to cart!`);
         setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
         // Reset quantity to 1 after adding
         setQuantities(prev => ({ ...prev, [product.asin]: 1 }));
     };
