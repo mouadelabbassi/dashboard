@@ -13,7 +13,11 @@ import ShopPage from "./pages/Buyer/ShopPage";
 import ProductDetailPage from "./pages/Buyer/ProductDetailPage";
 import MyReviewsPage from "./pages/Buyer/MyReviewsPage";
 import BuyerProfilePage from "./pages/Buyer/BuyerProfilePage";
+import CartPage from "./pages/Buyer/CartPage";
+import CheckoutPage from "./pages/Buyer/CheckoutPage";
+import OrderHistoryPage from "./pages/Buyer/OrderHistoryPage";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 
 // Component to redirect based on role
@@ -49,52 +53,57 @@ const BuyerRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 export default function App() {
     return (
         <AuthProvider>
-            <Router>
-                <ScrollToTop />
-                <Routes>
-                    {/* Public Routes - Auth Pages */}
-                    <Route path="/signin" element={<SignIn />} />
-                    <Route path="/signup" element={<SignUp />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
+            <CartProvider>
+                <Router>
+                    <ScrollToTop />
+                    <Routes>
+                        {/* Public Routes - Auth Pages */}
+                        <Route path="/signin" element={<SignIn />} />
+                        <Route path="/signup" element={<SignUp />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-                    {/* Role-based redirect for root */}
-                    <Route path="/" element={
-                        <ProtectedRoute>
-                            <RoleBasedRedirect />
-                        </ProtectedRoute>
-                    } />
+                        {/* Role-based redirect for root */}
+                        <Route path="/" element={
+                            <ProtectedRoute>
+                                <RoleBasedRedirect />
+                            </ProtectedRoute>
+                        } />
 
-                    {/* Admin/Analyst Routes - Dashboard Layout */}
-                    <Route element={
-                        <ProtectedRoute>
-                            <AdminRoute>
-                                <AppLayout />
-                            </AdminRoute>
-                        </ProtectedRoute>
-                    }>
-                        <Route path="/dashboard" element={<Home />} />
-                        <Route path="/products" element={<ProductsPage />} />
-                        <Route path="/profile" element={<UserProfiles />} />
-                    </Route>
+                        {/* Admin/Analyst Routes - Dashboard Layout */}
+                        <Route element={
+                            <ProtectedRoute>
+                                <AdminRoute>
+                                    <AppLayout />
+                                </AdminRoute>
+                            </ProtectedRoute>
+                        }>
+                            <Route path="/dashboard" element={<Home />} />
+                            <Route path="/products" element={<ProductsPage />} />
+                            <Route path="/profile" element={<UserProfiles />} />
+                        </Route>
 
-                    {/* Buyer Routes - Buyer Layout */}
-                    <Route element={
-                        <ProtectedRoute>
-                            <BuyerRoute>
-                                <BuyerLayout />
-                            </BuyerRoute>
-                        </ProtectedRoute>
-                    }>
-                        <Route path="/shop" element={<ShopPage />} />
-                        <Route path="/product/:asin" element={<ProductDetailPage />} />
-                        <Route path="/my-reviews" element={<MyReviewsPage />} />
-                        <Route path="/buyer-profile" element={<BuyerProfilePage />} />
-                    </Route>
+                        {/* Buyer Routes - Buyer Layout */}
+                        <Route element={
+                            <ProtectedRoute>
+                                <BuyerRoute>
+                                    <BuyerLayout />
+                                </BuyerRoute>
+                            </ProtectedRoute>
+                        }>
+                            <Route path="/shop" element={<ShopPage />} />
+                            <Route path="/product/:asin" element={<ProductDetailPage />} />
+                            <Route path="/my-reviews" element={<MyReviewsPage />} />
+                            <Route path="/buyer-profile" element={<BuyerProfilePage />} />
+                            <Route path="/cart" element={<CartPage />} />
+                            <Route path="/checkout" element={<CheckoutPage />} />
+                            <Route path="/order-history" element={<OrderHistoryPage />} />
+                        </Route>
 
-                    {/* Fallback Route */}
-                    <Route path="*" element={<NotFound />} />
-                </Routes>
-            </Router>
+                        {/* Fallback Route */}
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </Router>
+            </CartProvider>
         </AuthProvider>
     );
 }

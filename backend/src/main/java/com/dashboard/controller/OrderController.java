@@ -28,7 +28,7 @@ public class OrderController {
     private final UserService userService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('BUYER')")
+    @PreAuthorize("hasRole('BUYER')")
     @Operation(summary = "Create a new order", description = "Create a new order for the authenticated buyer")
     public ResponseEntity<ApiResponse<OrderResponse>> createOrder(@Valid @RequestBody OrderRequest request) {
         Long userId = userService.getCurrentUserProfile().getId();
@@ -39,7 +39,7 @@ public class OrderController {
     }
 
     @GetMapping("/my-orders")
-    @PreAuthorize("hasAuthority('BUYER')")
+    @PreAuthorize("hasRole('BUYER')")
     @Operation(summary = "Get current user's orders", description = "Fetch all orders for the authenticated buyer")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getMyOrders() {
         Long userId = userService.getCurrentUserProfile().getId();
@@ -56,7 +56,7 @@ public class OrderController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'ANALYST')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
     @Operation(summary = "Get all orders (Admin)", description = "Fetch all orders - Admin/Analyst only")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getAllOrders() {
         List<OrderResponse> orders = orderService.getAllOrders();
@@ -64,7 +64,7 @@ public class OrderController {
     }
 
     @PutMapping("/{id}/confirm")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'ANALYST')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
     @Operation(summary = "Confirm order (Admin)", description = "Confirm an order - Admin/Analyst only")
     public ResponseEntity<ApiResponse<OrderResponse>> confirmOrder(@PathVariable Long id) {
         OrderResponse order = orderService.confirmOrder(id);

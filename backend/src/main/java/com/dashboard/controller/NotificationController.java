@@ -23,7 +23,7 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'ANALYST')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
     @Operation(summary = "Get all notifications", description = "Fetch all notifications - Admin/Analyst only")
     public ResponseEntity<ApiResponse<List<NotificationResponse>>> getAllNotifications() {
         List<NotificationResponse> notifications = notificationService.getAllNotifications();
@@ -31,7 +31,7 @@ public class NotificationController {
     }
 
     @GetMapping("/unread")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'ANALYST')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
     @Operation(summary = "Get unread notifications", description = "Fetch unread notifications - Admin/Analyst only")
     public ResponseEntity<ApiResponse<List<NotificationResponse>>> getUnreadNotifications() {
         List<NotificationResponse> notifications = notificationService.getUnreadNotifications();
@@ -39,7 +39,7 @@ public class NotificationController {
     }
 
     @GetMapping("/unread/count")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'ANALYST')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
     @Operation(summary = "Get unread notification count", description = "Get count of unread notifications - Admin/Analyst only")
     public ResponseEntity<ApiResponse<Long>> getUnreadCount() {
         long count = notificationService.getUnreadCount();
@@ -47,7 +47,7 @@ public class NotificationController {
     }
 
     @PutMapping("/{id}/read")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'ANALYST')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
     @Operation(summary = "Mark notification as read", description = "Mark a specific notification as read - Admin/Analyst only")
     public ResponseEntity<ApiResponse<NotificationResponse>> markAsRead(@PathVariable Long id) {
         NotificationResponse notification = notificationService.markAsRead(id);
@@ -55,7 +55,7 @@ public class NotificationController {
     }
 
     @PutMapping("/read-all")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'ANALYST')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
     @Operation(summary = "Mark all as read", description = "Mark all notifications as read - Admin/Analyst only")
     public ResponseEntity<ApiResponse<String>> markAllAsRead() {
         notificationService.markAllAsRead();
