@@ -18,6 +18,7 @@ com\dashboard\dto\response\CategoryResponse$CategoryResponseBuilder.class
 com\dashboard\dto\response\ApiResponse.class
 com\dashboard\dto\response\SaleResponse$SaleResponseBuilder.class
 com\dashboard\entity\ProductReview$ProductReviewBuilder.class
+com\dashboard\service\IntelligentSearchService.class
 com\dashboard\service\ReviewService.class
 com\dashboard\service\ExportService.class
 com\dashboard\util\CsvHelper.class
@@ -62,11 +63,14 @@ com\dashboard\service\CategoryService.class
 com\dashboard\controller\ImportController.class
 com\dashboard\service\AuthService.class
 com\dashboard\controller\DashboardController.class
+com\dashboard\service\PredictiveAnalyticsService$PriceStats.class
 com\dashboard\entity\User$Role.class
 com\dashboard\dto\request\ResetPasswordRequest.class
 com\dashboard\dto\request\LoginRequest$LoginRequestBuilder.class
+com\dashboard\service\PredictiveAnalyticsService.class
 com\dashboard\repository\ProductRepository.class
 com\dashboard\dto\response\SaleResponse.class
+com\dashboard\service\IntelligentSearchService$SearchCriteria.class
 com\dashboard\controller\ProductController.class
 com\dashboard\controller\ExportController.class
 com\dashboard\dto\request\SaleRequest$SaleRequestBuilder.class
@@ -80,4 +84,5 @@ com\dashboard\dto\response\DashboardStatsResponse$DashboardStatsResponseBuilder.
 com\dashboard\controller\SaleController.class
 com\dashboard\dto\request\ProductRequest.class
 com\dashboard\entity\Sale$SaleStatus.class
+com\dashboard\controller\AIController.class
 com\dashboard\dto\response\ReviewResponse$ReviewResponseBuilder.class

@@ -38,7 +38,7 @@ const BuyerLayout: React.FC = () => {
                         {/* Logo */}
                         <Link to="/shop" className="flex items-center gap-3">
                             <img
-                                src="/logo.png"
+                                src="./images/logo/logo.png"
                                 alt="MouadVision"
                                 className="h-10 w-auto"
                             />
@@ -108,7 +108,7 @@ const BuyerLayout: React.FC = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
-                            <img src="/logo.png" alt="MouadVision" className="h-8 w-auto" />
+                            <img src="./images/logo/logo.png" alt="MouadVision" className="h-8 w-auto" />
                             <span className="font-semibold text-gray-900 dark:text-white">MouadVision</span>
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">

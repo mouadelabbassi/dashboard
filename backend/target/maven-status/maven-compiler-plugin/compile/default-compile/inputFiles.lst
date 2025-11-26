@@ -1,5 +1,6 @@
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\CategoryResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\UserRepository.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\PredictiveAnalyticsService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\OpenApiConfig.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\DashboardApplication.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\ProductService.java
@@ -30,6 +31,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controlle
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ProductRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\security\UserDetailsServiceImpl.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\security\JwtTokenProvider.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AIController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\ProductReview.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\ProductReviewRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\exception\GlobalExceptionHandler.java
@@ -41,6 +43,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\Us
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\SaleService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AuthController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\exception\BadRequestException.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\IntelligentSearchService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\ReviewService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\exception\DuplicateResourceException.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\LoginRequest.java
