@@ -1,0 +1,12 @@
+# Backend
+backend/target/
+backend/*.class
+
+# Frontend
+frontend/free-react-tailwind-admin-dashboard-main/node_modules/
+frontend/free-react-tailwind-admin-dashboard-main/dist/
+
+# IDE
+.idea/
+*.iml
+.vscode/

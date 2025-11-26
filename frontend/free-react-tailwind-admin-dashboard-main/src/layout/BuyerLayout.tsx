@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
+import CartIcon from '../components/cart/CartIcon';
 
 const BuyerLayout: React.FC = () => {
     const { logout } = useAuth();
@@ -24,6 +25,7 @@ const BuyerLayout: React.FC = () => {
 
     const navLinks = [
         { path: '/shop', label:'Shop'},
+        { path: '/order-history', label:'Orders'},
         { path: '/my-reviews', label:'My Reviews'},
         { path: '/buyer-profile', label:'Profile'},
     ];
@@ -66,6 +68,9 @@ const BuyerLayout: React.FC = () => {
 
                         {/* Right Section */}
                         <div className="flex items-center gap-4">
+                            {/* Cart Icon */}
+                            <CartIcon />
+
                             {/* Theme Toggle */}
                             <button
                                 onClick={() => setIsDark(!isDark)}

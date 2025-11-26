@@ -265,4 +265,76 @@ export const salesAPI = {
     },
 };
 
+// Order Types
+export interface OrderItem {
+    id?: number;
+    productAsin: string;
+    productName?: string;
+    productImageUrl?: string;
+    quantity: number;
+    unitPrice?: number;
+    subtotal?: number;
+}
+
+export interface Order {
+    id?: number;
+    userId?: number;
+    userEmail?: string;
+    userFullName?: string;
+    orderDate?: string;
+    status?: string;
+    totalAmount?: number;
+    items?: OrderItem[];
+}
+
+export interface OrderRequest {
+    items: {
+        productAsin: string;
+        quantity: number;
+    }[];
+}
+
+// Order API
+export const orderAPI = {
+    createOrder: async (request: OrderRequest): Promise<Order> => {
+        const response = await api.post<ApiResponse<Order>>('/orders', request);
+        return response.data.data;
+    },
+
+    getMyOrders: async (): Promise<Order[]> => {
+        try {
+            const response = await api.get<ApiResponse<Order[]>>('/orders/my-orders');
+            return response.data.data;
+        } catch (error) {
+            console.error('Error fetching my orders:', error);
+            return [];
+        }
+    },
+
+    getOrderById: async (id: number): Promise<Order | null> => {
+        try {
+            const response = await api.get<ApiResponse<Order>>(`/orders/${id}`);
+            return response.data.data;
+        } catch (error) {
+            console.error('Error fetching order:', error);
+            return null;
+        }
+    },
+
+    getAllOrders: async (): Promise<Order[]> => {
+        try {
+            const response = await api.get<ApiResponse<Order[]>>('/orders');
+            return response.data.data;
+        } catch (error) {
+            console.error('Error fetching all orders:', error);
+            return [];
+        }
+    },
+
+    confirmOrder: async (id: number): Promise<Order> => {
+        const response = await api.put<ApiResponse<Order>>(`/orders/${id}/confirm`);
+        return response.data.data;
+    },
+};
+
 export default api;
