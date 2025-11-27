@@ -61,7 +61,41 @@ export interface Product {
     isBestseller?: boolean;
     createdAt?: string;
     updatedAt?: string;
+    // NEW: Add these seller fields
+    sellerId?: number;
+    sellerName?: string;
+    stockQuantity?: number;
+    salesCount?: number;
+    approvalStatus?: string;
 }
+
+export interface SellerDashboard {
+    sellerId: number;
+    storeName: string;
+    isVerifiedSeller: boolean;
+    totalProducts: number;
+    approvedProducts: number;
+    pendingProducts: number;
+    pendingRequests: number;
+    totalSalesCount: number;
+    totalUnitsSold: number;
+    totalRevenue: number;
+    monthlyRevenue: number;
+    weeklyRevenue: number;
+    todayRevenue: number;
+    revenueTrend: { date: string; revenue: number }[];
+    topProducts: { asin: string; productName: string; unitsSold: number; revenue: number }[];
+}
+
+export interface SellerProductSubmission {
+    productName: string;
+    description: string;
+    price: number;
+    stockQuantity: number;
+    imageUrl: string;
+    categoryId: number;
+}
+
 
 export interface ProductCreateRequest {
     asin: string;
@@ -94,6 +128,40 @@ export interface CategoryRevenue {
     productCount: number;
     estimatedRevenue: number;
     avgPrice: number;
+}
+
+export interface AdminDashboard {
+    totalProducts: number;
+    pendingApprovals: number;
+    totalSellers: number;
+    totalBuyers: number;
+    totalPlatformRevenue: number;
+    totalPlatformFees: number;
+    todayRevenue: number;
+    todayOrders: number;
+}
+
+export interface PendingProduct {
+    id: number;
+    productName: string;
+    description: string;
+    price: number;
+    stockQuantity: number;
+    imageUrl: string;
+    categoryId: number;
+    categoryName: string;
+    sellerId: number;
+    sellerName: string;
+    sellerStoreName: string;
+    sellerEmail: string;
+    submittedAt: string;
+}
+
+export interface ProductWithSeller extends Product {
+    sellerId?: number;
+    sellerName?: string;
+    stockQuantity?: number;
+    approvalStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
 }
 
 export interface CorrelationPoint {
@@ -198,6 +266,29 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
     }
 };
 
+export const getAdminDashboard = async (): Promise<AdminDashboard> => {
+    const response = await api.get<ApiResponse<AdminDashboard>>('/admin/product-approvals/dashboard');
+    return response.data. data;
+};
+
+// Get Pending Products
+export const getPendingProducts = async (page: number = 0, size: number = 10): Promise<PagedResponse<PendingProduct>> => {
+    const response = await api.get<ApiResponse<PagedResponse<PendingProduct>>>('/admin/product-approvals/pending', {
+        params: { page, size }
+    });
+    return response.data. data;
+};
+
+// Approve Product
+export const approveProduct = async (requestId: number, adminNotes?: string): Promise<void> => {
+    await api.post(`/admin/product-approvals/${requestId}/approve`, { adminNotes });
+};
+
+// Reject Product
+export const rejectProduct = async (requestId: number, rejectionReason: string, adminNotes?: string): Promise<void> => {
+    await api.post(`/admin/product-approvals/${requestId}/reject`, { rejectionReason, adminNotes });
+};
+
 // Top Products
 export const getTopProducts = async (limit: number = 10): Promise<Product[]> => {
     try {
@@ -256,6 +347,31 @@ export const getMyOrders = async (): Promise<OrderResponse[]> => {
     return response.data.data;
 };
 
+export const getSellerDashboard = async (): Promise<SellerDashboard> => {
+    const response = await api. get<ApiResponse<SellerDashboard>>('/seller/dashboard');
+    return response.data.data;
+};
+
+// Submit Product for Approval
+export const submitProductForApproval = async (product: SellerProductSubmission): Promise<void> => {
+    await api.post('/seller/products/submit', product);
+};
+
+// Get My Products (Seller)
+export const getMySellerProducts = async (page: number = 0, size: number = 10): Promise<PagedResponse<ProductWithSeller>> => {
+    const response = await api.get<ApiResponse<PagedResponse<ProductWithSeller>>>('/seller/products', {
+        params: { page, size }
+    });
+    return response.data.data;
+};
+
+// Get My Sold Orders (Seller)
+export const getMySoldOrders = async (page: number = 0, size: number = 10): Promise<PagedResponse<OrderResponse>> => {
+    const response = await api.get<ApiResponse<PagedResponse<OrderResponse>>>('/seller/orders', {
+        params: { page, size }
+    });
+    return response.data.data;
+};
 // Get Order by ID
 export const getOrderById = async (orderId: number): Promise<OrderResponse> => {
     const response = await api.get<ApiResponse<OrderResponse>>(`/orders/${orderId}`);

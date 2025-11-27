@@ -1,8 +1,8 @@
-package com. dashboard.entity;
+package com.dashboard.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations. CreationTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
@@ -24,7 +24,7 @@ import java.util.List;
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType. IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "order_number", unique = true, nullable = false, length = 20)
@@ -46,7 +46,7 @@ public class Order {
     private Integer totalItems;
 
     @Column(name = "order_date")
-    @Builder.Default
+    @Builder. Default
     private LocalDateTime orderDate = LocalDateTime.now();
 
     @Column(name = "confirmed_at")
@@ -54,6 +54,13 @@ public class Order {
 
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
+
+    @Column(name = "payment_completed")
+    @Builder.Default
+    private Boolean paymentCompleted = false;
+
+    @Column(name = "payment_completed_at")
+    private LocalDateTime paymentCompletedAt;
 
     @Column(length = 500)
     private String notes;
@@ -89,7 +96,6 @@ public class Order {
         }
     }
 
-    // Helper methods
     public void addItem(OrderItem item) {
         items.add(item);
         item.setOrder(this);
@@ -110,10 +116,15 @@ public class Order {
         this.cancelledAt = LocalDateTime. now();
     }
 
+    public void markPaymentCompleted() {
+        this. paymentCompleted = true;
+        this.paymentCompletedAt = LocalDateTime.now();
+    }
+
     @PrePersist
     public void generateOrderNumber() {
         if (this.orderNumber == null) {
-            this.orderNumber = "ORD-" + System.currentTimeMillis();
+            this.orderNumber = "ORD-" + System. currentTimeMillis();
         }
     }
 }

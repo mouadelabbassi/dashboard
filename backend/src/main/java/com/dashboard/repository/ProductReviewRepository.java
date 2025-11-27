@@ -1,48 +1,49 @@
-package com.dashboard.repository;
+package com. dashboard.repository;
 
-import com.dashboard.entity.ProductReview;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.dashboard. entity.ProductReview;
+import org.springframework.data. domain.Page;
+import org.springframework. data.domain. Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.data.repository. query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
+import java.util. Optional;
 
 @Repository
 public interface ProductReviewRepository extends JpaRepository<ProductReview, Long> {
 
-    // Find review by user and product
     Optional<ProductReview> findByUserIdAndProductAsin(Long userId, String productAsin);
 
-    // Check if user has reviewed product
-    boolean existsByUserIdAndProductAsin(Long userId, String productAsin);
-
-    // Get all reviews for a product
     Page<ProductReview> findByProductAsinOrderByCreatedAtDesc(String productAsin, Pageable pageable);
 
-    // Get all reviews by a user
-    List<ProductReview> findByUserIdOrderByCreatedAtDesc(Long userId);
+    Page<ProductReview> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
-    // Calculate average rating for a product
-    @Query("SELECT AVG(r.rating) FROM ProductReview r WHERE r.product.asin = :productAsin")
-    Double calculateAverageRating(@Param("productAsin") String productAsin);
+    Long countByProductAsin(String productAsin);
 
-    // Count reviews for a product
-    @Query("SELECT COUNT(r) FROM ProductReview r WHERE r.product.asin = :productAsin")
-    Long countByProductAsin(@Param("productAsin") String productAsin);
+    @Query("SELECT AVG(r.rating) FROM ProductReview r WHERE r.product.asin = :asin")
+    Double calculateAverageRating(@Param("asin") String asin);
 
-    // Count likes for a product
-    @Query("SELECT COUNT(r) FROM ProductReview r WHERE r.product.asin = :productAsin AND r.isLiked = true")
-    Long countLikesByProductAsin(@Param("productAsin") String productAsin);
+    @Query("SELECT COUNT(r) FROM ProductReview r WHERE r.product.asin = :asin AND r.isLiked = true")
+    Long countLikesByProductAsin(@Param("asin") String asin);
 
-    // Count dislikes for a product
-    @Query("SELECT COUNT(r) FROM ProductReview r WHERE r.product.asin = :productAsin AND r.isLiked = false")
-    Long countDislikesByProductAsin(@Param("productAsin") String productAsin);
+    @Query("SELECT COUNT(r) FROM ProductReview r WHERE r.product.asin = :asin AND r.isLiked = false")
+    Long countDislikesByProductAsin(@Param("asin") String asin);
 
-    // Get rating distribution for a product
-    @Query("SELECT r.rating, COUNT(r) FROM ProductReview r WHERE r.product.asin = :productAsin GROUP BY r.rating ORDER BY r.rating DESC")
-    List<Object[]> getRatingDistribution(@Param("productAsin") String productAsin);
+    @Query("SELECT r. rating, COUNT(r) FROM ProductReview r WHERE r.product.asin = :asin GROUP BY r.rating")
+    List<Object[]> getRatingDistribution(@Param("asin") String asin);
+
+    // Seller-specific queries
+    @Query("SELECT r FROM ProductReview r WHERE r.product.asin IN :asins ORDER BY r.createdAt DESC")
+    Page<ProductReview> findByProductAsinInOrderByCreatedAtDesc(@Param("asins") List<String> asins, Pageable pageable);
+
+    @Query("SELECT COUNT(r) FROM ProductReview r WHERE r.product.asin IN :asins")
+    Long countByProductAsinIn(@Param("asins") List<String> asins);
+
+    @Query("SELECT AVG(r.rating) FROM ProductReview r WHERE r.product.asin IN :asins")
+    Double calculateAverageRatingForProducts(@Param("asins") List<String> asins);
+
+    @Query("SELECT r.rating, COUNT(r) FROM ProductReview r WHERE r. product.asin IN :asins GROUP BY r.rating")
+    List<Object[]> getRatingDistributionForProducts(@Param("asins") List<String> asins);
 }

@@ -2,13 +2,13 @@ package com.dashboard. entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate. annotations.CreationTimestamp;
-import org.hibernate.annotations. UpdateTimestamp;
+import org.hibernate.annotations. CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math. BigDecimal;
-import java.time. LocalDateTime;
-import java.util.ArrayList;
-import java. util.List;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util. ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products", indexes = {
@@ -16,7 +16,9 @@ import java. util.List;
         @Index(name = "idx_category", columnList = "category_id"),
         @Index(name = "idx_ranking", columnList = "ranking"),
         @Index(name = "idx_rating", columnList = "rating"),
-        @Index(name = "idx_sales_count", columnList = "sales_count")
+        @Index(name = "idx_sales_count", columnList = "sales_count"),
+        @Index(name = "idx_seller", columnList = "seller_id"),
+        @Index(name = "idx_approval_status", columnList = "approval_status")
 })
 @Getter
 @Setter
@@ -62,7 +64,7 @@ public class Product {
     private Category category;
 
     @Column(name = "is_bestseller")
-    @Builder. Default
+    @Builder.Default
     private Boolean isBestseller = false;
 
     @Column(name = "likes_count")
@@ -73,10 +75,37 @@ public class Product {
     @Builder. Default
     private Integer dislikesCount = 0;
 
-    // NEW: Track total sales for ranking
     @Column(name = "sales_count")
     @Builder.Default
     private Integer salesCount = 0;
+
+    // NEW: Seller reference
+    @ManyToOne(fetch = FetchType. LAZY)
+    @JoinColumn(name = "seller_id")
+    private User seller;
+
+    // NEW: Stock quantity
+    @Column(name = "stock_quantity")
+    @Builder.Default
+    private Integer stockQuantity = 100;
+
+    // NEW: Approval status for seller products
+    @Enumerated(EnumType.STRING)
+    @Column(name = "approval_status", length = 20)
+    @Builder.Default
+    private ApprovalStatus approvalStatus = ApprovalStatus.APPROVED;
+
+    // NEW: When the product was submitted (for seller products)
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
+
+    // NEW: When approved
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
+    // NEW: Who approved it
+    @Column(name = "approved_by")
+    private Long approvedBy;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -87,7 +116,7 @@ public class Product {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    @Builder.Default
+    @Builder. Default
     private List<Sale> sales = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -102,12 +131,53 @@ public class Product {
         this.salesCount += quantity;
     }
 
+    // NEW: Decrement stock
+    public void decrementStock(int quantity) {
+        if (this.stockQuantity == null) {
+            this.stockQuantity = 0;
+        }
+        this.stockQuantity = Math.max(0, this.stockQuantity - quantity);
+    }
+
+    // NEW: Get seller name
+    public String getSellerName() {
+        if (seller == null) {
+            return "MouadVision";
+        }
+        return seller.getStoreName() != null ? seller.getStoreName() : seller.getFullName();
+    }
+
+    // NEW: Check if MouadVision product
+    public boolean isMouadVisionProduct() {
+        return seller == null;
+    }
+
+    public String getSellerDisplayName() {
+        return getSellerName();
+    }
+
     @PrePersist
     @PreUpdate
     public void updateBestsellerStatus() {
-        // Consider both ranking and sales for bestseller status
         boolean highRanking = this.ranking != null && this.ranking <= 10;
-        boolean highSales = this. salesCount != null && this.salesCount >= 50;
+        boolean highSales = this.salesCount != null && this. salesCount >= 50;
         this.isBestseller = highRanking || highSales;
+    }
+
+    // NEW: Approval status enum
+    public enum ApprovalStatus {
+        PENDING("En attente d'approbation"),
+        APPROVED("Approuvé"),
+        REJECTED("Rejeté");
+
+        private final String description;
+
+        ApprovalStatus(String description) {
+            this.description = description;
+        }
+
+        public String getDescription() {
+            return description;
+        }
     }
 }

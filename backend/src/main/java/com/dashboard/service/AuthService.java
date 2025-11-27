@@ -2,23 +2,22 @@ package com.dashboard.service;
 
 import com.dashboard.dto.request.LoginRequest;
 import com.dashboard.dto.request.RegisterRequest;
+import com.dashboard.dto.request.SellerRegisterRequest;
 import com.dashboard.dto.response.AuthResponse;
-import com.dashboard.entity.User;
+import com. dashboard.entity.User;
 import com.dashboard.exception.BadRequestException;
-import com.dashboard.exception.DuplicateResourceException;
 import com.dashboard.repository.UserRepository;
 import com.dashboard.security.JwtTokenProvider;
-import lombok.RequiredArgsConstructor;
+import lombok. RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security. authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core. Authentication;
+import org.springframework.security. core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation. Transactional;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -29,22 +28,24 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider tokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        log.info("Registering new user with email: {}", request.getEmail());
-
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new DuplicateResourceException("Email already exists: " + request.getEmail());
+        if (userRepository.existsByEmail(request. getEmail())) {
+            throw new BadRequestException("Email already in use");
         }
 
-        User.Role role;
+        User. Role role;
         try {
             role = User.Role.valueOf(request.getRole().toUpperCase());
         } catch (IllegalArgumentException e) {
-            // Default to BUYER instead of USER (which doesn't exist)
-            role = User.Role.BUYER;
+            role = User.Role. BUYER;
+        }
+
+        // Prevent direct admin registration
+        if (role == User.Role. ADMIN) {
+            throw new BadRequestException("Cannot register as admin");
         }
 
         User user = User.builder()
@@ -53,102 +54,105 @@ public class AuthService {
                 .fullName(request.getFullName())
                 .role(role)
                 .securityQuestion(request.getSecurityQuestion())
-                .securityAnswer(passwordEncoder.encode(request.getSecurityAnswer()))
-                .isActive(true)
+                .securityAnswer(passwordEncoder.encode(request.getSecurityAnswer(). toLowerCase()))
                 .build();
 
         user = userRepository.save(user);
-        log.info("User registered successfully: {}", user.getEmail());
+        log.info("User registered: {} with role {}", user.getEmail(), user.getRole());
 
-        // Auto login after registration
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-
-        String token = tokenProvider.generateToken(authentication);
+        String token = jwtTokenProvider.generateToken(user. getEmail(), user.getRole(). name());
 
         return AuthResponse.builder()
                 .token(token)
+                . type("Bearer")
                 .id(user.getId())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
-                .role(user.getRole().name())
+                .role(user. getRole(). name())
+                . build();
+    }
+
+    @Transactional
+    public AuthResponse registerSeller(SellerRegisterRequest request) {
+        if (userRepository.existsByEmail(request. getEmail())) {
+            throw new BadRequestException("Email already in use");
+        }
+
+        User user = User.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getFullName())
+                . phone(request.getPhone())
+                .role(User.Role. SELLER)
+                .storeName(request.getStoreName())
+                .storeDescription(request.getStoreDescription())
+                .businessAddress(request.getBusinessAddress())
+                . securityQuestion(request. getSecurityQuestion())
+                .securityAnswer(passwordEncoder. encode(request.getSecurityAnswer().toLowerCase()))
+                .isVerifiedSeller(false)
+                .build();
+
+        user = userRepository.save(user);
+        log.info("Seller registered: {} - Store: {}", user. getEmail(), user.getStoreName());
+
+        String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole(). name());
+
+        return AuthResponse.builder()
+                .token(token)
+                . type("Bearer")
+                .id(user.getId())
+                .email(user. getEmail())
+                .fullName(user.getFullName())
+                .role(user.getRole(). name())
+                . storeName(user.getStoreName())
                 .build();
     }
 
     public AuthResponse login(LoginRequest request) {
-        log.info("User login attempt: {}", request.getEmail());
-
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String token = tokenProvider.generateToken(authentication);
+        SecurityContextHolder. getContext().setAuthentication(authentication);
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
-        log.info("User logged in successfully: {}", user.getEmail());
+        String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole(). name());
+
+        log.info("User logged in: {}", user.getEmail());
 
         return AuthResponse.builder()
                 .token(token)
-                .id(user.getId())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
+                .type("Bearer")
+                .id(user. getId())
+                . email(user.getEmail())
+                . fullName(user. getFullName())
                 .role(user.getRole().name())
+                .storeName(user.getStoreName())
                 .build();
     }
 
-    /**
-     * Get security question for password reset
-     */
     public Map<String, String> getSecurityQuestion(String email) {
-        log.info("Getting security question for email: {}", email);
-
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("User not found with email: " + email));
+                .orElseThrow(() -> new BadRequestException("User not found with this email"));
 
-        if (user.getSecurityQuestion() == null || user.getSecurityQuestion().isEmpty()) {
-            throw new BadRequestException("No security question set for this account");
-        }
-
-        Map<String, String> response = new HashMap<>();
-        response.put("email", user.getEmail());
-        response.put("securityQuestion", user.getSecurityQuestion());
-
-        return response;
+        return Map.of("securityQuestion", user.getSecurityQuestion());
     }
 
-    /**
-     * Reset password after verifying security answer
-     */
     @Transactional
     public void resetPassword(String email, String securityAnswer, String newPassword) {
-        log.info("Password reset attempt for email: {}", email);
-
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("User not found with email: " + email));
+                . orElseThrow(() -> new BadRequestException("User not found"));
 
-        if (user.getSecurityAnswer() == null) {
-            throw new BadRequestException("No security answer set for this account");
-        }
-
-        // Verify security answer
-        if (!passwordEncoder.matches(securityAnswer, user.getSecurityAnswer())) {
+        if (! passwordEncoder.matches(securityAnswer. toLowerCase(), user.getSecurityAnswer())) {
             throw new BadRequestException("Incorrect security answer");
         }
 
-        // Validate new password
-        if (newPassword == null || newPassword.length() < 6) {
-            throw new BadRequestException("Password must be at least 6 characters long");
-        }
-
-        // Update password
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
-        log.info("Password reset successfully for user: {}", email);
+        log. info("Password reset for user: {}", email);
     }
 
     public AuthResponse refreshToken() {
@@ -158,19 +162,21 @@ public class AuthService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
-        String token = tokenProvider.generateTokenFromUsername(email);
+        String token = jwtTokenProvider. generateToken(user.getEmail(), user.getRole().name());
 
         return AuthResponse.builder()
                 .token(token)
-                .id(user.getId())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
+                .type("Bearer")
+                .id(user. getId())
+                . email(user.getEmail())
+                . fullName(user. getFullName())
                 .role(user.getRole().name())
+                .storeName(user.getStoreName())
                 .build();
     }
 
     public User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext(). getAuthentication();
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)

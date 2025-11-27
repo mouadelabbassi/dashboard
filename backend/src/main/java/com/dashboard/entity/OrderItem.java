@@ -1,4 +1,4 @@
-package com.dashboard. entity;
+package com. dashboard.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,7 +8,8 @@ import java.math. BigDecimal;
 @Entity
 @Table(name = "order_items", indexes = {
         @Index(name = "idx_order_item_order", columnList = "order_id"),
-        @Index(name = "idx_order_item_product", columnList = "product_asin")
+        @Index(name = "idx_order_item_product", columnList = "product_asin"),
+        @Index(name = "idx_order_item_seller", columnList = "seller_id")
 })
 @Getter
 @Setter
@@ -18,16 +19,20 @@ import java.math. BigDecimal;
 public class OrderItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType. IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_asin", nullable = false)
     private Product product;
+
+    @ManyToOne(fetch = FetchType. LAZY)
+    @JoinColumn(name = "seller_id")
+    private User seller;
 
     @Column(nullable = false)
     private Integer quantity;
@@ -38,12 +43,18 @@ public class OrderItem {
     @Column(name = "subtotal", precision = 12, scale = 2, nullable = false)
     private BigDecimal subtotal;
 
-    // Snapshot of product details at time of order
     @Column(name = "product_name", length = 500)
     private String productName;
 
     @Column(name = "product_image", length = 500)
     private String productImage;
+
+    @Column(name = "seller_name", length = 255)
+    private String sellerName;
+
+    @Column(name = "seller_revenue_calculated")
+    @Builder.Default
+    private Boolean sellerRevenueCalculated = false;
 
     @PrePersist
     @PreUpdate

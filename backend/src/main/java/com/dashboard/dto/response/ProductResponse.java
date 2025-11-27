@@ -1,12 +1,12 @@
-package com.dashboard.dto.response;
+package com.dashboard. dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok. NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java. math.BigDecimal;
+import java. time.LocalDateTime;
 
 @Data
 @Builder
@@ -28,4 +28,11 @@ public class ProductResponse {
     private Boolean isBestseller;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // NEW: Seller-related fields
+    private Integer salesCount;
+    private Integer stockQuantity;
+    private String approvalStatus;
+    private String sellerName;
+    private Long sellerId;
 }

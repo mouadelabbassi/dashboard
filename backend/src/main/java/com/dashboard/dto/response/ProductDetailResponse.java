@@ -1,13 +1,13 @@
-package com.dashboard.dto.response;
+package com. dashboard.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok. Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
+import java.util. Map;
 
 @Data
 @Builder
@@ -41,4 +41,9 @@ public class ProductDetailResponse {
 
     // Recent reviews
     private List<ReviewResponse> recentReviews;
+
+    // NEW: Seller info
+    private String sellerName;
+    private Long sellerId;
+    private Boolean isMouadVisionProduct;
 }

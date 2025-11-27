@@ -1,16 +1,17 @@
-package com. dashboard.entity;
+package com.dashboard.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate. annotations.CreationTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time. LocalDateTime;
 
 @Entity
 @Table(name = "notifications", indexes = {
-        @Index(name = "idx_notification_user", columnList = "user_id"),
+        @Index(name = "idx_notification_recipient", columnList = "recipient_id"),
         @Index(name = "idx_notification_read", columnList = "is_read"),
-        @Index(name = "idx_notification_type", columnList = "type")
+        @Index(name = "idx_notification_type", columnList = "type"),
+        @Index(name = "idx_notification_created", columnList = "created_at")
 })
 @Getter
 @Setter
@@ -20,12 +21,12 @@ import java.time. LocalDateTime;
 public class Notification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType. IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User targetUser; // null = for all admins
+    @ManyToOne(fetch = FetchType. LAZY)
+    @JoinColumn(name = "recipient_id", nullable = false)
+    private User recipient;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -38,26 +39,16 @@ public class Notification {
     private String message;
 
     @Column(name = "reference_id")
-    private Long referenceId; // e.g., order ID
+    private String referenceId;
 
     @Column(name = "reference_type", length = 50)
-    private String referenceType; // e. g., "ORDER"
+    private String referenceType;
 
-    // Buyer info for purchase notifications
-    @Column(name = "buyer_name", length = 255)
-    private String buyerName;
-
-    @Column(name = "buyer_email", length = 255)
-    private String buyerEmail;
-
-    @Column(name = "order_total", length = 50)
-    private String orderTotal;
-
-    @Column(name = "items_count")
-    private Integer itemsCount;
+    @Column(name = "action_url", length = 500)
+    private String actionUrl;
 
     @Column(name = "is_read")
-    @Builder.Default
+    @Builder. Default
     private Boolean isRead = false;
 
     @Column(name = "read_at")
@@ -68,11 +59,27 @@ public class Notification {
     private LocalDateTime createdAt;
 
     public enum NotificationType {
-        NEW_ORDER("Nouvelle commande"),
+        // Seller notifications
+        PRODUCT_APPROVED("Produit approuvé"),
+        PRODUCT_REJECTED("Produit rejeté"),
+        PRODUCT_PURCHASED("Produit acheté"),
+        REVIEW_RECEIVED("Avis reçu"),
+        RATING_RECEIVED("Note reçue"),
+
+        // Buyer notifications
         ORDER_CONFIRMED("Commande confirmée"),
-        ORDER_CANCELLED("Commande annulée"),
-        NEW_USER("Nouvel utilisateur"),
-        SYSTEM("Système");
+        ORDER_SHIPPED("Commande expédiée"),
+        ORDER_DELIVERED("Commande livrée"),
+
+        NEW_ORDER("Nouvelle commande"),
+
+        // Admin notifications
+        NEW_SELLER_PRODUCT("Nouveau produit vendeur"),
+        NEW_SELLER_REGISTRATION("Nouvelle inscription vendeur"),
+
+        // General
+        SYSTEM("Système"),
+        PROMOTION("Promotion");
 
         private final String description;
 

@@ -1,13 +1,13 @@
 package com.dashboard.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml. jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time. LocalDateTime;
+import java.util. ArrayList;
 import java.util.List;
 
 @Entity
@@ -20,7 +20,7 @@ import java.util.List;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType. IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true, length = 255)
@@ -39,10 +39,14 @@ public class User {
     @Column(length = 500)
     private String bio;
 
+    // NEW: Profile image
+    @Column(name = "profile_image", length = 500)
+    private String profileImage;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
-    private Role role = Role.BUYER;
+    private Role role = Role. BUYER;
 
     @Column(name = "security_question", length = 500)
     private String securityQuestion;
@@ -52,8 +56,22 @@ public class User {
     private String securityAnswer;
 
     @Column(name = "is_active")
-    @Builder.Default
+    @Builder. Default
     private Boolean isActive = true;
+
+    // NEW: Seller-specific fields
+    @Column(name = "store_name", length = 255)
+    private String storeName;
+
+    @Column(name = "store_description", length = 1000)
+    private String storeDescription;
+
+    @Column(name = "business_address", length = 500)
+    private String businessAddress;
+
+    @Column(name = "is_verified_seller")
+    @Builder. Default
+    private Boolean isVerifiedSeller = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -69,9 +87,10 @@ public class User {
     private List<Sale> sales = new ArrayList<>();
 
     public enum Role {
-        BUYER("Regular Buyer "),
-        ANALYST("Data Analyst "),
-        ADMIN("Administrator ");
+        BUYER("Regular Buyer"),
+        SELLER("Product Seller"),  // NEW
+        ANALYST("Data Analyst"),
+        ADMIN("Administrator");
 
         private final String description;
 

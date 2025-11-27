@@ -38,7 +38,6 @@ const BuyerLayout: React.FC = () => {
             <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
-                        {/* Logo MouadVision */}
                         <Link to="/shop" className="flex items-center gap-3">
                             <img
                                 src="/images/logo/logo.png"
@@ -50,7 +49,6 @@ const BuyerLayout: React.FC = () => {
                             </span>
                         </Link>
 
-                        {/* Navigation - Center */}
                         <nav className="hidden md:flex items-center gap-1">
                             {navLinks.map(link => (
                                 <Link
@@ -67,9 +65,7 @@ const BuyerLayout: React.FC = () => {
                             ))}
                         </nav>
 
-                        {/* Right Section */}
                         <div className="flex items-center gap-3">
-                            {/* Cart Icon - FIXED SVG */}
                             <Link
                                 to="/cart"
                                 className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
@@ -95,8 +91,6 @@ const BuyerLayout: React.FC = () => {
                                     </span>
                                 )}
                             </Link>
-
-                            {/* Theme Toggle - FIXED SVG */}
                             <button
                                 onClick={() => setIsDark(!isDark)}
                                 className="flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
@@ -117,8 +111,6 @@ const BuyerLayout: React.FC = () => {
                                 )}
                             </button>
 
-
-                            {/* Logout Button */}
                             <button
                                 onClick={handleLogout}
                                 className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-red-500/25"

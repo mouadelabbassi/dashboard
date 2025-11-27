@@ -1,43 +1,43 @@
-package com.dashboard.repository;
+package com.dashboard. repository;
 
-import com. dashboard.entity. Notification;
+import com.dashboard.entity. Notification;
+import com.dashboard.entity. User;
 import org.springframework.data. domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data. jpa.repository. JpaRepository;
 import org.springframework. data.jpa. repository. Modifying;
-import org. springframework.data.jpa.repository.Query;
-import org. springframework.data.repository.query.Param;
-import org. springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query. Param;
+import org.springframework.stereotype.Repository;
 
-import java. util.List;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    // Find all notifications for admins (targetUser is null)
-    List<Notification> findByTargetUserIsNullOrderByCreatedAtDesc();
+    Page<Notification> findByRecipientOrderByCreatedAtDesc(User recipient, Pageable pageable);
 
-    Page<Notification> findByTargetUserIsNullOrderByCreatedAtDesc(Pageable pageable);
+    List<Notification> findByRecipientAndIsReadFalseOrderByCreatedAtDesc(User recipient);
 
-    // Find unread notifications for admins
-    List<Notification> findByTargetUserIsNullAndIsReadFalseOrderByCreatedAtDesc();
+    Page<Notification> findByRecipientAndTypeOrderByCreatedAtDesc(
+            User recipient,
+            Notification.NotificationType type,
+            Pageable pageable
+    );
 
-    // Count unread notifications for admins
-    Long countByTargetUserIsNullAndIsReadFalse();
+    Long countByRecipientAndIsReadFalse(User recipient);
 
-    // Find by type
-    List<Notification> findByTypeOrderByCreatedAtDesc(Notification.NotificationType type);
-
-    // Mark all as read for admins
     @Modifying
-    @Query("UPDATE Notification n SET n.isRead = true, n.readAt = CURRENT_TIMESTAMP WHERE n.targetUser IS NULL AND n.isRead = false")
-    void markAllAsReadForAdmins();
+    @Query("UPDATE Notification n SET n.isRead = true, n.readAt = :readAt WHERE n.recipient = :recipient AND n.isRead = false")
+    int markAllAsReadByRecipient(@Param("recipient") User recipient, @Param("readAt") LocalDateTime readAt);
 
-    // Find notifications by reference
-    List<Notification> findByReferenceTypeAndReferenceId(String referenceType, Long referenceId);
-
-    // Delete old read notifications (older than 30 days)
     @Modifying
-    @Query("DELETE FROM Notification n WHERE n.isRead = true AND n.createdAt < :cutoffDate")
-    void deleteOldReadNotifications(@Param("cutoffDate") java.time.LocalDateTime cutoffDate);
+    @Query("UPDATE Notification n SET n.isRead = true, n.readAt = :readAt WHERE n.id IN :ids AND n.recipient = :recipient")
+    int markAsReadByIds(@Param("ids") List<Long> ids, @Param("recipient") User recipient, @Param("readAt") LocalDateTime readAt);
+
+    @Query("SELECT n FROM Notification n WHERE n. recipient. id = :recipientId ORDER BY n.createdAt DESC")
+    List<Notification> findLatestByRecipientId(@Param("recipientId") Long recipientId, Pageable pageable);
+
+    void deleteByRecipientAndCreatedAtBefore(User recipient, LocalDateTime before);
 }
