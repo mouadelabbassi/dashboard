@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { getAllProducts, Product } from '../../service/api';
 import { useCart } from '../../context/CartContext';
 import Toast from '../../components/common/Toast';

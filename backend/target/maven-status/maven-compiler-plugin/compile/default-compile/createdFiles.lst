@@ -91,7 +91,6 @@ com\dashboard\DashboardApplication.class
 com\dashboard\dto\response\AuthResponse.class
 com\dashboard\service\OrderService.class
 com\dashboard\dto\request\SellerRegisterRequest$SellerRegisterRequestBuilder.class
-com\dashboard\security\SecurityConfig.class
 com\dashboard\dto\request\SaleRequest.class
 com\dashboard\dto\request\CreateOrderRequest.class
 com\dashboard\repository\CategoryRepository.class
@@ -105,6 +104,7 @@ com\dashboard\dto\request\ResetPasswordRequest$ResetPasswordRequestBuilder.class
 com\dashboard\controller\NotificationController.class
 com\dashboard\entity\OrderItem$OrderItemBuilder.class
 com\dashboard\entity\SellerProductRequest$SellerProductRequestBuilder.class
+com\dashboard\config\SecurityConfig.class
 com\dashboard\dto\response\AdminDashboardResponse$AdminDashboardResponseBuilder.class
 com\dashboard\dto\response\SellerOrderResponse$SellerOrderResponseBuilder.class
 com\dashboard\entity\Category$CategoryBuilder.class

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router";
+import { Link, useLocation } from "react-router-dom";
 
 import {
     ChevronDownIcon,
@@ -27,17 +27,17 @@ const navItems: NavItem[] = [
     {
         icon: <GridIcon />,
         name: "Dashboard",
-        path: "/",
+        path: "/admin",
     },
     {
         icon: <CheckCircleIcon />,  // NEW
         name: "Product Approvals",  // NEW
-        path: "/product-approvals", // NEW
+        path: "/admin/product-approvals", // NEW
     },
     {
         icon: <GridIcon />,
         name: "Products Management",
-        path: "/products",
+        path: "/admin/products",
     },
 ];
 

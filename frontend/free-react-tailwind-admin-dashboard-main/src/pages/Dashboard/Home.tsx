@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import PageMeta from '../../components/common/PageMeta';
 import EcommerceMetrics from '../../components/ecommerce/EcommerceMetrics';
 import TopProductTable from '../../components/ecommerce/TopProductTable';
@@ -55,7 +55,7 @@ const Home: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         {/* Pending Approvals - Clickable */}
                         <Link
-                            to="/product-approvals"
+                            to="/admin/product-approvals"
                             className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl shadow-lg p-5 text-white hover:shadow-xl transition transform hover:scale-105"
                         >
                             <div className="flex items-center justify-between">

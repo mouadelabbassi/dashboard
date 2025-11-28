@@ -110,12 +110,15 @@ const NotificationDropdown: React.FC = () => {
                 onClick={() => setIsOpen(! isOpen)}
                 className="relative p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition"
             >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
                     <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0.538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                        d="M10 2C10.5523 2 11 2.44772 11 3V3.09199C13.8377 3.55399 16 6.02757 16 9V13L17.2929 14.2929C17.9229 14.9229 17.4767 16 16.5858 16H3.41421C2.52331 16 2.07714 14.9229 2.70711 14.2929L4 13V9C4 6.02757 6.16229 3.55399 9 3.09199V3C9 2.44772 9.44772 2 10 2ZM10 5C7.79086 5 6 6.79086 6 9V13.4142L5.41421 14H14.5858L14 13.4142V9C14 6.79086 12.2091 5 10 5ZM8 17C8 18.1046 8.89543 19 10 19C11.1046 19 12 18.1046 12 17H8Z"
                     />
                 </svg>
                 {unreadCount > 0 && (
@@ -188,7 +191,7 @@ const NotificationDropdown: React.FC = () => {
                     {/* Footer */}
                     <div className="p-3 border-t dark:border-gray-700">
                         <Link
-                            to="/notifications"
+                            to="/admin/notifications"
                             className="block text-center text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 font-medium"
                             onClick={() => setIsOpen(false)}
                         >

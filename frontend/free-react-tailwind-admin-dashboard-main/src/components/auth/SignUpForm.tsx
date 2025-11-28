@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -12,7 +12,7 @@ const securityQuestions = [
     "What city were you born in?",
     "What is your mother's maiden name?",
     "What was your childhood nickname?",
-    "What is your favorite movie?",
+    "What is your favorite movie? ",
     "What street did you grow up on?"
 ];
 
@@ -34,21 +34,27 @@ export default function SignUpForm() {
     const { register } = useAuth();
     const navigate = useNavigate();
 
+    // ✅ UPDATED: Added SELLER role
     const roles = [
         {
             value: "BUYER",
             label: "Buyer",
-            icon: ""
+            icon: "🛒"
+        },
+        {
+            value: "SELLER",
+            label: "Seller",
+            icon: "🏪"
         },
         {
             value: "ANALYST",
             label: "Analyst",
-            icon: ""
+            icon: "📊"
         },
         {
             value: "ADMIN",
             label: "Admin",
-            icon: ""
+            icon: "👑"
         }
     ];
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 
 const CartIcon: React.FC = () => {

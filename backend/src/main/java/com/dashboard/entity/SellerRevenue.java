@@ -52,7 +52,7 @@ public class SellerRevenue {
 
     @Column(name = "platform_fee_percent", precision = 5, scale = 2)
     @Builder.Default
-    private BigDecimal platformFeePercent = new BigDecimal("10. 00");
+    private BigDecimal platformFeePercent = new BigDecimal("10.00");
 
     @Column(name = "platform_fee", precision = 12, scale = 2)
     private BigDecimal platformFee;
@@ -70,12 +70,12 @@ public class SellerRevenue {
     @PrePersist
     public void calculateRevenue() {
         if (this.grossAmount != null && this.platformFeePercent != null) {
-            this.platformFee = this. grossAmount.multiply(this.platformFeePercent)
+            this.platformFee = this.grossAmount.multiply(this.platformFeePercent)
                     .divide(new BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
-            this. netAmount = this. grossAmount.subtract(this.platformFee);
+            this. netAmount = this.grossAmount.subtract(this.platformFee);
         }
         if (this.revenueDate == null) {
-            this.revenueDate = LocalDate. now();
+            this.revenueDate = LocalDate.now();
         }
     }
 }

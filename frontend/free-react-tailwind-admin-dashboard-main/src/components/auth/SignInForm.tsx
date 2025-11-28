@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -19,19 +19,41 @@ export default function SignInForm() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const from = location.state?.from?.pathname || "/";
+    // Helper function to get redirect path based on role
+    const getRedirectPath = (role: string): string => {
+        switch (role) {
+            case 'ADMIN':
+                return '/admin';
+            case 'SELLER':
+                return '/seller/dashboard';
+            case 'BUYER':
+                return '/shop';
+            case 'ANALYST':
+                return '/admin';  // or wherever analysts should go
+            default:
+                return '/signin';
+        }
+    };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React. FormEvent) => {
         e.preventDefault();
         setError("");
         setIsLoading(true);
 
         try {
             await login(email, password);
-            // Redirect to the page they tried to visit or dashboard
-            navigate(from, { replace: true });
+
+            // Get the user from localStorage after login
+            const storedUser = localStorage. getItem('user');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                const redirectPath = location.state?.from?. pathname || getRedirectPath(userData.role);
+                navigate(redirectPath, { replace: true });
+            } else {
+                navigate('/signin', { replace: true });
+            }
         } catch (err: any) {
-            setError(err.message || "Login failed. Please check your credentials.");
+            setError(err.message || "Login failed.  Please check your credentials.");
         } finally {
             setIsLoading(false);
         }
@@ -74,7 +96,7 @@ export default function SignInForm() {
                                         type="email"
                                         placeholder="info@gmail.com"
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={(e) => setEmail(e. target.value)}
                                     />
                                 </div>
                                 <div>
@@ -92,20 +114,20 @@ export default function SignInForm() {
                                             onClick={() => setShowPassword(!showPassword)}
                                             className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
                                         >
-                      {showPassword ? (
-                          <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                      ) : (
-                          <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                      )}
-                    </span>
+                                            {showPassword ? (
+                                                <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                                            ) : (
+                                                <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
+                                            )}
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <Checkbox checked={isChecked} onChange={setIsChecked} />
                                         <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                      Keep me logged in
-                    </span>
+                                            Keep me logged in
+                                        </span>
                                     </div>
                                     <Link
                                         to="/forgot-password"
@@ -118,7 +140,7 @@ export default function SignInForm() {
                                     <Button
                                         className="w-full"
                                         size="sm"
-                                        type = "submit"
+                                        type="submit"
                                         disabled={isLoading}
                                     >
                                         {isLoading ? "Signing in..." : "Sign in"}
@@ -129,7 +151,7 @@ export default function SignInForm() {
 
                         <div className="mt-5">
                             <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                                Don&apos;t have an account?{" "}
+                                Don&apos;t have an account? {" "}
                                 <Link
                                     to="/signup"
                                     className="text-brand-500 hover:text-brand-600 dark:text-brand-400"

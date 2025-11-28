@@ -9,8 +9,8 @@ import SellerLayout from './layout/SellerLayout';
 // Existing Auth Pages
 import SignIn from './pages/AuthPages/SignIn';
 import SignUp from './pages/AuthPages/SignUp';
-// New Auth Page
-import SellerSignUp from './pages/AuthPages/SellerSignUp';
+// Auth Context
+import { AuthProvider } from './context/AuthContext';
 
 // Existing Dashboard Pages (Admin)
 import Home from './pages/Dashboard/Home';
@@ -42,12 +42,12 @@ import NotificationsPage from './pages/NotificationsPage';
 
 // Auth Guard
 interface PrivateRouteProps {
-    children: React.ReactNode;
+    children: React. ReactNode;
     allowedRoles: string[];
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, allowedRoles }) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage. getItem('token');
     const user = localStorage.getItem('user');
 
     if (!token || !user) {
@@ -55,7 +55,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, allowedRoles }) =
     }
 
     const userData = JSON.parse(user);
-    if (! allowedRoles.includes(userData.role)) {
+    if (! allowedRoles. includes(userData.role)) {
         switch (userData.role) {
             case 'ADMIN':
                 return <Navigate to="/admin" replace />;
@@ -73,74 +73,75 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, allowedRoles }) =
 
 function App() {
     return (
-        <Router>
-            <Routes>
-                {/* Public Auth Routes */}
-                <Route path="/signin" element={<SignIn />} />
-                <Route path="/signup" element={<SignUp />} />
-                <Route path="/signup/seller" element={<SellerSignUp />} />
+        <AuthProvider>
+            <Router>
+                <Routes>
+                    {/* Public Auth Routes */}
+                    <Route path="/signin" element={<SignIn />} />
+                    <Route path="/signup" element={<SignUp />} />
 
-                {/* Admin Routes - using existing AppLayout */}
-                <Route
-                    path="/admin"
-                    element={
-                        <PrivateRoute allowedRoles={['ADMIN']}>
-                            <AppLayout />
-                        </PrivateRoute>
-                    }
-                >
-                    <Route index element={<Home />} />
-                    <Route path="products" element={<ProductsPage />} />
-                    <Route path="product-approvals" element={<ProductApprovals />} />
-                    <Route path="notifications" element={<NotificationsPage />} />
-                </Route>
+                    {/* Admin Routes - using existing AppLayout */}
+                    <Route
+                        path="/admin"
+                        element={
+                            <PrivateRoute allowedRoles={['ADMIN']}>
+                                <AppLayout />
+                            </PrivateRoute>
+                        }
+                    >
+                        <Route index element={<Home/>} />
+                        <Route path="/admin/products" element={<ProductsPage/>} />
+                        <Route path="/admin/product-approvals" element={<ProductApprovals/>} />
+                        <Route path="/admin/notifications" element={<NotificationsPage/>} />
+                    </Route>
 
-                {/* Seller Routes - using new SellerLayout */}
-                <Route
-                    path="/seller"
-                    element={
-                        <PrivateRoute allowedRoles={['SELLER']}>
-                            <SellerLayout />
-                        </PrivateRoute>
-                    }
-                >
-                    <Route index element={<Navigate to="/seller/dashboard" replace />} />
-                    <Route path="dashboard" element={<SellerDashboard />} />
-                    <Route path="products" element={<SellerProducts />} />
-                    <Route path="products/new" element={<SellerProductForm />} />
-                    <Route path="products/:asin/edit" element={<SellerProductForm />} />
-                    <Route path="orders" element={<SellerOrders />} />
-                    <Route path="reviews" element={<SellerReviews />} />
-                    <Route path="profile" element={<SellerProfile />} />
-                    <Route path="notifications" element={<NotificationsPage />} />
-                </Route>
+                    {/* Seller Routes - using new SellerLayout */}
+                    <Route
+                        path="/seller"
+                        element={
+                            <PrivateRoute allowedRoles={['SELLER']}>
+                                <SellerLayout />
+                            </PrivateRoute>
+                        }
+                    >
+                        <Route index element={<Navigate to="/seller/dashboard" replace />} />
+                        <Route path="dashboard" element={<SellerDashboard />} />
+                        <Route path="products" element={<SellerProducts />} />
+                        <Route path="products/new" element={<SellerProductForm />} />
+                        <Route path="products/:asin/edit" element={<SellerProductForm />} />
+                        <Route path="orders" element={<SellerOrders />} />
+                        <Route path="reviews" element={<SellerReviews />} />
+                        <Route path="profile" element={<SellerProfile />} />
+                        <Route path="notifications" element={<NotificationsPage />} />
+                    </Route>
 
-                {/* Buyer Routes - using existing BuyerLayout */}
-                <Route
-                    path="/shop"
-                    element={
-                        <PrivateRoute allowedRoles={['BUYER']}>
-                            <BuyerLayout />
-                        </PrivateRoute>
-                    }
-                >
-                    <Route index element={<ShopPage />} />
-                    <Route path="product/:asin" element={<ProductDetailPage />} />
-                    <Route path="cart" element={<CartPage />} />
-                    <Route path="checkout" element={<CheckoutPage />} />
-                    <Route path="orders" element={<OrderHistoryPage />} />
-                    <Route path="profile" element={<BuyerProfilePage />} />
-                    <Route path="my-reviews" element={<MyReviewsPage />} />
-                    <Route path="notifications" element={<NotificationsPage />} />
-                </Route>
+                    {/* Buyer Routes - using existing BuyerLayout */}
+                    <Route
+                        path="/shop"
+                        element={
+                            <PrivateRoute allowedRoles={['BUYER']}>
+                                <BuyerLayout />
+                            </PrivateRoute>
+                        }
+                    >
+                        <Route index element={<ShopPage />} />
+                        <Route path="product/:asin" element={<ProductDetailPage />} />
+                        <Route path="cart" element={<CartPage />} />
+                        <Route path="checkout" element={<CheckoutPage />} />
+                        <Route path="orders" element={<OrderHistoryPage />} />
+                        <Route path="profile" element={<BuyerProfilePage />} />
+                        <Route path="my-reviews" element={<MyReviewsPage />} />
+                        <Route path="notifications" element={<NotificationsPage />} />
+                    </Route>
 
-                {/* Root redirect */}
-                <Route path="/" element={<Navigate to="/signin" replace />} />
+                    {/* Root redirect */}
+                    <Route path="/" element={<Navigate to="/signin" replace />} />
 
-                {/* 404 */}
-                <Route path="*" element={<NotFound />} />
-            </Routes>
-        </Router>
+                    {/* 404 */}
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+            </Router>
+        </AuthProvider>
     );
 }
 
