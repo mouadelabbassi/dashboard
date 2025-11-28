@@ -256,6 +256,7 @@ public class SellerService {
 
         Long totalReviews = reviewRepository.countByProductAsinIn(productAsins);
         Double avgRating = reviewRepository.calculateAverageRatingForProducts(productAsins);
+        if (avgRating == null) avgRating = 0.0;
 
         Map<Integer, Long> distribution = new HashMap<>();
         for (int i = 1; i <= 5; i++) {
@@ -286,7 +287,8 @@ public class SellerService {
         // Calculate average rating across all products
         List<Product> myProducts = productRepository.findBySellerOrderByCreatedAtDesc(seller, Pageable.unpaged()).getContent();
         List<String> productAsins = myProducts.stream().map(Product::getAsin).collect(Collectors.toList());
-        Double avgRating = productAsins.isEmpty() ?  0.0 : reviewRepository.calculateAverageRatingForProducts(productAsins);
+        Double avgRating = productAsins.isEmpty() ? 0.0 : reviewRepository.calculateAverageRatingForProducts(productAsins);
+        if (avgRating == null) avgRating = 0.0;
 
         return SellerProfileResponse.builder()
                 .id(seller.getId())

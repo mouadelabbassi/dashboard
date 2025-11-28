@@ -29,7 +29,7 @@ const NotificationDropdown: React.FC = () => {
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document. removeEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const fetchUnreadCount = async () => {
@@ -45,7 +45,7 @@ const NotificationDropdown: React.FC = () => {
         try {
             setLoading(true);
             const unread = await notificationService.getUnreadNotifications();
-            setNotifications(unread. slice(0, 10));
+            setNotifications(unread.slice(0, 10));
         } catch (error) {
             console.error('Error fetching notifications:', error);
         } finally {
@@ -56,7 +56,7 @@ const NotificationDropdown: React.FC = () => {
     const handleMarkAsRead = async (id: number) => {
         try {
             await notificationService.markAsRead(id);
-            setNotifications((prev) => prev.filter((n) => n. id !== id));
+            setNotifications((prev) => prev.filter((n) => n.id !== id));
             setUnreadCount((prev) => Math.max(0, prev - 1));
         } catch (error) {
             console.error('Error marking as read:', error);
@@ -95,7 +95,7 @@ const NotificationDropdown: React.FC = () => {
     const getTimeAgo = (dateString: string) => {
         const date = new Date(dateString);
         const now = new Date();
-        const seconds = Math.floor((now. getTime() - date.getTime()) / 1000);
+        const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
         if (seconds < 60) return 'À l\'instant';
         if (seconds < 3600) return `Il y a ${Math.floor(seconds / 60)} min`;
@@ -152,7 +152,7 @@ const NotificationDropdown: React.FC = () => {
                             <div className="flex justify-center py-8">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                             </div>
-                        ) : notifications. length === 0 ? (
+                        ) : notifications.length === 0 ? (
                             <div className="py-8 text-center text-gray-500">
                                 <svg className="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />

@@ -1,26 +1,26 @@
 package com.dashboard.service;
 
-import com.dashboard.dto.request. ProductApprovalRequest;
-import com.dashboard.dto.response. AdminDashboardResponse;
-import com.dashboard. dto.response.PendingProductResponse;
-import com. dashboard.dto.response. SellerProductRequestResponse;
+import com.dashboard.dto.request.ProductApprovalRequest;
+import com.dashboard.dto.response.AdminDashboardResponse;
+import com.dashboard.dto.response.PendingProductResponse;
+import com.dashboard.dto.response.SellerProductRequestResponse;
 import com.dashboard.entity.*;
 import com.dashboard.exception.BadRequestException;
-import com.dashboard.exception. ResourceNotFoundException;
+import com.dashboard.exception.ResourceNotFoundException;
 import com.dashboard.repository.*;
-import lombok. RequiredArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data. domain.Page;
-import org.springframework. data.domain. Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context. SecurityContextHolder;
-import org.springframework. stereotype.Service;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time. LocalDateTime;
-import java.util. UUID;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -37,8 +37,8 @@ public class AdminProductApprovalService {
 
     private User getCurrentAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication. getName();
-        User user = userRepository. findByEmail(email)
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
         if (user.getRole() != User.Role.ADMIN) {
@@ -53,14 +53,14 @@ public class AdminProductApprovalService {
     public Page<PendingProductResponse> getPendingProductRequests(Pageable pageable) {
         getCurrentAdmin();
         return productRequestRepository.findByStatusOrderByCreatedAtDesc(
-                        SellerProductRequest.RequestStatus. PENDING, pageable)
+                        SellerProductRequest.RequestStatus.PENDING, pageable)
                 .map(this::convertToPendingResponse);
     }
 
     @Transactional(readOnly = true)
     public PendingProductResponse getProductRequestDetails(Long requestId) {
         getCurrentAdmin();
-        SellerProductRequest request = productRequestRepository. findById(requestId)
+        SellerProductRequest request = productRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("ProductRequest", "id", requestId));
         return convertToPendingResponse(request);
     }
@@ -82,7 +82,7 @@ public class AdminProductApprovalService {
         // Create the actual product
         Product product = Product.builder()
                 .asin(asin)
-                . productName(request. getProductName())
+                .productName(request.getProductName())
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .stockQuantity(request.getStockQuantity())
@@ -103,7 +103,7 @@ public class AdminProductApprovalService {
         product = productRepository.save(product);
 
         // Update the request
-        request.setStatus(SellerProductRequest.RequestStatus. APPROVED);
+        request.setStatus(SellerProductRequest.RequestStatus.APPROVED);
         request.setReviewedBy(admin);
         request.setReviewedAt(LocalDateTime.now());
         request.setGeneratedAsin(asin);
@@ -111,7 +111,7 @@ public class AdminProductApprovalService {
         productRequestRepository.save(request);
 
         // Notify the seller
-        notificationService.notifySellerProductApproved(request. getSeller(), product);
+        notificationService.notifySellerProductApproved(request.getSeller(), product);
 
         log.info("Admin {} approved product request {} - Created product with ASIN: {}",
                 admin.getEmail(), requestId, asin);
@@ -123,33 +123,33 @@ public class AdminProductApprovalService {
     public SellerProductRequestResponse rejectProduct(Long requestId, ProductApprovalRequest approvalRequest) {
         User admin = getCurrentAdmin();
 
-        SellerProductRequest request = productRequestRepository. findById(requestId)
+        SellerProductRequest request = productRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("ProductRequest", "id", requestId));
 
-        if (request.getStatus() != SellerProductRequest.RequestStatus. PENDING) {
+        if (request.getStatus() != SellerProductRequest.RequestStatus.PENDING) {
             throw new BadRequestException("This request has already been processed");
         }
 
-        if (approvalRequest.getRejectionReason() == null || approvalRequest.getRejectionReason(). isBlank()) {
+        if (approvalRequest.getRejectionReason() == null || approvalRequest.getRejectionReason().isBlank()) {
             throw new BadRequestException("Rejection reason is required");
         }
 
         // Update the request
-        request.setStatus(SellerProductRequest. RequestStatus.REJECTED);
-        request. setReviewedBy(admin);
-        request. setReviewedAt(LocalDateTime.now());
-        request. setRejectionReason(approvalRequest.getRejectionReason());
+        request.setStatus(SellerProductRequest.RequestStatus.REJECTED);
+        request.setReviewedBy(admin);
+        request.setReviewedAt(LocalDateTime.now());
+        request.setRejectionReason(approvalRequest.getRejectionReason());
         request.setAdminNotes(approvalRequest.getAdminNotes());
         productRequestRepository.save(request);
 
         // Create a dummy product for notification (not saved)
-        Product dummyProduct = Product. builder()
-                . asin("REJECTED")
+        Product dummyProduct = Product.builder()
+                .asin("REJECTED")
                 .productName(request.getProductName())
                 .build();
 
         // Notify the seller
-        notificationService.notifySellerProductRejected(request. getSeller(), dummyProduct, approvalRequest.getRejectionReason());
+        notificationService.notifySellerProductRejected(request.getSeller(), dummyProduct, approvalRequest.getRejectionReason());
 
         log.info("Admin {} rejected product request {}: {}",
                 admin.getEmail(), requestId, approvalRequest.getRejectionReason());
@@ -171,7 +171,7 @@ public class AdminProductApprovalService {
 
         // User stats
         Long totalSellers = userRepository.countByRole(User.Role.SELLER);
-        Long totalBuyers = userRepository. countByRole(User.Role.BUYER);
+        Long totalBuyers = userRepository.countByRole(User.Role.BUYER);
 
         // Revenue stats - ONLY from actual purchases (confirmed orders)
         BigDecimal totalPlatformRevenue = revenueRepository.calculateTotalPlatformRevenue();
@@ -179,12 +179,12 @@ public class AdminProductApprovalService {
 
         // Orders completed today
         BigDecimal todayRevenue = orderRepository.calculateTodayRevenue();
-        Long todayOrders = orderRepository. countTodayOrders();
+        Long todayOrders = orderRepository.countTodayOrders();
 
         return AdminDashboardResponse.builder()
                 .totalProducts(totalProducts)
-                . pendingApprovals(pendingApprovals)
-                . totalSellers(totalSellers)
+                .pendingApprovals(pendingApprovals)
+                .totalSellers(totalSellers)
                 .totalBuyers(totalBuyers)
                 .totalPlatformRevenue(totalPlatformRevenue != null ? totalPlatformRevenue : BigDecimal.ZERO)
                 .totalPlatformFees(totalPlatformFees != null ?  totalPlatformFees : BigDecimal.ZERO)
@@ -204,7 +204,7 @@ public class AdminProductApprovalService {
 
     @Transactional(readOnly = true)
     public Page<SellerProductRequestResponse> getProductRequestsByStatus(
-            SellerProductRequest. RequestStatus status, Pageable pageable) {
+            SellerProductRequest.RequestStatus status, Pageable pageable) {
         getCurrentAdmin();
         return productRequestRepository.findByStatusOrderByCreatedAtDesc(status, pageable)
                 .map(this::convertToRequestResponse);
@@ -215,24 +215,24 @@ public class AdminProductApprovalService {
     private String generateUniqueAsin() {
         String asin;
         do {
-            asin = "SLR" + UUID.randomUUID().toString(). substring(0, 7). toUpperCase();
+            asin = "SLR" + UUID.randomUUID().toString().substring(0, 7).toUpperCase();
         } while (productRepository.existsByAsin(asin));
         return asin;
     }
 
     private PendingProductResponse convertToPendingResponse(SellerProductRequest request) {
         return PendingProductResponse.builder()
-                .id(request. getId())
-                . productName(request.getProductName())
-                . description(request.getDescription())
-                . price(request.getPrice())
-                . stockQuantity(request.getStockQuantity())
-                . imageUrl(request. getImageUrl())
+                .id(request.getId())
+                .productName(request.getProductName())
+                .description(request.getDescription())
+                .price(request.getPrice())
+                .stockQuantity(request.getStockQuantity())
+                .imageUrl(request.getImageUrl())
                 .categoryId(request.getCategory().getId())
-                .categoryName(request.getCategory(). getName())
-                . sellerId(request.getSeller().getId())
-                .sellerName(request. getSeller().getFullName())
-                . sellerStoreName(request.getSeller().getStoreName())
+                .categoryName(request.getCategory().getName())
+                .sellerId(request.getSeller().getId())
+                .sellerName(request.getSeller().getFullName())
+                .sellerStoreName(request.getSeller().getStoreName())
                 .sellerEmail(request.getSeller().getEmail())
                 .submittedAt(request.getCreatedAt())
                 .build();
@@ -240,21 +240,21 @@ public class AdminProductApprovalService {
 
     private SellerProductRequestResponse convertToRequestResponse(SellerProductRequest request) {
         return SellerProductRequestResponse.builder()
-                .id(request. getId())
-                . productName(request. getProductName())
+                .id(request.getId())
+                .productName(request.getProductName())
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .stockQuantity(request.getStockQuantity())
                 .imageUrl(request.getImageUrl())
                 .categoryId(request.getCategory().getId())
-                .categoryName(request.getCategory(). getName())
-                . status(request.getStatus().name())
+                .categoryName(request.getCategory().getName())
+                .status(request.getStatus().name())
                 .statusDescription(request.getStatus().getDescription())
-                . adminNotes(request.getAdminNotes())
-                . rejectionReason(request.getRejectionReason())
+                .adminNotes(request.getAdminNotes())
+                .rejectionReason(request.getRejectionReason())
                 .generatedAsin(request.getGeneratedAsin())
                 .createdAt(request.getCreatedAt())
-                .reviewedAt(request. getReviewedAt())
+                .reviewedAt(request.getReviewedAt())
                 .build();
     }
 }

@@ -2,7 +2,7 @@ package com.dashboard.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations. CreationTimestamp;
 
 import java.time. LocalDateTime;
 
@@ -21,7 +21,7 @@ import java.time. LocalDateTime;
 public class Notification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType. IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType. LAZY)
@@ -29,7 +29,7 @@ public class Notification {
     private User recipient;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false, length = 30)  // Changed from 20 to 30
     private NotificationType type;
 
     @Column(nullable = false, length = 255)
@@ -48,7 +48,7 @@ public class Notification {
     private String actionUrl;
 
     @Column(name = "is_read")
-    @Builder. Default
+    @Builder.Default
     private Boolean isRead = false;
 
     @Column(name = "read_at")
@@ -59,32 +59,24 @@ public class Notification {
     private LocalDateTime createdAt;
 
     public enum NotificationType {
-        // Seller notifications
         PRODUCT_APPROVED("Produit approuvé"),
         PRODUCT_REJECTED("Produit rejeté"),
         PRODUCT_PURCHASED("Produit acheté"),
         REVIEW_RECEIVED("Avis reçu"),
         RATING_RECEIVED("Note reçue"),
-
-        // Buyer notifications
         ORDER_CONFIRMED("Commande confirmée"),
         ORDER_SHIPPED("Commande expédiée"),
         ORDER_DELIVERED("Commande livrée"),
-
         NEW_ORDER("Nouvelle commande"),
-
-        // Admin notifications
         NEW_SELLER_PRODUCT("Nouveau produit vendeur"),
         NEW_SELLER_REGISTRATION("Nouvelle inscription vendeur"),
-
-        // General
         SYSTEM("Système"),
         PROMOTION("Promotion");
 
         private final String description;
 
         NotificationType(String description) {
-            this.description = description;
+            this. description = description;
         }
 
         public String getDescription() {

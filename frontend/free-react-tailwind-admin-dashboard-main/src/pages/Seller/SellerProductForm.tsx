@@ -9,7 +9,7 @@ interface Category {
     name: string;
 }
 
-const SellerProductForm: React. FC = () => {
+const SellerProductForm: React.FC = () => {
     const navigate = useNavigate();
     const { asin } = useParams<{ asin: string }>();
     const isEditing = !!asin;
@@ -43,9 +43,9 @@ const SellerProductForm: React. FC = () => {
             const response = await axios.get('http://localhost:8080/api/categories', {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setCategories(response.data. data || response.data);
+            setCategories(response.data.data || response.data);
         } catch (error) {
-            console. error('Error fetching categories:', error);
+            console.error('Error fetching categories:', error);
         }
     };
 
@@ -63,18 +63,18 @@ const SellerProductForm: React. FC = () => {
                 categoryId: product.categoryId,
             });
         } catch (error: any) {
-            setError(error. response?.data?.message || 'Failed to load product');
+            setError(error.response?.data?.message || 'Failed to load product');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSubmit = async (e: React. FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setSuccess(null);
 
-        if (! formData.productName || !formData. price || !formData.categoryId) {
+        if (! formData.productName || !formData.price || !formData.categoryId) {
             setError('Veuillez remplir tous les champs obligatoires');
             return;
         }
@@ -90,7 +90,7 @@ const SellerProductForm: React. FC = () => {
             }
             setTimeout(() => navigate('/seller/products'), 2000);
         } catch (error: any) {
-            setError(error. response?.data?.message || 'Une erreur est survenue');
+            setError(error.response?.data?.message || 'Une erreur est survenue');
         } finally {
             setSubmitting(false);
         }
@@ -113,7 +113,7 @@ const SellerProductForm: React. FC = () => {
                 <p className="text-gray-600 dark:text-gray-400 mt-1">
                     {isEditing
                         ? 'Modifiez les informations de votre produit'
-                        : 'Remplissez le formulaire pour soumettre un nouveau produit à la vente.  Il sera examiné par notre équipe avant publication. '}
+                        : 'Remplissez le formulaire pour soumettre un nouveau produit à la vente. Il sera examiné par notre équipe avant publication.'}
                 </p>
             </div>
 
@@ -154,7 +154,7 @@ const SellerProductForm: React. FC = () => {
                             Description
                         </label>
                         <textarea
-                            value={formData. description}
+                            value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             rows={4}
                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
@@ -165,14 +165,14 @@ const SellerProductForm: React. FC = () => {
                     {/* Price */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Prix (MAD) *
+                            Price ($) *
                         </label>
                         <input
                             type="number"
                             step="0.01"
-                            min="0. 01"
+                            min="0.01"
                             value={formData.price}
-                            onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target. value) })}
+                            onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                             required
                         />
@@ -186,7 +186,7 @@ const SellerProductForm: React. FC = () => {
                         <input
                             type="number"
                             min="1"
-                            value={formData. stockQuantity}
+                            value={formData.stockQuantity}
                             onChange={(e) => setFormData({ ...formData, stockQuantity: parseInt(e.target.value) })}
                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                             required
@@ -205,9 +205,9 @@ const SellerProductForm: React. FC = () => {
                             required
                         >
                             <option value={0}>Sélectionner une catégorie</option>
-                            {categories. map((cat) => (
+                            {categories.map((cat) => (
                                 <option key={cat.id} value={cat.id}>
-                                    {cat. name}
+                                    {cat.name}
                                 </option>
                             ))}
                         </select>
@@ -262,7 +262,7 @@ const SellerProductForm: React. FC = () => {
                         {submitting && (
                             <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5. 373 0 0 5. 373 0 12h4z" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                             </svg>
                         )}
                         {isEditing ? 'Mettre à jour' : 'Soumettre pour Approbation'}
@@ -275,15 +275,15 @@ const SellerProductForm: React. FC = () => {
                 <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                     <h4 className="font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-2">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h. 01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Comment ça marche?
                     </h4>
                     <ul className="mt-2 text-sm text-blue-700 dark:text-blue-400 space-y-1">
                         <li>1. Soumettez votre produit avec toutes les informations requises</li>
                         <li>2. Notre équipe examinera votre demande (généralement sous 24h)</li>
-                        <li>3.  Vous recevrez une notification une fois approuvé</li>
-                        <li>4. Votre produit sera automatiquement mis en vente</li>
+                        <li>3. Vous recevrez une notification une fois approuvé</li>
+                        <li>4.Votre produit sera automatiquement mis en vente</li>
                     </ul>
                 </div>
             )}

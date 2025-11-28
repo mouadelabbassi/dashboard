@@ -1,12 +1,12 @@
 package com.dashboard.repository;
 
-import com. dashboard.entity. SellerProductRequest;
-import com.dashboard.entity. User;
-import org.springframework.data. domain.Page;
-import org.springframework. data.domain. Pageable;
+import com.dashboard.entity.SellerProductRequest;
+import com.dashboard.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository. query.Param;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,13 +17,13 @@ public interface SellerProductRequestRepository extends JpaRepository<SellerProd
     Page<SellerProductRequest> findBySellerOrderByCreatedAtDesc(User seller, Pageable pageable);
 
     Page<SellerProductRequest> findByStatusOrderByCreatedAtDesc(
-            SellerProductRequest. RequestStatus status,
+            SellerProductRequest.RequestStatus status,
             Pageable pageable
     );
 
     List<SellerProductRequest> findBySellerAndStatusOrderByCreatedAtDesc(
             User seller,
-            SellerProductRequest. RequestStatus status
+            SellerProductRequest.RequestStatus status
     );
 
     Long countByStatus(SellerProductRequest.RequestStatus status);

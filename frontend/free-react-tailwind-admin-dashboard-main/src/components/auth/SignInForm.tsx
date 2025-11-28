@@ -19,7 +19,6 @@ export default function SignInForm() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Helper function to get redirect path based on role
     const getRedirectPath = (role: string): string => {
         switch (role) {
             case 'ADMIN':
@@ -29,13 +28,13 @@ export default function SignInForm() {
             case 'BUYER':
                 return '/shop';
             case 'ANALYST':
-                return '/admin';  // or wherever analysts should go
+                return '/admin';
             default:
                 return '/signin';
         }
     };
 
-    const handleSubmit = async (e: React. FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
         setIsLoading(true);
@@ -43,17 +42,16 @@ export default function SignInForm() {
         try {
             await login(email, password);
 
-            // Get the user from localStorage after login
-            const storedUser = localStorage. getItem('user');
+            const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const userData = JSON.parse(storedUser);
-                const redirectPath = location.state?.from?. pathname || getRedirectPath(userData.role);
+                const redirectPath = location.state?.from?.pathname || getRedirectPath(userData.role);
                 navigate(redirectPath, { replace: true });
             } else {
                 navigate('/signin', { replace: true });
             }
         } catch (err: any) {
-            setError(err.message || "Login failed.  Please check your credentials.");
+            setError(err.message || "Login failed. Please check your credentials.");
         } finally {
             setIsLoading(false);
         }
@@ -61,8 +59,7 @@ export default function SignInForm() {
 
     return (
         <div className="flex flex-col flex-1">
-            <div className="w-full max-w-md pt-10 mx-auto">
-            </div>
+            <div className="w-full max-w-md pt-10 mx-auto"></div>
             <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
                 <div>
                     <div className="mb-5 sm:mb-8">
@@ -96,7 +93,7 @@ export default function SignInForm() {
                                         type="email"
                                         placeholder="info@gmail.com"
                                         value={email}
-                                        onChange={(e) => setEmail(e. target.value)}
+                                        onChange={(e) => setEmail(e.target.value)}
                                     />
                                 </div>
                                 <div>

@@ -49,11 +49,11 @@ const ShopPage: React.FC = () => {
         }
 
         if (selectedCategory !== 'all') {
-            result = result. filter(p => p.categoryName === selectedCategory);
+            result = result.filter(p => p.categoryName === selectedCategory);
         }
 
         if (priceRange !== 'all') {
-            const [min, max] = priceRange. split('-').map(Number);
+            const [min, max] = priceRange.split('-').map(Number);
             result = result.filter(p => {
                 const price = p.price || 0;
                 if (max) return price >= min && price <= max;
@@ -61,7 +61,7 @@ const ShopPage: React.FC = () => {
             });
         }
 
-        result. sort((a, b) => {
+        result.sort((a, b) => {
             switch (sortBy) {
                 case 'price-low':
                     return (a.price || 0) - (b.price || 0);
@@ -72,7 +72,7 @@ const ShopPage: React.FC = () => {
                 case 'reviews':
                     return (b.reviewsCount || 0) - (a.reviewsCount || 0);
                 default:
-                    return (a.ranking || 999) - (b. ranking || 999);
+                    return (a.ranking || 999) - (b.ranking || 999);
             }
         });
 
@@ -94,7 +94,7 @@ const ShopPage: React.FC = () => {
         setQuantities(prev => ({ ...prev, [product.asin]: 1 }));
     };
 
-    const categories = ['all', ... new Set(products. map(p => p.categoryName). filter(Boolean))];
+    const categories = ['all', ...new Set(products.map(p => p.categoryName).filter(Boolean))];
 
     if (loading) {
         return (
@@ -106,7 +106,7 @@ const ShopPage: React.FC = () => {
 
     return (
         <div>
-            {toast && <Toast message={toast. message} type={toast.type} onClose={() => setToast(null)} />}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Shop</h1>
@@ -127,8 +127,8 @@ const ShopPage: React.FC = () => {
                                 type="text"
                                 placeholder="Search products..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target. value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </div>
                     </div>
@@ -138,9 +138,9 @@ const ShopPage: React.FC = () => {
                         onChange={(e) => setSelectedCategory(e.target.value)}
                         className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     >
-                        {categories. map(cat => (
+                        {categories.map(cat => (
                             <option key={cat} value={cat}>
-                                {cat === 'all' ?  'All Categories' : cat}
+                                {cat === 'all' ?   'All Categories' : cat}
                             </option>
                         ))}
                     </select>
@@ -172,7 +172,7 @@ const ShopPage: React.FC = () => {
             </div>
 
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Showing {filteredProducts. length} of {products.length} products
+                Showing {filteredProducts.length} of {products.length} products
             </p>
 
             {/* Products Grid */}
@@ -182,9 +182,10 @@ const ShopPage: React.FC = () => {
                         key={product.asin}
                         className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group"
                     >
-                        <Link to={`/product/${product.asin}`} className="block relative">
+                        {/* FIXED: Changed from /product/ to /shop/product/ */}
+                        <Link to={`/shop/product/${product.asin}`} className="block relative">
                             <div className="aspect-square bg-gray-100 dark:bg-gray-700 overflow-hidden">
-                                {product.imageUrl ? (
+                                {product.imageUrl ?  (
                                     <img
                                         src={product.imageUrl}
                                         alt={product.productName}
@@ -193,7 +194,7 @@ const ShopPage: React.FC = () => {
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-400">
                                         <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4. 586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1. 586a2 2 0 012. 828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </div>
                                 )}
@@ -212,9 +213,9 @@ const ShopPage: React.FC = () => {
                                 )}
                             </div>
 
-                            {isInCart(product. asin) && (
+                            {isInCart(product.asin) && (
                                 <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
-                                    ✓ In Cart ({getItemQuantity(product. asin)})
+                                    ✓ In Cart ({getItemQuantity(product.asin)})
                                 </div>
                             )}
                         </Link>
@@ -224,9 +225,10 @@ const ShopPage: React.FC = () => {
                                 {product.categoryName || 'Uncategorized'}
                             </p>
 
-                            <Link to={`/product/${product.asin}`}>
+                            {/* FIXED: Changed from /product/ to /shop/product/ */}
+                            <Link to={`/shop/product/${product.asin}`}>
                                 <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400 mb-2">
-                                    {product. productName}
+                                    {product.productName}
                                 </h3>
                             </Link>
 
@@ -234,17 +236,17 @@ const ShopPage: React.FC = () => {
                                 <div className="flex items-center">
                                     <span className="text-yellow-400">★</span>
                                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-                                        {product.rating?. toFixed(1) || 'N/A'}
+                                        {product.rating?.toFixed(1) || 'N/A'}
                                     </span>
                                 </div>
                                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                                    ({product.reviewsCount?. toLocaleString() || 0} reviews)
+                                    ({product.reviewsCount?.toLocaleString() || 0} reviews)
                                 </span>
                             </div>
 
                             <div className="flex items-center justify-between mb-3">
                                 <p className="text-xl font-bold text-gray-900 dark:text-white">
-                                    ${product.price?. toFixed(2) || '0.00'}
+                                    ${product.price?.toFixed(2) || '0.00'}
                                 </p>
                             </div>
 
@@ -252,7 +254,7 @@ const ShopPage: React.FC = () => {
                                 <span className="text-sm text-gray-600 dark:text-gray-400">Qty:</span>
                                 <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg">
                                     <button
-                                        onClick={() => setQuantity(product.asin, getQuantity(product. asin) - 1)}
+                                        onClick={() => setQuantity(product.asin, getQuantity(product.asin) - 1)}
                                         className="px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                     >
                                         -
@@ -261,8 +263,8 @@ const ShopPage: React.FC = () => {
                                         type="number"
                                         min="1"
                                         max="99"
-                                        value={getQuantity(product. asin)}
-                                        onChange={(e) => setQuantity(product.asin, parseInt(e. target.value) || 1)}
+                                        value={getQuantity(product.asin)}
+                                        onChange={(e) => setQuantity(product.asin, parseInt(e.target.value) || 1)}
                                         className="w-12 text-center border-x border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-white focus:outline-none"
                                     />
                                     <button
@@ -279,7 +281,7 @@ const ShopPage: React.FC = () => {
                                 className="w-full py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5. 4 5M7 13l-2.293 2. 293c-.63. 63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                                 Add to Cart
                             </button>
@@ -291,7 +293,7 @@ const ShopPage: React.FC = () => {
             {filteredProducts.length === 0 && (
                 <div className="text-center py-16">
                     <svg className="w-20 h-20 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9. 172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No products found</h3>
                     <p className="text-gray-500 dark:text-gray-400">Try adjusting your filters</p>

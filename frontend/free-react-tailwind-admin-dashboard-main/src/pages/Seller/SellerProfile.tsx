@@ -39,7 +39,7 @@ const SellerProfile: React.FC = () => {
                 businessAddress: data.businessAddress || '',
             });
         } catch (err: any) {
-            setError(err. response?.data?.message || 'Erreur lors du chargement du profil');
+            setError(err.response?.data?.message || 'Erreur lors du chargement du profil');
         } finally {
             setLoading(false);
         }
@@ -56,7 +56,7 @@ const SellerProfile: React.FC = () => {
             setSuccess('Profil mis à jour avec succès! ');
             setTimeout(() => setSuccess(null), 3000);
         } catch (err: any) {
-            setError(err. response?.data?.message || 'Erreur lors de la mise à jour');
+            setError(err.response?.data?.message || 'Erreur lors de la mise à jour');
         } finally {
             setSaving(false);
         }
@@ -153,7 +153,7 @@ const SellerProfile: React.FC = () => {
                                     />
                                 ) : (
                                     <span className="text-4xl text-blue-600 dark:text-blue-400 font-bold">
-                    {formData.fullName?. charAt(0).toUpperCase() || 'S'}
+                    {formData.fullName?.charAt(0).toUpperCase() || 'S'}
                   </span>
                                 )}
                             </div>
@@ -234,8 +234,8 @@ const SellerProfile: React.FC = () => {
                             </label>
                             {editing ? (
                                 <textarea
-                                    value={formData. bio}
-                                    onChange={(e) => setFormData({ ... formData, bio: e.target.value })}
+                                    value={formData.bio}
+                                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                                     rows={3}
                                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                                     placeholder="Parlez de vous..."
@@ -260,7 +260,7 @@ const SellerProfile: React.FC = () => {
                             {editing ?  (
                                 <input
                                     type="text"
-                                    value={formData. storeName}
+                                    value={formData.storeName}
                                     onChange={(e) => setFormData({ ...formData, storeName: e.target.value })}
                                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                                 />
@@ -292,7 +292,7 @@ const SellerProfile: React.FC = () => {
                             {editing ? (
                                 <textarea
                                     value={formData.storeDescription}
-                                    onChange={(e) => setFormData({ ...formData, storeDescription: e.target. value })}
+                                    onChange={(e) => setFormData({ ...formData, storeDescription: e.target.value })}
                                     rows={3}
                                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
                                     placeholder="Décrivez votre boutique..."
@@ -332,7 +332,7 @@ const SellerProfile: React.FC = () => {
                                 {saving && (
                                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5. 373 0 0 5.373 0 12h4z" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                                     </svg>
                                 )}
                                 Enregistrer

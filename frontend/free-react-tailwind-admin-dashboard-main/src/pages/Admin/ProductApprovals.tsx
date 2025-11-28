@@ -25,9 +25,9 @@ const ProductApprovals: React.FC = () => {
             const data = await adminService.getPendingProducts(currentPage, 10);
             setPendingProducts(data.content);
             setTotalPages(data.totalPages);
-            setTotalElements(data. totalElements);
+            setTotalElements(data.totalElements);
         } catch (error) {
-            console. error('Error fetching pending products:', error);
+            console.error('Error fetching pending products:', error);
         } finally {
             setLoading(false);
         }
@@ -44,7 +44,7 @@ const ProductApprovals: React.FC = () => {
     const handleAction = async () => {
         if (! selectedProduct) return;
 
-        if (modalAction === 'reject' && ! rejectionReason. trim()) {
+        if (modalAction === 'reject' && ! rejectionReason.trim()) {
             alert('Veuillez indiquer une raison de rejet');
             return;
         }
@@ -52,7 +52,7 @@ const ProductApprovals: React.FC = () => {
         try {
             setActionLoading(true);
             if (modalAction === 'approve') {
-                await adminService. approveProduct(selectedProduct.id, { adminNotes });
+                await adminService.approveProduct(selectedProduct.id, { adminNotes });
             } else {
                 await adminService.rejectProduct(selectedProduct.id, {
                     rejectionReason,
@@ -92,14 +92,14 @@ const ProductApprovals: React.FC = () => {
                         Aucun produit en attente
                     </h3>
                     <p className="text-gray-500 mt-2">
-                        Tous les produits ont été traités.  Revenez plus tard.
+                        Tous les produits ont été traités. Revenez plus tard.
                     </p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 gap-6">
                     {pendingProducts.map((product) => (
                         <div
-                            key={product. id}
+                            key={product.id}
                             className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
                         >
                             <div className="p-6">
@@ -108,7 +108,7 @@ const ProductApprovals: React.FC = () => {
                                     <div className="lg:w-48 flex-shrink-0">
                                         <img
                                             src={product.imageUrl || '/placeholder-product.png'}
-                                            alt={product. productName}
+                                            alt={product.productName}
                                             className="w-full h-48 lg:h-full object-cover rounded-lg"
                                         />
                                     </div>
@@ -125,7 +125,7 @@ const ProductApprovals: React.FC = () => {
                                                 </p>
                                             </div>
                                             <span className="text-2xl font-bold text-blue-600">
-                        {product.price. toLocaleString('fr-FR')} MAD
+                        {product.price.toLocaleString('fr-FR')} MAD
                       </span>
                                         </div>
 
@@ -137,7 +137,7 @@ const ProductApprovals: React.FC = () => {
                                             <div>
                                                 <span className="text-gray-500">Stock:</span>
                                                 <span className="ml-2 font-semibold text-gray-900 dark:text-white">
-                          {product. stockQuantity}
+                          {product.stockQuantity}
                         </span>
                                             </div>
                                             <div>
@@ -235,7 +235,7 @@ const ProductApprovals: React.FC = () => {
                         <div className="p-6">
                             <p className="text-gray-600 dark:text-gray-400 mb-4">
                                 {modalAction === 'approve'
-                                    ? `Êtes-vous sûr de vouloir approuver "${selectedProduct.productName}"?  Le produit sera immédiatement mis en vente. `
+                                    ? `Êtes-vous sûr de vouloir approuver "${selectedProduct.productName}"?  Le produit sera immédiatement mis en vente.`
                                     : `Êtes-vous sûr de vouloir rejeter "${selectedProduct.productName}"?`}
                             </p>
 
@@ -261,7 +261,7 @@ const ProductApprovals: React.FC = () => {
                                 </label>
                                 <textarea
                                     value={adminNotes}
-                                    onChange={(e) => setAdminNotes(e.target. value)}
+                                    onChange={(e) => setAdminNotes(e.target.value)}
                                     rows={2}
                                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                     placeholder="Notes internes..."

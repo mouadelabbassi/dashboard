@@ -1,7 +1,7 @@
 package com.dashboard.service;
 
-import com. dashboard.dto.request.OrderRequest;
-import com.dashboard.dto. response.OrderResponse;
+import com.dashboard.dto.request.OrderRequest;
+import com.dashboard. dto.response.OrderResponse;
 import com.dashboard.entity.*;
 import com.dashboard.exception.BadRequestException;
 import com.dashboard.exception.ResourceNotFoundException;
@@ -11,12 +11,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain. Pageable;
 import org.springframework. security.core.Authentication;
-import org.springframework.security.core.context. SecurityContextHolder;
-import org.springframework. stereotype.Service;
+import org. springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 import org.springframework. transaction.annotation. Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.math. BigDecimal;
+import java.time. LocalDate;
 import java. util.List;
 import java.util. Map;
 import java.util. stream.Collectors;
@@ -30,18 +30,19 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;  // ADD THIS LINE
 
     private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext(). getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("User not found"));
+                . orElseThrow(() -> new BadRequestException("User not found"));
     }
 
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
         User buyer = getCurrentUser();
-        log.info("Creating order for user: {}", buyer. getEmail());
+        log.info("Creating order for user: {}", buyer.getEmail());
 
         if (request.getItems() == null || request.getItems().isEmpty()) {
             throw new BadRequestException("Order must contain at least one item");
@@ -53,11 +54,11 @@ public class OrderService {
                 .notes(request.getNotes())
                 .build();
 
-        BigDecimal totalAmount = BigDecimal.ZERO;
+        BigDecimal totalAmount = BigDecimal. ZERO;
         int totalItems = 0;
 
-        for (OrderRequest. OrderItemRequest itemRequest : request.getItems()) {
-            Product product = productRepository.findByAsin(itemRequest. getProductAsin())
+        for (OrderRequest.OrderItemRequest itemRequest : request.getItems()) {
+            Product product = productRepository.findByAsin(itemRequest.getProductAsin())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Product not found: " + itemRequest.getProductAsin()));
 
@@ -71,7 +72,7 @@ public class OrderService {
                     .product(product)
                     .quantity(quantity)
                     .unitPrice(product.getPrice())
-                    .subtotal(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
+                    .subtotal(product.getPrice(). multiply(BigDecimal.valueOf(quantity)))
                     .productName(product.getProductName())
                     .productImage(product.getImageUrl())
                     .build();
@@ -81,24 +82,24 @@ public class OrderService {
             totalItems += quantity;
         }
 
-        order.setTotalAmount(totalAmount);
+        order. setTotalAmount(totalAmount);
         order.setTotalItems(totalItems);
 
         order = orderRepository.save(order);
         log.info("Order created: {} with {} items, total: {}",
-                order. getOrderNumber(), totalItems, totalAmount);
+                order.getOrderNumber(), totalItems, totalAmount);
 
         return OrderResponse.fromEntity(order);
     }
 
     @Transactional
     public OrderResponse confirmOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository. findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
 
         User currentUser = getCurrentUser();
 
-        if (! order.getUser().getId().equals(currentUser.getId())
+        if (!order. getUser().getId(). equals(currentUser. getId())
                 && currentUser.getRole() != User.Role.ADMIN) {
             throw new BadRequestException("You can only confirm your own orders");
         }
@@ -115,8 +116,11 @@ public class OrderService {
         // Update product sales count
         updateProductSalesCount(order);
 
-        // Create notification
+        // Create notification for buyer
         createOrderNotification(order);
+
+        // NEW: Send notifications to sellers and admins
+        sendPurchaseNotifications(order);
 
         return OrderResponse.fromEntity(order);
     }
@@ -148,7 +152,7 @@ public class OrderService {
             throw new BadRequestException("Order is already cancelled");
         }
 
-        if (order.getStatus() == Order.OrderStatus.DELIVERED) {
+        if (order.getStatus() == Order.OrderStatus. DELIVERED) {
             throw new BadRequestException("Cannot cancel a delivered order");
         }
 
@@ -161,14 +165,14 @@ public class OrderService {
     }
 
     public OrderResponse getOrderById(Long orderId) {
-        Order order = orderRepository. findById(orderId)
+        Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
 
         User currentUser = getCurrentUser();
 
         if (! order.getUser(). getId().equals(currentUser.getId())
                 && currentUser. getRole() != User.Role.ADMIN
-                && currentUser. getRole() != User.Role.ANALYST) {
+                && currentUser.getRole() != User.Role. ANALYST) {
             throw new BadRequestException("Access denied");
         }
 
@@ -176,8 +180,8 @@ public class OrderService {
     }
 
     public OrderResponse getOrderByNumber(String orderNumber) {
-        Order order = orderRepository. findByOrderNumber(orderNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderNumber));
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                . orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderNumber));
 
         return OrderResponse.fromEntity(order);
     }
@@ -192,7 +196,7 @@ public class OrderService {
     }
 
     public Page<OrderResponse> getAllOrders(Pageable pageable) {
-        return orderRepository.findAll(pageable)
+        return orderRepository. findAll(pageable)
                 .map(OrderResponse::fromEntity);
     }
 
@@ -214,25 +218,65 @@ public class OrderService {
 
     private void createOrderNotification(Order order) {
         try {
-            String itemsDescription = order.getItems().stream()
-                    .map(item -> item.getProductName() + " x" + item.getQuantity())
-                    . reduce((a, b) -> a + ", " + b)
-                    . orElse("");
+            String itemsDescription = order. getItems().stream()
+                    .map(item -> item. getProductName() + " x" + item.getQuantity())
+                    .reduce((a, b) -> a + ", " + b)
+                    .orElse("");
 
-            Notification notification = Notification.builder()
-                    .recipient(order.getUser())  // Required - the user who placed the order
-                    . type(Notification.NotificationType.NEW_ORDER)
-                    .title("🛒 New Order #" + order.getOrderNumber())
-                    .message("Order from " + order.getUser().getFullName() + ": " + itemsDescription +
-                            " - Total: " + order.getTotalAmount() + " MAD (" + order.getTotalItems() + " items)")
-                    .referenceId(String.valueOf(order. getId()))  // Convert Long to String
+            Notification notification = Notification. builder()
+                    .recipient(order. getUser())
+                    .type(Notification.NotificationType.ORDER_CONFIRMED)  // Changed to ORDER_CONFIRMED for buyer
+                    .title("✅ Order Confirmed #" + order.getOrderNumber())
+                    .message("Your order has been confirmed: " + itemsDescription +
+                            " - Total: $" + order.getTotalAmount() + " (" + order.getTotalItems() + " items)")
+                    . referenceId(String.valueOf(order. getId()))
                     .referenceType("ORDER")
+                    .actionUrl("/shop/orders")
                     .build();
 
             notificationRepository.save(notification);
-            log.info("Notification created for order: {}", order.getOrderNumber());
+            log. info("Notification created for buyer: {}", order. getOrderNumber());
         } catch (Exception e) {
-            log.error("Failed to create notification for order {}: {}", order.getOrderNumber(), e. getMessage());
+            log.error("Failed to create notification for order {}: {}", order.getOrderNumber(), e.getMessage());
+        }
+    }
+
+    // NEW METHOD: Send notifications to sellers and admins when a product is purchased
+    private void sendPurchaseNotifications(Order order) {
+        try {
+            User buyer = order.getUser();
+
+            for (OrderItem item : order.getItems()) {
+                Product product = item.getProduct();
+                int quantity = item.getQuantity();
+                double itemTotal = item.getSubtotal(). doubleValue();
+
+                // Notify the seller if it's a seller's product
+                if (product.getSeller() != null) {
+                    notificationService.notifySellerProductPurchased(
+                            product.getSeller(),
+                            product,
+                            order,
+                            quantity
+                    );
+                    log.info("Notification sent to seller {} for product {}",
+                            product.getSeller().getEmail(), product.getAsin());
+                }
+
+                // Notify all admins about the purchase (for all products including MouadVision products)
+                notificationService.notifyAdminProductPurchased(
+                        product,
+                        order,
+                        quantity,
+                        itemTotal,
+                        buyer. getFullName()
+                );
+            }
+
+            log.info("Purchase notifications sent for order {}", order. getOrderNumber());
+        } catch (Exception e) {
+            log.error("Failed to send purchase notifications for order {}: {}",
+                    order.getOrderNumber(), e.getMessage());
         }
     }
 }

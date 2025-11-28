@@ -1,27 +1,27 @@
-package com.dashboard. service;
+package com.dashboard.service;
 
 import com.dashboard.dto.response.NotificationResponse;
 import com.dashboard.entity.Notification;
-import com. dashboard.entity.Order;
-import com. dashboard.entity.Product;
-import com. dashboard.entity.ProductReview;
+import com.dashboard.entity.Order;
+import com.dashboard.entity.Product;
+import com.dashboard.entity.ProductReview;
 import com.dashboard.entity.User;
 import com.dashboard.exception.BadRequestException;
 import com.dashboard.exception.ResourceNotFoundException;
-import com.dashboard.repository. NotificationRepository;
-import com.dashboard. repository.UserRepository;
+import com.dashboard.repository.NotificationRepository;
+import com.dashboard.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain. Pageable;
-import org.springframework. security.core.Authentication;
-import org. springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework. transaction.annotation. Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time. LocalDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util. stream.Collectors;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,25 +32,25 @@ public class NotificationService {
     private final UserRepository userRepository;
 
     private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder. getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
     }
 
     @Transactional
-    public Notification createNotification(User recipient, Notification. NotificationType type,
+    public Notification createNotification(User recipient, Notification.NotificationType type,
                                            String title, String message, String referenceId,
                                            String referenceType, String actionUrl) {
         Notification notification = Notification.builder()
                 .recipient(recipient)
                 .type(type)
-                . title(title)
+                .title(title)
                 .message(message)
                 .referenceId(referenceId)
-                . referenceType(referenceType)
+                .referenceType(referenceType)
                 .actionUrl(actionUrl)
-                . build();
+                .build();
 
         notification = notificationRepository.save(notification);
         log.info("Created notification for user {}: {}", recipient.getEmail(), title);
@@ -65,7 +65,7 @@ public class NotificationService {
                 Notification.NotificationType.PRODUCT_APPROVED,
                 "Produit approuvé!  🎉",
                 String.format("Votre produit '%s' a été approuvé et est maintenant en vente.", product.getProductName()),
-                product. getAsin(),
+                product.getAsin(),
                 "PRODUCT",
                 "/seller/products/" + product.getAsin()
         );
@@ -77,10 +77,10 @@ public class NotificationService {
                 seller,
                 Notification.NotificationType.PRODUCT_REJECTED,
                 "Produit rejeté",
-                String.format("Votre produit '%s' a été rejeté.  Raison: %s", product. getProductName(), reason),
-                product. getAsin(),
+                String.format("Votre produit '%s' a été rejeté. Raison: %s", product.getProductName(), reason),
+                product.getAsin(),
                 "PRODUCT",
-                "/seller/products/" + product. getAsin()
+                "/seller/products/" + product.getAsin()
         );
     }
 
@@ -90,8 +90,8 @@ public class NotificationService {
                 seller,
                 Notification.NotificationType.PRODUCT_PURCHASED,
                 "Nouvelle vente!  💰",
-                String.format("Votre produit '%s' a été acheté (x%d). Commande #%s",
-                        product. getProductName(), quantity, order.getOrderNumber()),
+                String.format("Votre produit '%s' a été acheté (x%d).Commande #%s",
+                        product.getProductName(), quantity, order.getOrderNumber()),
                 order.getOrderNumber(),
                 "ORDER",
                 "/seller/orders/" + order.getId()
@@ -99,15 +99,33 @@ public class NotificationService {
     }
 
     @Transactional
+    public void notifyAdminProductPurchased(Product product, Order order, int quantity, double totalAmount, String buyerName) {
+        List<User> admins = userRepository.findByRoleAndIsActiveTrue(User.Role.ADMIN);
+
+        for (User admin : admins) {
+            createNotification(
+                    admin,
+                    Notification.NotificationType.NEW_ORDER,
+                    "New Order Received!  🛒",
+                    String.format("'%s' purchased '%s' x%d for $%.2f.Order #%s",
+                            buyerName, product.getProductName(), quantity, totalAmount, order.getOrderNumber()),
+                    order.getOrderNumber(),
+                    "ORDER",
+                    "/admin/orders"
+            );
+        }
+    }
+
+    @Transactional
     public void notifySellerNewReview(User seller, Product product, ProductReview review) {
         String ratingStars = "⭐".repeat(review.getRating());
         createNotification(
                 seller,
-                Notification.NotificationType. REVIEW_RECEIVED,
+                Notification.NotificationType.REVIEW_RECEIVED,
                 "Nouvel avis reçu " + ratingStars,
-                String. format("Un acheteur a laissé un avis sur '%s': %s",
-                        product. getProductName(),
-                        review. getComment() != null ? review. getComment(). substring(0, Math.min(50, review.getComment(). length())) + "..." : "Aucun commentaire"),
+                String.format("Un acheteur a laissé un avis sur '%s': %s",
+                        product.getProductName(),
+                        review.getComment() != null ? review.getComment().substring(0, Math.min(50, review.getComment().length())) + "..." : "Aucun commentaire"),
                 product.getAsin(),
                 "PRODUCT",
                 "/seller/products/" + product.getAsin() + "/reviews"
@@ -119,10 +137,10 @@ public class NotificationService {
     public void notifyBuyerOrderConfirmed(User buyer, Order order) {
         createNotification(
                 buyer,
-                Notification. NotificationType.ORDER_CONFIRMED,
+                Notification.NotificationType.ORDER_CONFIRMED,
                 "Commande confirmée ✓",
-                String. format("Votre commande #%s a été confirmée.", order.getOrderNumber()),
-                order. getOrderNumber(),
+                String.format("Votre commande #%s a été confirmée.", order.getOrderNumber()),
+                order.getOrderNumber(),
                 "ORDER",
                 "/orders/" + order.getId()
         );
@@ -131,18 +149,18 @@ public class NotificationService {
     // Admin notifications
     @Transactional
     public void notifyAdminsNewProductSubmission(Product product) {
-        List<User> admins = userRepository. findByRoleAndIsActiveTrue(User.Role. ADMIN);
+        List<User> admins = userRepository.findByRoleAndIsActiveTrue(User.Role.ADMIN);
         for (User admin : admins) {
             createNotification(
                     admin,
-                    Notification. NotificationType.NEW_SELLER_PRODUCT,
+                    Notification.NotificationType.NEW_SELLER_PRODUCT,
                     "Nouveau produit à approuver",
                     String.format("Le vendeur '%s' a soumis un nouveau produit: %s",
-                            product. getSeller().getStoreName() != null ? product. getSeller().getStoreName() : product.getSeller().getFullName(),
+                            product.getSeller().getStoreName() != null ? product.getSeller().getStoreName() : product.getSeller().getFullName(),
                             product.getProductName()),
                     product.getAsin(),
                     "PRODUCT",
-                    "/admin/product-approvals/" + product. getAsin()
+                    "/admin/product-approvals/" + product.getAsin()
             );
         }
     }
@@ -187,7 +205,7 @@ public class NotificationService {
     public void markAllAsRead() {
         User currentUser = getCurrentUser();
         notificationRepository.markAllAsReadByRecipient(currentUser, LocalDateTime.now());
-        log.info("Marked all notifications as read for user: {}", currentUser. getEmail());
+        log.info("Marked all notifications as read for user: {}", currentUser.getEmail());
     }
 
     @Transactional
@@ -199,16 +217,16 @@ public class NotificationService {
     private NotificationResponse convertToResponse(Notification notification) {
         return NotificationResponse.builder()
                 .id(notification.getId())
-                .type(notification.getType(). name())
-                . typeDescription(notification.getType().getDescription())
+                .type(notification.getType().name())
+                .typeDescription(notification.getType().getDescription())
                 .title(notification.getTitle())
                 .message(notification.getMessage())
                 .referenceId(notification.getReferenceId())
-                . referenceType(notification.getReferenceType())
+                .referenceType(notification.getReferenceType())
                 .actionUrl(notification.getActionUrl())
                 .isRead(notification.getIsRead())
                 .readAt(notification.getReadAt())
-                .createdAt(notification. getCreatedAt())
+                .createdAt(notification.getCreatedAt())
                 .build();
     }
 }

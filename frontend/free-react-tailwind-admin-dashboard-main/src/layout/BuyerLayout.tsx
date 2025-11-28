@@ -16,7 +16,7 @@ const BuyerLayout: React.FC = () => {
         if (isDark) {
             document.documentElement.classList.add('dark');
         } else {
-            document. documentElement.classList.remove('dark');
+            document.documentElement.classList.remove('dark');
         }
     }, [isDark]);
 
@@ -27,9 +27,9 @@ const BuyerLayout: React.FC = () => {
 
     const navLinks = [
         { path: '/shop', label: 'Shop' },
-        { path: '/my-orders', label: 'My Orders' },
-        { path: '/my-reviews', label: 'My Reviews' },
-        { path: '/buyer-profile', label: 'Profile' },
+        { path: '/shop/orders', label: 'My Orders' },
+        { path: '/shop/my-reviews', label: 'My Reviews' },
+        { path: '/shop/profile', label: 'Profile' },
     ];
 
     return (
@@ -52,10 +52,10 @@ const BuyerLayout: React.FC = () => {
                         <nav className="hidden md:flex items-center gap-1">
                             {navLinks.map(link => (
                                 <Link
-                                    key={link. path}
-                                    to={link. path}
+                                    key={link.path}
+                                    to={link.path}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                        location.pathname === link. path
+                                        location.pathname === link.path
                                             ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25'
                                             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                                     }`}
@@ -67,7 +67,7 @@ const BuyerLayout: React.FC = () => {
 
                         <div className="flex items-center gap-3">
                             <Link
-                                to="/cart"
+                                to="/shop/cart"
                                 className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
                                 title="Shopping Cart"
                             >
@@ -86,23 +86,19 @@ const BuyerLayout: React.FC = () => {
                                     />
                                 </svg>
                                 {itemCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center shadow-lg animate-pulse">
+                                    <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
                                         {itemCount > 99 ? '99+' : itemCount}
                                     </span>
                                 )}
                             </Link>
                             <button
                                 onClick={() => setIsDark(!isDark)}
-                                className="flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
+                                className="flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                                 title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                             >
                                 {isDark ? (
                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-                                            clipRule="evenodd"
-                                        />
+                                        <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
                                     </svg>
                                 ) : (
                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -126,13 +122,13 @@ const BuyerLayout: React.FC = () => {
 
                 {/* Mobile Navigation */}
                 <nav className="md:hidden border-t border-gray-200 dark:border-gray-800 px-2 py-2 flex justify-around bg-white dark:bg-gray-900">
-                    {navLinks. map(link => (
+                    {navLinks.map(link => (
                         <Link
                             key={link.path}
                             to={link.path}
                             className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                                location. pathname === link.path
-                                    ?  'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                                location.pathname === link.path
+                                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
                                     : 'text-gray-600 dark:text-gray-400'
                             }`}
                         >
@@ -140,9 +136,9 @@ const BuyerLayout: React.FC = () => {
                         </Link>
                     ))}
                     <Link
-                        to="/cart"
+                        to="/shop/cart"
                         className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors relative ${
-                            location.pathname === '/cart'
+                            location.pathname === '/shop/cart'
                                 ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
                                 : 'text-gray-600 dark:text-gray-400'
                         }`}

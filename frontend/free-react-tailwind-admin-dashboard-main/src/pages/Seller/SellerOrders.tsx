@@ -17,8 +17,8 @@ const SellerOrders: React.FC = () => {
         try {
             setLoading(true);
             const data = await sellerService.getMySoldOrders(currentPage, 10);
-            setOrders(data. content);
-            setTotalPages(data. totalPages);
+            setOrders(data.content);
+            setTotalPages(data.totalPages);
             setTotalElements(data.totalElements);
         } catch (error) {
             console.error('Error fetching orders:', error);
@@ -45,7 +45,7 @@ const SellerOrders: React.FC = () => {
             CANCELLED: 'Annulée',
         };
         return (
-            <span className={`px-2. 5 py-0.5 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100'}`}>
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100'}`}>
         {labels[status] || status}
       </span>
         );
@@ -114,7 +114,7 @@ const SellerOrders: React.FC = () => {
                                     <td className="px-6 py-4">
                                         <div className="flex items-center">
                                             <img
-                                                src={order.productImage || '/placeholder-product. png'}
+                                                src={order.productImage || '/placeholder-product.png'}
                                                 alt={order.productName}
                                                 className="w-10 h-10 rounded object-cover mr-3"
                                             />
@@ -134,7 +134,7 @@ const SellerOrders: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <span className="text-sm font-semibold text-green-600">
-                        {order.subtotal. toLocaleString('fr-FR')} MAD
+                        {order.subtotal.toLocaleString('fr-FR')} MAD
                       </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-center">
