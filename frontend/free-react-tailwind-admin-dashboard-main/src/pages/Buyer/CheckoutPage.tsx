@@ -294,7 +294,7 @@ const CheckoutPage: React.FC = () => {
                             Download PDF Receipt
                         </button>
                         <Link
-                            to="/my-orders"
+                            to="/shop/orders"
                             className="flex-1 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -426,7 +426,7 @@ const CheckoutPage: React.FC = () => {
                             )}
                         </button>
 
-                        <Link to="/cart" className="block text-center mt-4 text-blue-600 dark:text-blue-400 hover:underline">
+                        <Link to="/shop/cart" className="block text-center mt-4 text-blue-600 dark:text-blue-400 hover:underline">
                             ← Back to Cart
                         </Link>
                     </div>

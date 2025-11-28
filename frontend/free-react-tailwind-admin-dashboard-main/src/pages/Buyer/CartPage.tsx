@@ -101,7 +101,7 @@ const CartPage: React.FC = () => {
                             {/* Product Details */}
                             <div className="flex-1 min-w-0">
                                 <Link
-                                    to={`/product/${item.product. asin}`}
+                                    to={`/shop/product/${item.product. asin}`}
                                     className="text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 line-clamp-2"
                                 >
                                     {item.product.productName}
@@ -177,7 +177,7 @@ const CartPage: React.FC = () => {
                         </div>
 
                         <button
-                            onClick={() => navigate('/checkout')}
+                            onClick={() => navigate('/shop/checkout')}
                             className="w-full mt-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

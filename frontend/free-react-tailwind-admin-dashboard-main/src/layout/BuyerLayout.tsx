@@ -27,9 +27,9 @@ const BuyerLayout: React.FC = () => {
 
     const navLinks = [
         { path: '/shop', label: 'Shop' },
-        { path: '/my-orders', label: 'My Orders' },
-        { path: '/my-reviews', label: 'My Reviews' },
-        { path: '/buyer-profile', label: 'Profile' },
+        { path: '/shop/orders', label: 'My Orders' },
+        { path: '/shop/my-reviews', label: 'My Reviews' },
+        { path: '/shop/profile', label: 'Profile' },
     ];
 
     return (
@@ -67,7 +67,7 @@ const BuyerLayout: React.FC = () => {
 
                         <div className="flex items-center gap-3">
                             <Link
-                                to="/cart"
+                                to="/shop/cart"
                                 className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
                                 title="Shopping Cart"
                             >
@@ -140,9 +140,9 @@ const BuyerLayout: React.FC = () => {
                         </Link>
                     ))}
                     <Link
-                        to="/cart"
+                        to="/shop/cart"
                         className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors relative ${
-                            location.pathname === '/cart'
+                            location.pathname === '/shop/cart'
                                 ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
                                 : 'text-gray-600 dark:text-gray-400'
                         }`}

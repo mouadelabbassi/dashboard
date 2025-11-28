@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ThemeToggleButton } from "../common/ThemeToggleButton";
 import UserDropdown from "./UserDropdown";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import NotificationsPanel from "../admin/NotificationsPanel";
 
 interface HeaderProps {
