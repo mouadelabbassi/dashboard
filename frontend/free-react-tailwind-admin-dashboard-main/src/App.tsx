@@ -11,10 +11,12 @@ import SignIn from './pages/AuthPages/SignIn';
 import SignUp from './pages/AuthPages/SignUp';
 // Auth Context
 import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 
 // Existing Dashboard Pages (Admin)
 import Home from './pages/Dashboard/Home';
 import ProductsPage from './pages/Dashboard/ProductsPage';
+import UserProfiles from './pages/UserProfiles';
 // New Admin Page
 import ProductApprovals from './pages/Admin/ProductApprovals';
 
@@ -74,26 +76,28 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, allowedRoles }) =
 function App() {
     return (
         <AuthProvider>
-            <Router>
-                <Routes>
-                    {/* Public Auth Routes */}
-                    <Route path="/signin" element={<SignIn />} />
-                    <Route path="/signup" element={<SignUp />} />
+            <CartProvider>
+                <Router>
+                    <Routes>
+                        {/* Public Auth Routes */}
+                        <Route path="/signin" element={<SignIn />} />
+                        <Route path="/signup" element={<SignUp />} />
 
-                    {/* Admin Routes - using existing AppLayout */}
-                    <Route
-                        path="/admin"
-                        element={
-                            <PrivateRoute allowedRoles={['ADMIN']}>
-                                <AppLayout />
-                            </PrivateRoute>
-                        }
-                    >
-                        <Route index element={<Home/>} />
-                        <Route path="/admin/products" element={<ProductsPage/>} />
-                        <Route path="/admin/product-approvals" element={<ProductApprovals/>} />
-                        <Route path="/admin/notifications" element={<NotificationsPage/>} />
-                    </Route>
+                        {/* Admin Routes - using existing AppLayout */}
+                        <Route
+                            path="/admin"
+                            element={
+                                <PrivateRoute allowedRoles={['ADMIN']}>
+                                    <AppLayout />
+                                </PrivateRoute>
+                            }
+                        >
+                            <Route index element={<Home/>} />
+                            <Route path="/admin/products" element={<ProductsPage/>} />
+                            <Route path="/admin/product-approvals" element={<ProductApprovals/>} />
+                            <Route path="/admin/notifications" element={<NotificationsPage/>} />
+                            <Route path="/admin/profile" element={<UserProfiles/>} />
+                        </Route>
 
                     {/* Seller Routes - using new SellerLayout */}
                     <Route
@@ -141,6 +145,7 @@ function App() {
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </Router>
+            </CartProvider>
         </AuthProvider>
     );
 }

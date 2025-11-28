@@ -49,7 +49,7 @@ const ProductDetailPage: React.FC = () => {
     const handleBuyNow = () => {
         if (product) {
             addToCart(product, quantity);
-            navigate('/cart');
+            navigate('/shop/cart');
         }
     };
 
