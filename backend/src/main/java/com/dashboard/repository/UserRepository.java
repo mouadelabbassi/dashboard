@@ -28,6 +28,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Long countByRoleAndIsActiveTrue(User.Role role);
 
+    // ADD THIS METHOD - for filtering by verification status
+    Page<User> findByRoleAndIsVerifiedSeller(User.Role role, Boolean isVerifiedSeller, Pageable pageable);
+
     @Query("SELECT u FROM User u WHERE u.role = 'SELLER' AND u.isVerifiedSeller = true ORDER BY u.createdAt DESC")
     List<User> findVerifiedSellers(Pageable pageable);
 

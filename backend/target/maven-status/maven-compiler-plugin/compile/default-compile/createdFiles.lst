@@ -1,6 +1,8 @@
 com\dashboard\entity\SellerRevenue.class
 com\dashboard\dto\request\LoginRequest.class
 com\dashboard\dto\request\ProductRequest$ProductRequestBuilder.class
+com\dashboard\dto\request\StockUpdateRequest.class
+com\dashboard\service\SellerRevenueService.class
 com\dashboard\repository\SellerProductRequestRepository.class
 com\dashboard\repository\SellerRevenueRepository.class
 com\dashboard\dto\response\CategoryStatsResponse.class
@@ -11,6 +13,7 @@ com\dashboard\entity\Sale.class
 com\dashboard\dto\request\SellerProfileUpdateRequest.class
 com\dashboard\dto\response\ProductResponse$ProductResponseBuilder.class
 com\dashboard\dto\response\ProductResponse.class
+com\dashboard\service\StockManagementService.class
 com\dashboard\service\UserService.class
 com\dashboard\dto\response\DashboardResponse.class
 com\dashboard\security\JwtTokenProvider.class
@@ -31,6 +34,7 @@ com\dashboard\service\SaleService.class
 com\dashboard\dto\request\SellerProductSubmissionRequest$SellerProductSubmissionRequestBuilder.class
 com\dashboard\dto\response\ProductDetailResponse.class
 com\dashboard\dto\response\ReviewResponse.class
+com\dashboard\entity\StockUpdateRequest.class
 com\dashboard\dto\response\NotificationResponse.class
 com\dashboard\exception\DuplicateResourceException.class
 com\dashboard\dto\request\ForgotPasswordRequest.class
@@ -51,6 +55,7 @@ com\dashboard\entity\Order$OrderBuilder.class
 com\dashboard\service\AdminProductApprovalService.class
 com\dashboard\repository\OrderItemRepository.class
 com\dashboard\dto\response\PendingProductResponse.class
+com\dashboard\entity\StockUpdateRequest$StockUpdateRequestBuilder.class
 com\dashboard\dto\response\SellerProfileResponse.class
 com\dashboard\service\CsvImportService.class
 com\dashboard\dto\request\RegisterRequest.class
@@ -59,7 +64,9 @@ com\dashboard\repository\SaleRepository.class
 com\dashboard\entity\SellerProductRequest.class
 com\dashboard\dto\response\AdminDashboardResponse.class
 com\dashboard\dto\request\SellerRegisterRequest.class
+com\dashboard\repository\StockUpdateRequestRepository.class
 com\dashboard\dto\response\SellerProductRequestResponse$SellerProductRequestResponseBuilder.class
+com\dashboard\entity\StockUpdateRequest$RequestStatus.class
 com\dashboard\dto\request\LoginRequest$LoginRequestBuilder.class
 com\dashboard\repository\ProductRepository.class
 com\dashboard\controller\ProductController.class
@@ -71,9 +78,11 @@ com\dashboard\dto\request\ProductApprovalRequest.class
 com\dashboard\repository\NotificationRepository.class
 com\dashboard\dto\request\OrderRequest$OrderItemRequest$OrderItemRequestBuilder.class
 com\dashboard\service\ProductService.class
+com\dashboard\dto\request\StockUpdateRequest$StockUpdateRequestBuilder.class
 com\dashboard\controller\AuthController.class
 com\dashboard\controller\AdminProductApprovalController.class
 com\dashboard\entity\Sale$SaleBuilder.class
+com\dashboard\controller\AdminStockController.class
 com\dashboard\dto\request\OrderRequest$OrderRequestBuilder.class
 com\dashboard\dto\response\OrderResponse$OrderItemResponse$OrderItemResponseBuilder.class
 com\dashboard\dto\request\ReviewRequest$ReviewRequestBuilder.class
@@ -136,6 +145,7 @@ com\dashboard\service\SellerService.class
 com\dashboard\dto\request\SaleRequest$SaleRequestBuilder.class
 com\dashboard\security\JwtAuthenticationFilter.class
 com\dashboard\dto\response\DashboardStatsResponse.class
+com\dashboard\controller\AdminSellerController.class
 com\dashboard\dto\request\ReviewRequest.class
 com\dashboard\dto\response\OrderResponse.class
 com\dashboard\config\OpenApiConfig.class

@@ -2,9 +2,11 @@ package com.dashboard.controller;
 
 import com.dashboard.dto. request.SellerProductSubmissionRequest;
 import com.dashboard.dto.request.SellerProfileUpdateRequest;
+import com.dashboard.dto.request.StockUpdateRequest;
 import com.dashboard.dto. response.*;
 import com.dashboard.entity.Product;
 import com. dashboard.service.SellerService;
+import com.dashboard.service.StockManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +29,7 @@ import org.springframework.web.bind. annotation.*;
 public class SellerController {
 
     private final SellerService sellerService;
+    private StockManagementService stockManagementService;
 
     // ========== DASHBOARD ==========
 
@@ -141,5 +144,23 @@ public class SellerController {
     public ResponseEntity<ApiResponse<SellerReviewSummary>> getReviewSummary() {
         SellerReviewSummary summary = sellerService. getReviewSummary();
         return ResponseEntity.ok(ApiResponse.success("Review summary retrieved", summary));
+    }
+
+    @PostMapping("/products/{asin}/request-stock")
+    @Operation(summary = "Request stock update", description = "Request to add more stock to a product")
+    public ResponseEntity<ApiResponse<com.dashboard.entity.StockUpdateRequest>> requestStockUpdate(
+            @PathVariable String asin,
+            @Valid @RequestBody StockUpdateRequest request) {
+        com.dashboard.entity.StockUpdateRequest stockRequest = stockManagementService.requestStockUpdate(
+                asin, request.getQuantity(), request.getReason());
+        return ResponseEntity.ok(ApiResponse.success("Stock update request submitted", stockRequest));
+    }
+
+    @GetMapping("/stock-requests")
+    @Operation(summary = "Get my stock requests", description = "Returns all stock update requests")
+    public ResponseEntity<ApiResponse<Page<com.dashboard.entity.StockUpdateRequest>>> getMyStockRequests(
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<com.dashboard.entity.StockUpdateRequest> requests = stockManagementService.getMyStockRequests(pageable);
+        return ResponseEntity.ok(ApiResponse.success("Stock requests retrieved", requests));
     }
 }

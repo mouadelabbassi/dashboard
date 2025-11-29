@@ -229,4 +229,51 @@ public class NotificationService {
                 .createdAt(notification.getCreatedAt())
                 .build();
     }
+
+    @Transactional
+    public void notifyAdminsStockUpdateRequest(User seller, Product product, Integer quantity) {
+        List<User> admins = userRepository.findByRoleAndIsActiveTrue(User.Role.ADMIN);
+        for (User admin : admins) {
+            createNotification(
+                    admin,
+                    Notification.NotificationType.NEW_SELLER_PRODUCT,
+                    "Stock Update Request 📦",
+                    String.format("Seller '%s' wants to add %d units to '%s'",
+                            seller.getStoreName() != null ? seller.getStoreName() : seller.getFullName(),
+                            quantity,
+                            product.getProductName()),
+                    product.getAsin(),
+                    "STOCK_REQUEST",
+                    "/admin/stock-requests"
+            );
+        }
+    }
+
+    @Transactional
+    public void notifySellerStockApproved(User seller, Product product, Integer quantity) {
+        createNotification(
+                seller,
+                Notification.NotificationType.PRODUCT_APPROVED,
+                "Stock Update Approved ✅",
+                String.format("Your request to add %d units to '%s' has been approved",
+                        quantity, product.getProductName()),
+                product.getAsin(),
+                "PRODUCT",
+                "/seller/products/" + product.getAsin()
+        );
+    }
+
+    @Transactional
+    public void notifySellerStockRejected(User seller, Product product, String reason) {
+        createNotification(
+                seller,
+                Notification.NotificationType.PRODUCT_REJECTED,
+                "Stock Update Rejected ❌",
+                String.format("Your stock update for '%s' was rejected. Reason: %s",
+                        product.getProductName(), reason),
+                product.getAsin(),
+                "PRODUCT",
+                "/seller/products/" + product.getAsin()
+        );
+    }
 }

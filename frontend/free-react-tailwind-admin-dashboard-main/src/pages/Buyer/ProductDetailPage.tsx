@@ -1,34 +1,157 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getProductByAsin, Product } from '../../service/api';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import Toast from '../../components/common/Toast';
+import axios from 'axios';
+
+interface Product {
+    asin: string;
+    productName: string;
+    description?: string;
+    price: number;
+    rating?: number;
+    reviewsCount?: number;
+    imageUrl?: string;
+    categoryName?: string;
+    sellerName?: string;
+    sellerId?: number;
+    storeName?: string;
+    isBestseller?: boolean;
+}
+
+interface Review {
+    id: number;
+    userId: number;
+    userName: string;
+    rating: number;
+    comment: string;
+    createdAt: string;
+    isLiked: boolean;
+}
 
 const ProductDetailPage: React.FC = () => {
     const { asin } = useParams<{ asin: string }>();
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const { addToCart, isInCart, getItemQuantity } = useCart();
+
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-    const { addToCart, isInCart, getItemQuantity } = useCart();
+    // Review states
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [reviewsLoading, setReviewsLoading] = useState(false);
+    const [userRating, setUserRating] = useState(0);
+    const [hoverRating, setHoverRating] = useState(0);
+    const [reviewComment, setReviewComment] = useState('');
+    const [submittingReview, setSubmittingReview] = useState(false);
+    const [hasUserReviewed, setHasUserReviewed] = useState(false);
 
     useEffect(() => {
         if (asin) {
             fetchProduct();
+            fetchReviews();
         }
     }, [asin]);
 
     const fetchProduct = async () => {
         try {
             setLoading(true);
-            const data = await getProductByAsin(asin! );
-            setProduct(data);
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:8080/api/products/${asin}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const productData = response.data?.data || response.data;
+            setProduct(productData);
         } catch (error) {
             console.error('Error fetching product:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchReviews = async () => {
+        try {
+            setReviewsLoading(true);
+            const token = localStorage.getItem('token');
+
+            const response = await axios.get(
+                `http://localhost:8080/api/reviews/product/${asin}/all`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    params: { page: 0, size: 50 }
+                }
+            );
+
+            console.log('Reviews response:', response.data);
+
+            let reviewsData: Review[] = [];
+
+            if (response.data?.data?.content) {
+                reviewsData = response.data.data.content;
+            } else if (response.data?.content) {
+                reviewsData = response.data.content;
+            } else if (Array.isArray(response.data?.data)) {
+                reviewsData = response.data.data;
+            } else if (Array.isArray(response.data)) {
+                reviewsData = response.data;
+            }
+
+            setReviews(reviewsData);
+
+            if (user && reviewsData.length > 0) {
+                const userReview = reviewsData.find((r: Review) => r.userId === user.id);
+                if (userReview) {
+                    setHasUserReviewed(true);
+                    setUserRating(userReview.rating);
+                    setReviewComment(userReview.comment || '');
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+            setReviews([]);
+        } finally {
+            setReviewsLoading(false);
+        }
+    };
+
+    const handleSubmitReview = async () => {
+        if (userRating === 0) {
+            setToast({ message: 'Please select a rating', type: 'error' });
+            return;
+        }
+
+        try {
+            setSubmittingReview(true);
+            const token = localStorage.getItem('token');
+
+            await axios.post(
+                `http://localhost:8080/api/reviews/product/${asin}`,
+                {
+                    rating: userRating,
+                    comment: reviewComment,
+                    isLiked: userRating >= 4
+                },
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+
+            setToast({ message: 'Review submitted successfully! ', type: 'success' });
+            setHasUserReviewed(true);
+
+            await fetchReviews();
+            await fetchProduct();
+
+        } catch (error: any) {
+            console.error('Submit review error:', error);
+            const errorMessage = error.response?.data?.message || 'Failed to submit review';
+            setToast({ message: errorMessage, type: 'error' });
+        } finally {
+            setSubmittingReview(false);
         }
     };
 
@@ -40,17 +163,45 @@ const ProductDetailPage: React.FC = () => {
 
     const handleAddToCart = () => {
         if (product) {
-            addToCart(product, quantity);
-            setToast({ message: `Added ${quantity} item(s) to cart!`, type: 'success' });
+            addToCart(product as any, quantity);
+            setToast({ message: `Added ${quantity} item(s) to cart! `, type: 'success' });
             setQuantity(1);
         }
     };
 
     const handleBuyNow = () => {
         if (product) {
-            addToCart(product, quantity);
+            addToCart(product as any, quantity);
             navigate('/shop/cart');
         }
+    };
+
+    const renderStars = (rating: number, interactive: boolean = false, size: string = 'w-5 h-5') => {
+        return [...Array(5)].map((_, i) => (
+            <svg
+                key={i}
+                className={`${size} ${interactive ? 'cursor-pointer' : 'cursor-default'} ${
+                    i < (interactive ? (hoverRating || userRating) : Math.floor(rating))
+                        ? 'text-yellow-400'
+                        : 'text-gray-300'
+                }`}
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                onMouseEnter={() => interactive && setHoverRating(i + 1)}
+                onMouseLeave={() => interactive && setHoverRating(0)}
+                onClick={() => interactive && setUserRating(i + 1)}
+            >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+        ));
+    };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
     };
 
     if (loading) {
@@ -72,7 +223,8 @@ const ProductDetailPage: React.FC = () => {
 
     const inCart = isInCart(product.asin);
     const cartQuantity = getItemQuantity(product.asin);
-    const sellerName = product.sellerName || 'MouadVision';
+    const sellerName = product.sellerName || 'MouadVision Store';
+    const isMouadVisionProduct = ! product.sellerId;
 
     return (
         <div className="max-w-6xl mx-auto">
@@ -87,7 +239,7 @@ const ProductDetailPage: React.FC = () => {
                 </ol>
             </nav>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                 {/* Product Image */}
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm">
                     <img
@@ -103,36 +255,35 @@ const ProductDetailPage: React.FC = () => {
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                             {product.productName}
                         </h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Sold by: <span className="text-blue-600 dark:text-blue-400">{sellerName}</span>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            Sold by:
+                            <span className={`font-medium ${isMouadVisionProduct ? 'text-purple-600 dark:text-purple-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                                {sellerName}
+                            </span>
+                            {! isMouadVisionProduct && (
+                                <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs rounded-full">
+                                    Verified Seller
+                                </span>
+                            )}
                         </p>
                     </div>
 
                     {/* Rating */}
                     <div className="flex items-center gap-2">
                         <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                                <svg
-                                    key={i}
-                                    className={`w-5 h-5 ${i < Math.floor(product.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`}
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                            ))}
+                            {renderStars(product.rating || 0)}
                         </div>
                         <span className="text-gray-600 dark:text-gray-400">
-                            {product.rating?.toFixed(1)} ({product.reviewsCount?.toLocaleString()} reviews)
+                            {product.rating?.toFixed(1) || '0.0'} ({product.reviewsCount?.toLocaleString() || 0} reviews)
                         </span>
                     </div>
 
                     {/* Price */}
                     <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                        ${product.price.toFixed(2)}
+                        ${product.price?.toFixed(2) || '0.00'}
                     </div>
 
-                    {/* Quantity & Add to Cart */}
+                    {/* Quantity */}
                     <div className="flex items-center gap-4">
                         <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg">
                             <button
@@ -183,6 +334,141 @@ const ProductDetailPage: React.FC = () => {
                         </div>
                     )}
                 </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6 mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                    Customer Reviews
+                </h2>
+
+                {/* Write Review Form */}
+                {user && ! hasUserReviewed && (
+                    <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6 mb-8">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                            Write a Review
+                        </h3>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Your Rating *
+                            </label>
+                            <div className="flex items-center gap-1">
+                                {renderStars(0, true, 'w-8 h-8')}
+                                <span className="ml-2 text-gray-600 dark:text-gray-400">
+                                    {userRating > 0 ? `${userRating} star${userRating > 1 ? 's' : ''}` : 'Click to rate'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Your Review (Optional)
+                            </label>
+                            <textarea
+                                value={reviewComment}
+                                onChange={(e) => setReviewComment(e.target.value)}
+                                rows={4}
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none"
+                                placeholder="Share your experience with this product..."
+                            />
+                        </div>
+
+                        <button
+                            onClick={handleSubmitReview}
+                            disabled={submittingReview || userRating === 0}
+                            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                            {submittingReview ? (
+                                <>
+                                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                    </svg>
+                                    Submitting...
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Submit Review
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
+
+                {/* Already Reviewed Message */}
+                {user && hasUserReviewed && (
+                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 mb-8">
+                        <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="font-medium">You have already reviewed this product</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Not Logged In Message */}
+                {!user && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-8">
+                        <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Please <Link to="/signin" className="font-medium underline">sign in</Link> to write a review</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Reviews List */}
+                {reviewsLoading ? (
+                    <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    </div>
+                ) : reviews.length > 0 ? (
+                    <div className="space-y-6">
+                        {reviews.map((review) => (
+                            <div key={review.id} className="border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0">
+                                <div className="flex items-start justify-between mb-2">
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="font-semibold text-gray-900 dark:text-white">
+                                                {review.userName}
+                                            </span>
+                                            {review.userId === user?.id && (
+                                                <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs rounded-full">
+                                                    You
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex">{renderStars(review.rating, false, 'w-4 h-4')}</div>
+                                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                {formatDate(review.createdAt)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {review.comment && (
+                                    <p className="text-gray-600 dark:text-gray-400 mt-2">
+                                        {review.comment}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-8">
+                        <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                        <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No reviews yet</h3>
+                        <p className="text-gray-500 dark:text-gray-400">Be the first to review this product! </p>
+                    </div>
+                )}
             </div>
         </div>
     );

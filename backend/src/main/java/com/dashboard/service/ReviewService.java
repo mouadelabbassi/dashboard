@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import com.dashboard.service.NotificationService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,6 +38,7 @@ public class ReviewService {
     private final ProductReviewRepository reviewRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -124,6 +126,8 @@ public class ReviewService {
         Optional<ProductReview> existingReview = reviewRepository.findByUserIdAndProductAsin(user.getId(), asin);
 
         ProductReview review;
+        boolean isNewReview = false;
+
         if (existingReview.isPresent()) {
             review = existingReview.get();
             review.setRating(request.getRating());
@@ -138,14 +142,22 @@ public class ReviewService {
                     .comment(request.getComment())
                     .isLiked(request.getIsLiked())
                     .build();
+            isNewReview = true;
             log.info("Creating new review for product {} by user {}", asin, user.getEmail());
         }
 
         review = reviewRepository.save(review);
         updateProductStats(product);
 
+        // Notify seller about new review (only for new reviews, not updates)
+        if (isNewReview && product.getSeller() != null) {
+            notificationService.notifySellerNewReview(product.getSeller(), product, review);
+        }
+
         return convertToResponse(review);
     }
+
+
 
     // This method signature matches what ReviewController expects
     @Transactional

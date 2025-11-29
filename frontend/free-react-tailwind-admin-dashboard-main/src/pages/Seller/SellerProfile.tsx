@@ -111,7 +111,9 @@ const SellerProfile: React.FC = () => {
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                     <p className="text-sm text-gray-500">Revenue Totale</p>
-                    <p className="text-2xl font-bold text-green-600">{profile.totalRevenue.toLocaleString('fr-FR')} MAD</p>
+                    <p className="text-2xl font-bold text-green-600">
+                        {profile.totalRevenue.toLocaleString('fr-FR', { style: 'currency', currency: 'USD' })}
+                    </p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                     <p className="text-sm text-gray-500">Note Moyenne</p>

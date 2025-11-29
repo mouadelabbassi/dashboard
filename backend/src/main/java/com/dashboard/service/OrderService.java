@@ -30,7 +30,8 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
-    private final NotificationService notificationService;  // ADD THIS LINE
+    private final NotificationService notificationService;
+    private final SellerRevenueService sellerRevenueService;
 
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -48,13 +49,32 @@ public class OrderService {
             throw new BadRequestException("Order must contain at least one item");
         }
 
+        // ✅ VALIDATE STOCK BEFORE CREATING ORDER
+        for (OrderRequest.OrderItemRequest itemRequest : request.getItems()) {
+            Product product = productRepository.findByAsin(itemRequest.getProductAsin())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Product not found: " + itemRequest.getProductAsin()));
+
+            int quantity = itemRequest.getQuantity() != null ? itemRequest.getQuantity() : 1;
+
+            // ✅ CHECK STOCK AVAILABILITY
+            if (!product.isInStock()) {
+                throw new BadRequestException(product.getProductName() + " is currently out of stock");
+            }
+
+            if (!product.hasEnoughStock(quantity)) {
+                throw new BadRequestException(product.getProductName() +
+                        " only has " + product.getStockQuantity() + " units in stock");
+            }
+        }
+
         Order order = Order.builder()
                 .user(buyer)
                 .status(Order.OrderStatus.PENDING)
                 .notes(request.getNotes())
                 .build();
 
-        BigDecimal totalAmount = BigDecimal. ZERO;
+        BigDecimal totalAmount = BigDecimal.ZERO;
         int totalItems = 0;
 
         for (OrderRequest.OrderItemRequest itemRequest : request.getItems()) {
@@ -66,23 +86,32 @@ public class OrderService {
                 throw new BadRequestException("Product price not available: " + product.getProductName());
             }
 
-            int quantity = itemRequest. getQuantity() != null ? itemRequest. getQuantity() : 1;
+            int quantity = itemRequest.getQuantity() != null ? itemRequest.getQuantity() : 1;
 
             OrderItem orderItem = OrderItem.builder()
                     .product(product)
                     .quantity(quantity)
                     .unitPrice(product.getPrice())
-                    .subtotal(product.getPrice(). multiply(BigDecimal.valueOf(quantity)))
+                    .subtotal(product.getPrice().multiply(BigDecimal.valueOf(quantity)))
                     .productName(product.getProductName())
                     .productImage(product.getImageUrl())
+                    .seller(product.getSeller())
+                    .sellerRevenueCalculated(false)
                     .build();
 
             order.addItem(orderItem);
             totalAmount = totalAmount.add(orderItem.getSubtotal());
             totalItems += quantity;
+
+            // ✅ REDUCE STOCK IMMEDIATELY WHEN ORDER IS CREATED
+            product.reduceStock(quantity);
+            productRepository.save(product);
+
+            log.info("Reduced stock for product {} by {} units. New stock: {}",
+                    product.getAsin(), quantity, product.getStockQuantity());
         }
 
-        order. setTotalAmount(totalAmount);
+        order.setTotalAmount(totalAmount);
         order.setTotalItems(totalItems);
 
         order = orderRepository.save(order);
@@ -94,17 +123,17 @@ public class OrderService {
 
     @Transactional
     public OrderResponse confirmOrder(Long orderId) {
-        Order order = orderRepository. findById(orderId)
+        Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
 
         User currentUser = getCurrentUser();
 
-        if (!order. getUser().getId(). equals(currentUser. getId())
+        if (!order.getUser().getId().equals(currentUser.getId())
                 && currentUser.getRole() != User.Role.ADMIN) {
             throw new BadRequestException("You can only confirm your own orders");
         }
 
-        if (order.getStatus() != Order.OrderStatus. PENDING) {
+        if (order.getStatus() != Order.OrderStatus.PENDING) {
             throw new BadRequestException("Only pending orders can be confirmed");
         }
 
@@ -116,13 +145,50 @@ public class OrderService {
         // Update product sales count
         updateProductSalesCount(order);
 
+        // ✅ FIXED: Send purchase notifications to sellers
+        sendPurchaseNotificationsToSellers(order);
+
         // Create notification for buyer
         createOrderNotification(order);
 
-        // NEW: Send notifications to sellers and admins
-        sendPurchaseNotifications(order);
-
         return OrderResponse.fromEntity(order);
+    }
+
+    // ✅ NEW METHOD: Send notifications to all sellers in the order
+    private void sendPurchaseNotificationsToSellers(Order order) {
+        try {
+            User buyer = order.getUser();
+
+            for (OrderItem item : order.getItems()) {
+                Product product = item.getProduct();
+
+                // Notify the seller if it's a seller's product
+                if (product.getSeller() != null) {
+                    notificationService.notifySellerProductPurchased(
+                            product.getSeller(),
+                            product,
+                            order,
+                            item.getQuantity()
+                    );
+                    log.info("✅ Purchase notification sent to seller {} for product {}",
+                            product.getSeller().getEmail(), product.getAsin());
+                }
+
+                // ✅ ALWAYS notify admins about ALL purchases (including MouadVision products)
+                notificationService.notifyAdminProductPurchased(
+                        product,
+                        order,
+                        item.getQuantity(),
+                        item.getSubtotal().doubleValue(),
+                        buyer.getFullName()
+                );
+            }
+
+            log.info("✅ Purchase notifications sent for order {}", order.getOrderNumber());
+        } catch (Exception e) {
+            log.error("❌ Failed to send purchase notifications for order {}: {}",
+                    order.getOrderNumber(), e.getMessage());
+        }
     }
 
     @Transactional

@@ -86,8 +86,7 @@ public class Product {
 
     // NEW: Stock quantity
     @Column(name = "stock_quantity")
-    @Builder.Default
-    private Integer stockQuantity = 100;
+    private Integer stockQuantity;
 
     // NEW: Approval status for seller products
     @Enumerated(EnumType.STRING)
@@ -130,6 +129,31 @@ public class Product {
         }
         this.salesCount += quantity;
     }
+
+    public boolean isInStock() {
+        return stockQuantity != null && stockQuantity > 0;
+    }
+
+    public boolean hasEnoughStock(int requestedQuantity) {
+        return stockQuantity != null && stockQuantity >= requestedQuantity;
+    }
+
+    // ✅ NEW: Reduce stock when purchased
+    public void reduceStock(int quantity) {
+        if (this.stockQuantity == null) {
+            this.stockQuantity = 0;
+        }
+        this.stockQuantity = Math.max(0, this.stockQuantity - quantity);
+    }
+
+    // ✅ NEW: Increase stock when restocked
+    public void addStock(int quantity) {
+        if (this.stockQuantity == null) {
+            this.stockQuantity = 0;
+        }
+        this.stockQuantity += quantity;
+    }
+
 
     // NEW: Decrement stock
     public void decrementStock(int quantity) {

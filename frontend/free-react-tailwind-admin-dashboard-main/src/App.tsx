@@ -38,6 +38,8 @@ import OrderHistoryPage from './pages/Buyer/OrderHistoryPage';
 import BuyerProfilePage from './pages/Buyer/BuyerProfilePage';
 import MyReviewsPage from './pages/Buyer/MyReviewsPage';
 
+import SellerManagement from './pages/Admin/SellerManagement';
+
 // Other Pages
 import NotFound from './pages/OtherPage/NotFound';
 
@@ -97,6 +99,7 @@ function App() {
                             <Route path="product-approvals" element={<ProductApprovals />} />
                             <Route path="notifications" element={<NotificationsPage />} />
                             <Route path="profile" element={<UserProfiles />} />
+                            <Route path="/admin/sellers" element={<SellerManagement />} />
                         </Route>
 
                         {/* Seller Routes */}

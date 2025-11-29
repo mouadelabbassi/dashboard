@@ -1,9 +1,9 @@
-package com. dashboard.entity;
+package com.dashboard.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math. BigDecimal;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "order_items", indexes = {
@@ -19,7 +19,7 @@ import java.math. BigDecimal;
 public class OrderItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType. IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,7 +30,7 @@ public class OrderItem {
     @JoinColumn(name = "product_asin", nullable = false)
     private Product product;
 
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private User seller;
 
@@ -53,7 +53,6 @@ public class OrderItem {
     private String sellerName;
 
     @Column(name = "seller_revenue_calculated")
-    @Builder.Default
     private Boolean sellerRevenueCalculated = false;
 
     @PrePersist

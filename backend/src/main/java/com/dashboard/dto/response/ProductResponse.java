@@ -1,5 +1,6 @@
 package com.dashboard. dto.response;
 
+import com.dashboard.entity.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,8 +32,18 @@ public class ProductResponse {
 
     // NEW: Seller-related fields
     private Integer salesCount;
-    private Integer stockQuantity;
     private String approvalStatus;
     private String sellerName;
     private Long sellerId;
+
+    private Integer stockQuantity;
+    private Boolean inStock;
+
+    public static ProductResponse fromEntity(Product product) {
+        return ProductResponse.builder()
+                // ... existing mappings ...
+                .stockQuantity(product.getStockQuantity())
+                .inStock(product.isInStock())
+                .build();
+    }
 }
