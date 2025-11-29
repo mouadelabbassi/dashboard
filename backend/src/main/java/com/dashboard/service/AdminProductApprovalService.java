@@ -34,6 +34,7 @@ public class AdminProductApprovalService {
     private final NotificationService notificationService;
     private final SellerRevenueRepository revenueRepository;
     private final OrderRepository orderRepository;
+    private final PlatformRevenueRepository platformRevenueRepository;
 
     private User getCurrentAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -165,6 +166,11 @@ public class AdminProductApprovalService {
         LocalDate today = LocalDate.now();
         LocalDate thirtyDaysAgo = today.minusDays(30);
 
+        BigDecimal totalPlatformRevenue = platformRevenueRepository.calculateTotalPlatformRevenue();
+        BigDecimal directSalesRevenue = platformRevenueRepository.calculateDirectSalesRevenue();
+        BigDecimal commissionRevenue = platformRevenueRepository.calculateCommissionRevenue();
+        BigDecimal totalPlatformFees = platformRevenueRepository.calculateTotalPlatformFees();
+
         // Product stats
         Long totalProducts = productRepository.countApprovedProducts();
         Long pendingApprovals = productRequestRepository.countPendingRequests();
@@ -174,8 +180,6 @@ public class AdminProductApprovalService {
         Long totalBuyers = userRepository.countByRole(User.Role.BUYER);
 
         // Revenue stats - ONLY from actual purchases (confirmed orders)
-        BigDecimal totalPlatformRevenue = revenueRepository.calculateTotalPlatformRevenue();
-        BigDecimal totalPlatformFees = revenueRepository.calculateTotalPlatformFees();
 
         // Orders completed today
         BigDecimal todayRevenue = orderRepository.calculateTodayRevenue();

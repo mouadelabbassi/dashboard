@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { getAllProducts, Product } from '../../service/api';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import Toast from '../../components/common/Toast';
 
 const ShopPage: React.FC = () => {
@@ -15,90 +16,97 @@ const ShopPage: React.FC = () => {
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
     const { addToCart, isInCart, getItemQuantity } = useCart();
-    const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+    const { user } = useAuth();
+    const location = useLocation();
+
+    // Determine if we're in seller context or buyer context
+    const isSellerContext = location.pathname.startsWith('/seller');
+    const shopBasePath = isSellerContext ? '/seller/shop' : '/shop';
 
     useEffect(() => {
         fetchProducts();
     }, []);
 
-    useEffect(() => {
-        filterAndSortProducts();
-    }, [products, searchQuery, selectedCategory, priceRange, sortBy]);
-
     const fetchProducts = async () => {
         try {
             setLoading(true);
             const data = await getAllProducts();
-            setProducts(data);
-            setFilteredProducts(data);
+
+            // Filter out the current seller's own products when they're shopping
+            let availableProducts = data;
+            if (isSellerContext && user?.id) {
+                availableProducts = data.filter((product: Product) => product.sellerId !== user.id);
+            }
+
+            setProducts(availableProducts);
+            setFilteredProducts(availableProducts);
         } catch (error) {
             console.error('Error fetching products:', error);
+            setToast({ message: 'Failed to load products', type: 'error' });
         } finally {
             setLoading(false);
         }
     };
 
-    const filterAndSortProducts = () => {
+    useEffect(() => {
         let result = [...products];
 
+        // Search filter
         if (searchQuery) {
             result = result.filter(p =>
-                p.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                p.asin.toLowerCase().includes(searchQuery.toLowerCase())
+                p.productName.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
 
+        // Category filter
         if (selectedCategory !== 'all') {
             result = result.filter(p => p.categoryName === selectedCategory);
         }
 
+        // Price filter
         if (priceRange !== 'all') {
             const [min, max] = priceRange.split('-').map(Number);
             result = result.filter(p => {
-                const price = p.price || 0;
-                if (max) return price >= min && price <= max;
-                return price >= min;
+                if (max) {
+                    return p.price >= min && p.price <= max;
+                }
+                return p.price >= min;
             });
         }
 
-        result.sort((a, b) => {
-            switch (sortBy) {
-                case 'price-low':
-                    return (a.price || 0) - (b.price || 0);
-                case 'price-high':
-                    return (b.price || 0) - (a.price || 0);
-                case 'rating':
-                    return (b.rating || 0) - (a.rating || 0);
-                case 'reviews':
-                    return (b.reviewsCount || 0) - (a.reviewsCount || 0);
-                default:
-                    return (a.ranking || 999) - (b.ranking || 999);
-            }
-        });
+        // Sort
+        switch (sortBy) {
+            case 'price-low':
+                result.sort((a, b) => a.price - b.price);
+                break;
+            case 'price-high':
+                result.sort((a, b) => b.price - a.price);
+                break;
+            case 'rating':
+                result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+                break;
+            case 'reviews':
+                result.sort((a, b) => (b.reviewsCount || 0) - (a.reviewsCount || 0));
+                break;
+            case 'ranking':
+            default:
+                result.sort((a, b) => (a.ranking || 999) - (b.ranking || 999));
+                break;
+        }
 
         setFilteredProducts(result);
-    };
-
-    const getQuantity = (asin: string) => quantities[asin] || 1;
-
-    const setQuantity = (asin: string, qty: number) => {
-        if (qty < 1) qty = 1;
-        if (qty > 99) qty = 99;
-        setQuantities(prev => ({ ...prev, [asin]: qty }));
-    };
-
-    const handleAddToCart = (product: Product) => {
-        const qty = getQuantity(product.asin);
-        addToCart(product, qty);
-        setToast({ message: `Added ${qty} item(s) to cart! `, type: 'success' });
-        setQuantities(prev => ({ ...prev, [product.asin]: 1 }));
-    };
+    }, [searchQuery, selectedCategory, priceRange, sortBy, products]);
 
     const categories = ['all', ...new Set(products.map(p => p.categoryName).filter(Boolean))];
 
+    const handleAddToCart = (product: Product) => {
+        addToCart(product);
+        setToast({ message: `${product.productName} added to cart! `, type: 'success' });
+    };
+
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="flex justify-center items-center h-64">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
             </div>
         );
@@ -112,6 +120,7 @@ const ShopPage: React.FC = () => {
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Shop</h1>
                 <p className="text-gray-500 dark:text-gray-400">
                     Discover our collection of {products.length} products
+                    {isSellerContext && <span className="text-sm ml-2">(Your own products are hidden)</span>}
                 </p>
             </div>
 
@@ -140,7 +149,7 @@ const ShopPage: React.FC = () => {
                     >
                         {categories.map(cat => (
                             <option key={cat} value={cat}>
-                                {cat === 'all' ?   'All Categories' : cat}
+                                {cat === 'all' ?  'All Categories' : cat}
                             </option>
                         ))}
                     </select>
@@ -182,7 +191,7 @@ const ShopPage: React.FC = () => {
                         key={product.asin}
                         className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group"
                     >
-                        <Link to={`/shop/product/${product.asin}`} className="block relative">
+                        <Link to={`${shopBasePath}/product/${product.asin}`} className="block relative">
                             <div className="aspect-square bg-gray-100 dark:bg-gray-700 overflow-hidden">
                                 {product.imageUrl ?  (
                                     <img
@@ -193,13 +202,13 @@ const ShopPage: React.FC = () => {
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-400">
                                         <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="absolute top-2 left-2 flex flex-col gap-1">
+                            <div className="absolute top-2 left-2 flex flex-wrap gap-1">
                                 {product.ranking && product.ranking <= 10 && (
                                     <span className="px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
                                         🏆 Top {product.ranking}
@@ -225,90 +234,56 @@ const ShopPage: React.FC = () => {
                             </p>
                             {/* Seller Badge */}
                             <div className="mb-2">
-                                {!product.sellerId ? (
-                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
-                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16z" />
-                                        </svg>
-                                        MouadVision Store
+                                {! product.sellerId ?  (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                        🏪 MouadVision
                                     </span>
-                                        ) : (
-                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full">
-                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        {product.sellerName || 'Third-party Seller'}
+                                ) : (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                        👤 {product.sellerName || 'Seller'}
                                     </span>
                                 )}
                             </div>
-
-                            {/* FIXED: Changed from /product/ to /shop/product/ */}
-                            <Link to={`/shop/product/${product.asin}`}>
+                            <Link to={`${shopBasePath}/product/${product.asin}`}>
                                 <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400 mb-2">
                                     {product.productName}
                                 </h3>
                             </Link>
 
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="flex items-center">
-                                    <span className="text-yellow-400">★</span>
-                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
-                                        {product.rating?.toFixed(1) || 'N/A'}
-                                    </span>
-                                </div>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">
-                                    ({product.reviewsCount?.toLocaleString() || 0} reviews)
-                                </span>
-                            </div>
-
-                            <div className="flex items-center justify-between mb-3">
-                                <p className="text-xl font-bold text-gray-900 dark:text-white">
-                                    ${product.price?.toFixed(2) || '0.00'}
-                                </p>
-                            </div>
-
                             <div className="flex items-center gap-2 mb-3">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">Qty:</span>
-                                <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg">
-                                    <button
-                                        onClick={() => setQuantity(product.asin, getQuantity(product.asin) - 1)}
-                                        className="px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        -
-                                    </button>
-                                    <input
-                                        type="number"
-                                        min="1"
-                                        max="99"
-                                        value={getQuantity(product.asin)}
-                                        onChange={(e) => setQuantity(product.asin, parseInt(e.target.value) || 1)}
-                                        className="w-12 text-center border-x border-gray-300 dark:border-gray-600 bg-transparent text-gray-900 dark:text-white focus:outline-none"
-                                    />
-                                    <button
-                                        onClick={() => setQuantity(product.asin, getQuantity(product.asin) + 1)}
-                                        className="px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        +
-                                    </button>
-                                </div>
+                                {product.rating && (
+                                    <div className="flex items-center">
+                                        <span className="text-yellow-500">★</span>
+                                        <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">
+                                            {product.rating.toFixed(1)}
+                                        </span>
+                                    </div>
+                                )}
+                                {product.reviewsCount && (
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        ({product.reviewsCount.toLocaleString()} reviews)
+                                    </span>
+                                )}
                             </div>
 
-                            <button
-                                onClick={() => handleAddToCart(product)}
-                                className="w-full py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                Add to Cart
-                            </button>
+                            <div className="flex items-center justify-between">
+                                <span className="text-xl font-bold text-gray-900 dark:text-white">
+                                    ${product.price.toFixed(2)}
+                                </span>
+                                <button
+                                    onClick={() => handleAddToCart(product)}
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                                >
+                                    Add to Cart
+                                </button>
+                            </div>
                         </div>
                     </div>
                 ))}
             </div>
 
             {filteredProducts.length === 0 && (
-                <div className="text-center py-16">
+                <div className="text-center py-12">
                     <svg className="w-20 h-20 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>

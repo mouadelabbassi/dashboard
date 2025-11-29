@@ -24,10 +24,11 @@ const EcommerceMetrics: React.FC = () => {
         fetchStats();
     }, []);
 
+    // Removed "Platform Revenue" since it's already shown in the admin quick stats
     const metrics = [
         {
             title: 'Total Products',
-            value: stats?.totalProducts?.toLocaleString() || '0',
+            value: stats?.totalProducts?. toLocaleString() || '0',
             icon: '📦',
         },
         {
@@ -50,17 +51,12 @@ const EcommerceMetrics: React.FC = () => {
             value: stats?.totalReviews?.toLocaleString() || '0',
             icon: '💬',
         },
-        {
-            title: 'Platform Revenue',
-            value: `$${stats?.totalRevenue?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}`,
-            icon: '💰',
-        },
     ];
 
     if (loading) {
         return (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
-                {[...Array(6)].map((_, index) => (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-5 2xl:gap-7.5">
+                {[... Array(5)].map((_, index) => (
                     <div key={index} className="rounded-lg border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-gray-800 dark:bg-gray-900">
                         <div className="animate-pulse">
                             <div className="h-12 w-12 bg-gray-200 dark:bg-gray-700 rounded-full mb-4"></div>
@@ -82,8 +78,8 @@ const EcommerceMetrics: React.FC = () => {
     }
 
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
-            {metrics.map((metric, index) => (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-5 2xl:gap-7.5">
+            {metrics. map((metric, index) => (
                 <div
                     key={index}
                     className="rounded-lg border border-stroke bg-white px-7.5 py-6 shadow-default dark:border-gray-800 dark:bg-gray-900 hover:shadow-lg transition-shadow duration-200"
@@ -91,9 +87,9 @@ const EcommerceMetrics: React.FC = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="text-2xl">{metric.icon}</span>
+                                <span className="text-2xl">{metric. icon}</span>
                                 <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                    {metric.title}
+                                    {metric. title}
                                 </h4>
                             </div>
                             <span className="text-2xl font-bold text-black dark:text-white">

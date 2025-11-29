@@ -3,6 +3,7 @@ package com.dashboard.controller;
 import com.dashboard.dto.response.ApiResponse;
 import com.dashboard.entity.User;
 import com.dashboard.exception.ResourceNotFoundException;
+import com.dashboard.repository.SellerRevenueRepository;
 import com.dashboard.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,8 +16,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -27,6 +31,7 @@ import java.util.Map;
 public class AdminSellerController {
 
     private final UserRepository userRepository;
+    private final SellerRevenueRepository sellerRevenueRepository;
 
     @GetMapping
     @Operation(summary = "Get all sellers", description = "Returns paginated list of all sellers")
@@ -60,6 +65,27 @@ public class AdminSellerController {
         }
 
         return ResponseEntity.ok(ApiResponse.success("Seller details retrieved", mapSellerToResponse(seller)));
+    }
+
+    @GetMapping("/top-performers")
+    @Operation(summary = "Get top performing sellers", description = "Returns sellers ranked by revenue and products sold")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getTopPerformers(
+            @RequestParam(defaultValue = "10") int limit) {
+
+        List<Object[]> topSellers = sellerRevenueRepository.getTopSellersByRevenue(Pageable.ofSize(limit));
+
+        List<Map<String, Object>> result = topSellers.stream().map(row -> {
+            Map<String, Object> seller = new HashMap<>();
+            seller.put("sellerId", row[0]);
+            seller.put("sellerName", row[1]);
+            seller.put("storeName", row[2]);
+            seller.put("totalRevenue", row[3] != null ? ((BigDecimal) row[3]).doubleValue() : 0.0);
+            seller.put("totalProductsSold", row[4] != null ?  ((Long) row[4]).intValue() : 0);
+            seller.put("totalOrders", row[5] != null ? ((Long) row[5]).intValue() : 0);
+            return seller;
+        }).collect(Collectors.toList());
+
+        return ResponseEntity.ok(ApiResponse.success("Top performers retrieved", result));
     }
 
     @PostMapping("/{sellerId}/verify")

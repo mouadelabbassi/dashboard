@@ -98,11 +98,11 @@ public class OrderService {
             totalAmount = totalAmount.add(orderItem.getSubtotal());
             totalItems += quantity;
 
-            // REDUCE STOCK IMMEDIATELY
             product.reduceStock(quantity);
+            product.incrementSalesCount(quantity);
             productRepository.save(product);
-            log.info("STOCK REDUCED for product {} by {} units.  New stock: {}",
-                    product.getAsin(), quantity, product.getStockQuantity());
+            log.info("STOCK REDUCED for product {} by {} units.  New stock: {}.  Sales count: {}",
+                    product.getAsin(), quantity, product.getStockQuantity(), product. getSalesCount());
         }
 
         order.setTotalAmount(totalAmount);

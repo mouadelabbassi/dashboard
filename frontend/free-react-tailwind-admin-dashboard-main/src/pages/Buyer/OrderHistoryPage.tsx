@@ -1,32 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { getMyOrders } from '../../service/api';
-
-interface OrderItem {
-    id: number;
-    productAsin: string;
-    productName: string;
-    productImage: string;
-    quantity: number;
-    unitPrice: number;
-    subtotal: number;
-}
-
-interface Order {
-    id: number;
-    orderNumber: string;
-    status: string;
-    statusDescription: string;
-    totalAmount: number;
-    totalItems: number;
-    orderDate: string;
-    items: OrderItem[];
-}
+import { Link, useLocation } from 'react-router-dom';
+import { getMyOrders, OrderResponse } from '../../service/api';
 
 const OrderHistoryPage: React.FC = () => {
-    const [orders, setOrders] = useState<Order[]>([]);
+    const [orders, setOrders] = useState<OrderResponse[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
+    const location = useLocation();
+
+    // Determine if we're in seller context or buyer context
+    const isSellerContext = location.pathname.startsWith('/seller');
+    const shopBasePath = isSellerContext ? '/seller/shop' : '/shop';
 
     useEffect(() => {
         fetchOrders();
@@ -79,7 +63,7 @@ const OrderHistoryPage: React.FC = () => {
                 <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">No orders yet</h2>
                 <p className="text-gray-500 dark:text-gray-400 mb-6">Start shopping to see your orders here! </p>
                 <Link
-                    to="/shop"
+                    to={shopBasePath}
                     className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
                     Browse Products
@@ -115,17 +99,17 @@ const OrderHistoryPage: React.FC = () => {
                                             })}
                                         </p>
                                     </div>
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order. status)}`}>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                                         {order.statusDescription}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <div className="text-right">
-                                        <p className="text-lg font-bold text-gray-900 dark:text-white">${order. totalAmount.toFixed(2)}</p>
+                                        <p className="text-lg font-bold text-gray-900 dark:text-white">${order.totalAmount.toFixed(2)}</p>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">{order.totalItems} items</p>
                                     </div>
                                     <svg
-                                        className={`w-5 h-5 text-gray-400 transition-transform ${expandedOrder === order. id ? 'rotate-180' : ''}`}
+                                        className={`w-5 h-5 text-gray-400 transition-transform ${expandedOrder === order.id ? 'rotate-180' : ''}`}
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -141,11 +125,11 @@ const OrderHistoryPage: React.FC = () => {
                             <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-700/30">
                                 <h4 className="font-medium text-gray-900 dark:text-white mb-3">Order Items</h4>
                                 <div className="space-y-3">
-                                    {order.items. map((item) => (
+                                    {order.items.map((item) => (
                                         <div key={item.id} className="flex items-center gap-4">
                                             <div className="w-16 h-16 bg-white dark:bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
-                                                {item.productImage ?  (
-                                                    <img src={item.productImage} alt={item. productName} className="w-full h-full object-contain" />
+                                                {item.productImage ? (
+                                                    <img src={item.productImage} alt={item.productName} className="w-full h-full object-contain" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-400">
                                                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +140,7 @@ const OrderHistoryPage: React.FC = () => {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <Link
-                                                    to={`/product/${item.productAsin}`}
+                                                    to={`${shopBasePath}/product/${item.productAsin}`}
                                                     className="font-medium text-gray-900 dark:text-white hover:text-blue-600 line-clamp-1"
                                                 >
                                                     {item.productName}

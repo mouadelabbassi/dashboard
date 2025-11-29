@@ -33,9 +33,11 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\No
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\exception\BadRequestException.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\OrderItemRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\ReviewController.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\PlatformRevenue.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ForgotPasswordRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\SellerRevenueService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ProductDetailResponse.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\PlatformRevenueRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AdminStockController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\AdminProductApprovalService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\NotificationController.java

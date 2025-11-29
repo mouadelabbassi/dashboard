@@ -25,18 +25,17 @@ const SellerLayout: React.FC = () => {
     };
 
     const navLinks = [
-        { path: '/seller/dashboard', label: 'Dashboard', icon: '📊' },
-        { path: '/seller/products', label: 'My Products', icon: '📦' },
-        { path: '/seller/orders', label: 'Orders', icon: '🛒' },
-        { path: '/seller/reviews', label: 'Reviews', icon: '⭐' },
-        { path: '/seller/profile', label: 'Profile', icon: '👤' },
-        { path: '/seller/notifications', label: 'Notifications', icon: '🔔' },
+        { path: '/seller/dashboard', label: 'Dashboard' },
+        { path: '/seller/products', label: 'My Products' },
+        { path: '/seller/orders', label: 'Orders'},
+        { path: '/seller/reviews', label: 'Reviews' },
+        { path: '/seller/profile', label: 'Profile' },
+        { path: '/seller/notifications', label: 'Notifications' },
     ];
 
-    // Shop links for seller to act as buyer
     const shopLinks = [
-        { path: '/seller/shop', label: 'Shop', icon: '🏪' },
-        { path: '/seller/shop/orders', label: 'My Purchases', icon: '📋' },
+        { path: '/seller/shop', label: 'Shop' },
+        { path: '/seller/shop/orders', label: 'My Purchases' },
     ];
 
     const isActive = (path: string) => location.pathname === path;
@@ -80,7 +79,6 @@ const SellerLayout: React.FC = () => {
                                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                                 }`}
                             >
-                                <span>{link.icon}</span>
                                 <span>{link.label}</span>
                             </Link>
                         ))}
@@ -102,7 +100,6 @@ const SellerLayout: React.FC = () => {
                                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                                 }`}
                             >
-                                <span>{link.icon}</span>
                                 <span>{link.label}</span>
                             </Link>
                         ))}

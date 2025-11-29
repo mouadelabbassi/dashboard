@@ -9,6 +9,7 @@ import PriceDistributionChart from '../../components/ecommerce/PriceDistribution
 import RatingDistributionChart from '../../components/ecommerce/RatingDistributionChart';
 import TopCategoriesRevenueChart from '../../components/ecommerce/TopCategoriesRevenueChart';
 import ReviewsCorrelationChart from '../../components/ecommerce/ReviewsCorrelationChart';
+import TopSellersChart from '../../components/ecommerce/TopSellersChart';  // NEW IMPORT
 import { useAuth } from '../../context/AuthContext';
 import { getAdminDashboard, AdminDashboard } from '../../service/api';
 
@@ -50,7 +51,7 @@ const Home: React.FC = () => {
                     </p>
                 </div>
 
-                {/* NEW: Admin Quick Stats - Pending Approvals & Revenue */}
+                {/* Admin Quick Stats - Pending Approvals & Revenue */}
                 {adminStats && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         {/* Pending Approvals - Clickable */}
@@ -78,7 +79,7 @@ const Home: React.FC = () => {
                                 <div>
                                     <p className="text-green-100 text-sm font-medium">Platform Revenue</p>
                                     <p className="text-3xl font-bold mt-1">
-                                        ${adminStats.totalPlatformRevenue?. toFixed(2) || '0. 00'}
+                                        ${adminStats.totalPlatformRevenue?.toFixed(2) || '0.00'}
                                     </p>
                                 </div>
                                 <div className="bg-green-400/30 p-3 rounded-full">
@@ -110,7 +111,7 @@ const Home: React.FC = () => {
                         <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-5 text-white">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-purple-100 text-sm font-medium">Total Buyers</p>
+                                    <p className="text-purple-100 text-sm font-medium">Total Clients</p>
                                     <p className="text-3xl font-bold mt-1">{adminStats.totalBuyers || 0}</p>
                                 </div>
                                 <div className="bg-purple-400/30 p-3 rounded-full">
@@ -119,14 +120,19 @@ const Home: React.FC = () => {
                                     </svg>
                                 </div>
                             </div>
-                            <p className="text-purple-200 text-xs mt-2">Registered buyers</p>
+                            <p className="text-purple-200 text-xs mt-2">Registered </p>
                         </div>
                     </div>
                 )}
 
-                {/* Existing Metrics Cards */}
+                {/* Existing Metrics Cards (without duplicate Platform Revenue) */}
                 <div className="mb-6">
                     <EcommerceMetrics />
+                </div>
+
+                {/* NEW: Top Sellers Performance Chart */}
+                <div className="mb-6">
+                    <TopSellersChart />
                 </div>
 
                 {/* Top 3 Bestseller Cards */}

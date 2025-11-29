@@ -61,4 +61,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // Get total revenue today
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE DATE(o.orderDate) = CURRENT_DATE AND o.status = 'CONFIRMED'")
     BigDecimal calculateTodayRevenue();
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.status = 'CONFIRMED'")
+    Long countConfirmedOrders();
 }

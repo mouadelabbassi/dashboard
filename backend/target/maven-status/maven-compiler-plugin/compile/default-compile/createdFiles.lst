@@ -26,6 +26,7 @@ com\dashboard\dto\response\DashboardResponse$DashboardResponseBuilder.class
 com\dashboard\entity\User$UserBuilder.class
 com\dashboard\entity\Order$OrderStatus.class
 com\dashboard\entity\Product$ApprovalStatus.class
+com\dashboard\repository\PlatformRevenueRepository.class
 com\dashboard\dto\response\SellerDashboardResponse.class
 com\dashboard\dto\response\SellerProductRequestResponse.class
 com\dashboard\entity\Notification.class
@@ -36,6 +37,7 @@ com\dashboard\dto\response\ProductDetailResponse.class
 com\dashboard\dto\response\ReviewResponse.class
 com\dashboard\entity\StockUpdateRequest.class
 com\dashboard\dto\response\NotificationResponse.class
+com\dashboard\entity\PlatformRevenue.class
 com\dashboard\exception\DuplicateResourceException.class
 com\dashboard\dto\request\ForgotPasswordRequest.class
 com\dashboard\dto\response\ApiResponse$ApiResponseBuilder.class
@@ -86,6 +88,7 @@ com\dashboard\controller\AdminStockController.class
 com\dashboard\dto\request\OrderRequest$OrderRequestBuilder.class
 com\dashboard\dto\response\OrderResponse$OrderItemResponse$OrderItemResponseBuilder.class
 com\dashboard\dto\request\ReviewRequest$ReviewRequestBuilder.class
+com\dashboard\entity\PlatformRevenue$RevenueType.class
 com\dashboard\controller\CategoryController.class
 com\dashboard\dto\response\ApiResponse.class
 com\dashboard\controller\OrderController.class
@@ -137,6 +140,7 @@ com\dashboard\dto\response\SellerProfileResponse$SellerProfileResponseBuilder.cl
 com\dashboard\service\AuthService.class
 com\dashboard\controller\DashboardController.class
 com\dashboard\entity\OrderItem.class
+com\dashboard\entity\PlatformRevenue$PlatformRevenueBuilder.class
 com\dashboard\entity\User$Role.class
 com\dashboard\dto\request\ResetPasswordRequest.class
 com\dashboard\dto\response\SaleResponse.class

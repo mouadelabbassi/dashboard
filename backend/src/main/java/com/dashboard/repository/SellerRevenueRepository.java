@@ -56,5 +56,14 @@ public interface SellerRevenueRepository extends JpaRepository<SellerRevenue, Lo
     @Query("SELECT COALESCE(SUM(sr.platformFee), 0) FROM SellerRevenue sr")
     BigDecimal calculateTotalPlatformFees();
 
+    @Query("SELECT sr.seller. id, sr.seller. fullName, sr.seller.storeName, " +
+            "COALESCE(SUM(sr.grossAmount), 0), " +
+            "COALESCE(SUM(sr. quantitySold), 0), " +
+            "COUNT(DISTINCT sr.order.id) " +
+            "FROM SellerRevenue sr " +
+            "GROUP BY sr.seller. id, sr.seller.fullName, sr.seller.storeName " +
+            "ORDER BY SUM(sr.grossAmount) DESC")
+    List<Object[]> getTopSellersByRevenue(Pageable pageable);
+
     boolean existsByOrderItemId(Long orderItemId);
 }

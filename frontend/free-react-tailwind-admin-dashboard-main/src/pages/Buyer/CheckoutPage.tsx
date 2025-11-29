@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { createOrder, confirmOrder } from '../../service/api';
@@ -9,10 +9,15 @@ import jsPDF from 'jspdf';
 const CheckoutPage: React.FC = () => {
     const { items, getTotal, clearCart } = useCart();
     const { user } = useAuth();
+    const location = useLocation();
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderComplete, setOrderComplete] = useState(false);
     const [orderDetails, setOrderDetails] = useState<any>(null);
+
+    // Determine if we're in seller context or buyer context
+    const isSellerContext = location.pathname.startsWith('/seller');
+    const shopBasePath = isSellerContext ?  '/seller/shop' : '/shop';
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -30,7 +35,7 @@ const CheckoutPage: React.FC = () => {
                 ...prev,
                 fullName: user.fullName || '',
                 email: user.email || '',
-                phone: user. phone || '',
+                phone: user.phone || ''
             }));
         }
     }, [user]);
@@ -40,186 +45,180 @@ const CheckoutPage: React.FC = () => {
     const total = subtotal + tax;
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target. value });
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
     };
 
-    // PDF Receipt Generator
     const generatePDFReceipt = () => {
         if (!orderDetails) return;
 
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
 
+        // Header
+        doc.setFillColor(59, 130, 246);
+        doc.rect(0, 0, pageWidth, 40, 'F');
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.text('MouadVision', 20, 25);
+
         doc.setFontSize(12);
-        doc. setFont('helvetica', 'normal');
+        doc.setFont('helvetica', 'normal');
         doc.text('Order Receipt', pageWidth - 20, 25, { align: 'right' });
 
+        // Order Info
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(14);
-        doc. setFont('helvetica', 'bold');
-        doc.text('Order Confirmation', 20, 55);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`Order #${orderDetails.orderNumber}`, 20, 55);
 
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        doc. setTextColor(100, 100, 100);
-        doc.text(`Order Number: ${orderDetails. orderNumber}`, 20, 65);
-        doc. text(`Date: ${new Date(orderDetails.orderDate).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        })}`, 20, 72);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 63);
 
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(12);
-        doc. setFont('helvetica', 'bold');
-        doc.text('Customer Information', 20, 90);
-
-        doc. setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc. setTextColor(60, 60, 60);
-        doc.text(`Name: ${orderDetails.shippingAddress.fullName}`, 20, 100);
-        doc.text(`Email: ${orderDetails.shippingAddress.email}`, 20, 107);
-        doc. text(`Phone: ${orderDetails.shippingAddress.phone}`, 20, 114);
-
+        // Customer Info
+        let yPos = 80;
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-        doc.text('Shipping Address', 110, 90);
+        doc.text('Bill To:', 20, yPos);
 
-        doc.setFontSize(10);
+        yPos += 8;
         doc.setFont('helvetica', 'normal');
-        doc.setTextColor(60, 60, 60);
-        doc.text(orderDetails.shippingAddress.address, 110, 100);
-        doc.text(`${orderDetails.shippingAddress.city}, ${orderDetails.shippingAddress.postalCode}`, 110, 107);
+        doc.setFontSize(10);
+        doc.text(orderDetails.shippingAddress.fullName, 20, yPos);
+        yPos += 6;
+        doc.text(orderDetails.shippingAddress.email, 20, yPos);
+        yPos += 6;
+        doc.text(orderDetails.shippingAddress.phone, 20, yPos);
+        yPos += 6;
+        doc.text(`${orderDetails.shippingAddress.address}, ${orderDetails.shippingAddress.city}`, 20, yPos);
+        yPos += 6;
+        doc.text(orderDetails.shippingAddress.postalCode, 20, yPos);
 
-        let yPos = 135;
-        doc. setFillColor(245, 245, 245);
+        // Items Table Header
+        yPos += 20;
+        doc.setFillColor(243, 244, 246);
         doc.rect(20, yPos - 5, pageWidth - 40, 10, 'F');
 
+        doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.setFontSize(10);
-        doc. setFont('helvetica', 'bold');
-        doc. text('Product', 25, yPos + 2);
-        doc.text('Qty', 120, yPos + 2);
-        doc. text('Price', 140, yPos + 2);
-        doc.text('Subtotal', 165, yPos + 2, { align: 'right' });
+        doc.text('Item', 25, yPos);
+        doc.text('Qty', 120, yPos);
+        doc.text('Price', 145, yPos);
+        doc.text('Total', 170, yPos);
 
-        yPos += 15;
-        doc. setFont('helvetica', 'normal');
-        doc.setTextColor(60, 60, 60);
-
+        // Items
+        yPos += 10;
+        doc.setFont('helvetica', 'normal');
         orderDetails.items.forEach((item: any) => {
-            const productName = item. productName. length > 40
-                ? item.productName.substring(0, 40) + '...'
-                : item.productName;
-            doc.text(productName, 25, yPos);
-            doc.text(item.quantity. toString(), 125, yPos);
-            doc.text(`$${item.price.toFixed(2)}`, 140, yPos);
-            doc.text(`$${item.subtotal.toFixed(2)}`, 165, yPos, { align: 'right' });
-            yPos += 10;
+            const itemName = item.productName.length > 35 ? item.productName.substring(0, 35) + '...' : item.productName;
+            doc.text(itemName, 25, yPos);
+            doc.text(item.quantity.toString(), 125, yPos);
+            doc.text(`$${item.price.toFixed(2)}`, 145, yPos);
+            doc.text(`$${(item.price * item.quantity).toFixed(2)}`, 170, yPos);
+            yPos += 8;
         });
 
+        // Totals
         yPos += 10;
         doc.setDrawColor(200, 200, 200);
-        doc.line(20, yPos, pageWidth - 20, yPos);
-        yPos += 10;
+        doc.line(120, yPos - 5, pageWidth - 20, yPos - 5);
 
-        doc. setTextColor(60, 60, 60);
         doc.text('Subtotal:', 130, yPos);
         doc.text(`$${orderDetails.subtotal.toFixed(2)}`, 165, yPos, { align: 'right' });
 
         yPos += 8;
-        doc. text('Tax (10%):', 130, yPos);
+        doc.text('Tax (10%):', 130, yPos);
         doc.text(`$${orderDetails.tax.toFixed(2)}`, 165, yPos, { align: 'right' });
 
         yPos += 8;
         doc.text('Shipping:', 130, yPos);
         doc.setTextColor(34, 197, 94);
-        doc. text('Free', 165, yPos, { align: 'right' });
+        doc.text('Free', 165, yPos, { align: 'right' });
 
         yPos += 12;
-        doc. setDrawColor(200, 200, 200);
+        doc.setDrawColor(200, 200, 200);
         doc.line(120, yPos - 5, pageWidth - 20, yPos - 5);
 
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(14);
-        doc. setFont('helvetica', 'bold');
+        doc.setFont('helvetica', 'bold');
         doc.text('Total:', 130, yPos + 3);
-        doc. text(`$${orderDetails.total.toFixed(2)}`, 165, yPos + 3, { align: 'right' });
+        doc.text(`$${orderDetails.total.toFixed(2)}`, 165, yPos + 3, { align: 'right' });
 
         yPos += 25;
-        doc. setFontSize(10);
-        doc. setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
         doc.setTextColor(100, 100, 100);
         doc.text(`Payment Method: ${orderDetails.shippingAddress.paymentMethod === 'cod' ?  'Cash on Delivery' : 'Credit/Debit Card'}`, 20, yPos);
 
         const footerY = doc.internal.pageSize.getHeight() - 20;
         doc.setFontSize(9);
-        doc. setTextColor(150, 150, 150);
+        doc.setTextColor(150, 150, 150);
         doc.text('Thank you for shopping with MouadVision!', pageWidth / 2, footerY, { align: 'center' });
         doc.text('For support, contact: support@mouadvision.com', pageWidth / 2, footerY + 7, { align: 'center' });
 
-        doc.save(`MouadVision-Receipt-${orderDetails.orderNumber}. pdf`);
+        doc.save(`MouadVision-Receipt-${orderDetails.orderNumber}.pdf`);
         setToast({ message: 'Receipt downloaded successfully!', type: 'success' });
     };
 
-    // ✅ FIXED: Actually call the backend API to create and confirm the order
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsProcessing(true);
 
         try {
-            // Step 1: Create order in backend
             const orderRequest = {
                 items: items.map(item => ({
                     productAsin: item.product.asin,
                     quantity: item.quantity
                 })),
-                notes: `Shipping: ${formData.address}, ${formData. city}, ${formData.postalCode}`
+                notes: `Shipping: ${formData.address}, ${formData.city}, ${formData.postalCode}`
             };
 
-            console.log('Creating order... ', orderRequest);
+            console.log('Creating order...', orderRequest);
             const createdOrder = await createOrder(orderRequest);
             console.log('Order created:', createdOrder);
 
-            // Step 2: Confirm the order immediately
             console.log('Confirming order...', createdOrder.id);
             const confirmedOrder = await confirmOrder(createdOrder.id);
             console.log('Order confirmed:', confirmedOrder);
 
-            // Step 3: Prepare order details for display
             const order = {
                 orderNumber: confirmedOrder.orderNumber,
-                items: confirmedOrder.items. map((item: any) => ({
+                items: confirmedOrder.items.map((item: any) => ({
                     productName: item.productName,
                     quantity: item.quantity,
-                    price: item.unitPrice,
-                    subtotal: item. subtotal
+                    price: item.unitPrice
                 })),
                 subtotal: subtotal,
                 tax: tax,
                 total: total,
-                shippingAddress: formData,
-                orderDate: confirmedOrder.createdAt || new Date().toISOString()
+                shippingAddress: formData
             };
 
             setOrderDetails(order);
             setOrderComplete(true);
             clearCart();
-            setToast({ message: 'Order placed and confirmed successfully!', type: 'success' });
+            setToast({ message: 'Order placed successfully! ', type: 'success' });
 
         } catch (error: any) {
-            console.error('Order failed:', error);
-            const errorMessage = error. response?.data?.message || error.message || 'Failed to place order.  Please try again.';
-            setToast({ message: errorMessage, type: 'error' });
+            console.error('Order error:', error);
+            setToast({
+                message: error.response?.data?.message || 'Failed to place order. Please try again.',
+                type: 'error'
+            });
         } finally {
             setIsProcessing(false);
         }
     };
 
-    // ORDER CONFIRMED VIEW
+    // Order Complete View
     if (orderComplete && orderDetails) {
         return (
             <div className="max-w-2xl mx-auto text-center py-12">
@@ -231,44 +230,41 @@ const CheckoutPage: React.FC = () => {
                     </svg>
                 </div>
 
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Order Confirmed!</h1>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Order Confirmed! </h1>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    Thank you for your purchase. Your order number is:
-                </p>
-                <p className="text-2xl font-mono font-bold text-blue-600 dark:text-blue-400 mb-8">
-                    {orderDetails.orderNumber}
+                    Thank you for your purchase.Your order number is:
                 </p>
 
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-left mb-6">
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Order Summary</h3>
-                    <div className="space-y-2">
-                        {orderDetails.items.map((item: any, index: number) => (
-                            <div key={index} className="flex justify-between text-sm">
-                                <span className="text-gray-600 dark:text-gray-400">
-                                    {item.productName} × {item.quantity}
-                                </span>
-                                <span className="font-medium text-gray-900 dark:text-white">
-                                    ${item.subtotal.toFixed(2)}
-                                </span>
-                            </div>
-                        ))}
-                        <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
-                            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                                <span>Subtotal</span>
-                                <span>${orderDetails.subtotal. toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                                <span>Tax (10%)</span>
-                                <span>${orderDetails.tax.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                                <span>Shipping</span>
-                                <span className="text-green-500">Free</span>
-                            </div>
-                            <div className="flex justify-between font-bold text-gray-900 dark:text-white mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                                <span>Total</span>
-                                <span>${orderDetails.total.toFixed(2)}</span>
-                            </div>
+                <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 mb-8 inline-block">
+                    <span className="text-2xl font-mono font-bold text-blue-600 dark:text-blue-400">
+                        {orderDetails.orderNumber}
+                    </span>
+                </div>
+
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 text-left mb-8">
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-4">Order Summary</h3>
+                    {orderDetails.items.map((item: any, index: number) => (
+                        <div key={index} className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                            <span className="text-gray-600 dark:text-gray-400">{item.productName} × {item.quantity}</span>
+                            <span className="font-medium text-gray-900 dark:text-white">${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
+                    ))}
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                            <span>Subtotal</span>
+                            <span>${orderDetails.subtotal.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                            <span>Tax (10%)</span>
+                            <span>${orderDetails.tax.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                            <span>Shipping</span>
+                            <span className="text-green-500">Free</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-gray-900 dark:text-white mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                            <span>Total</span>
+                            <span>${orderDetails.total.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -285,7 +281,7 @@ const CheckoutPage: React.FC = () => {
 
                 <div className="flex flex-col sm:flex-row gap-3">
                     <Link
-                        to="/shop/orders"
+                        to={`${shopBasePath}/orders`}
                         className="flex-1 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,7 +290,7 @@ const CheckoutPage: React.FC = () => {
                         View My Orders
                     </Link>
                     <Link
-                        to="/shop"
+                        to={shopBasePath}
                         className="flex-1 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all flex items-center justify-center gap-2"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -311,7 +307,7 @@ const CheckoutPage: React.FC = () => {
         return (
             <div className="text-center py-12">
                 <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-4">Your cart is empty</h2>
-                <Link to="/shop" className="text-blue-600 hover:underline">Go to Shop</Link>
+                <Link to={shopBasePath} className="text-blue-600 hover:underline">Go to Shop</Link>
             </div>
         );
     }
@@ -389,7 +385,7 @@ const CheckoutPage: React.FC = () => {
                                     <input
                                         type="text"
                                         name="postalCode"
-                                        value={formData. postalCode}
+                                        value={formData.postalCode}
                                         onChange={handleInputChange}
                                         required
                                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
@@ -409,7 +405,7 @@ const CheckoutPage: React.FC = () => {
                                         {item.product.productName} × {item.quantity}
                                     </span>
                                     <span className="font-medium text-gray-900 dark:text-white">
-                                        ${(item.product.price * item. quantity).toFixed(2)}
+                                        ${(item.product.price * item.quantity).toFixed(2)}
                                     </span>
                                 </div>
                             ))}
@@ -443,7 +439,7 @@ const CheckoutPage: React.FC = () => {
                                 <>
                                     <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5. 373 0 12h4z" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                                     </svg>
                                     Processing...
                                 </>
@@ -458,7 +454,7 @@ const CheckoutPage: React.FC = () => {
                         </button>
 
                         <Link
-                            to="/shop/cart"
+                            to={`${shopBasePath}/cart`}
                             className="block text-center mt-4 text-blue-600 dark:text-blue-400 hover:underline"
                         >
                             ← Back to Cart

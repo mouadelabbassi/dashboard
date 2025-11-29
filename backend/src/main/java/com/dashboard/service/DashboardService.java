@@ -5,9 +5,7 @@ import com.dashboard.dto.response.DashboardStatsResponse;
 import com.dashboard.dto.response.ProductResponse;
 import com.dashboard.entity.Category;
 import com.dashboard.entity.Product;
-import com.dashboard.repository.CategoryRepository;
-import com.dashboard.repository.ProductRepository;
-import com.dashboard.repository.SaleRepository;
+import com.dashboard.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +27,8 @@ public class DashboardService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final SaleRepository saleRepository;
+    private final SellerRevenueRepository sellerRevenueRepository;
+    private final OrderRepository orderRepository;
 
     /**
      * Get ALL products (both store and seller products)
@@ -74,8 +74,9 @@ public class DashboardService {
                 .mapToLong(Product::getReviewsCount)
                 .sum();
 
-        BigDecimal totalRevenue = saleRepository.calculateTotalRevenue();
-        Long totalSales = saleRepository.countCompletedSales();
+        // CHANGE TO:
+        BigDecimal totalRevenue = sellerRevenueRepository.calculateTotalPlatformRevenue();
+        Long totalSales = orderRepository.countConfirmedOrders();
 
         // Calculate inventory value
         BigDecimal totalInventoryValue = allProducts.stream()
