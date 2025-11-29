@@ -3,9 +3,9 @@ package com.dashboard.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate. annotations.UpdateTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java. math.BigDecimal;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,7 +25,7 @@ public class SellerProductRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;
 
@@ -41,13 +41,15 @@ public class SellerProductRequest {
     @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity;
 
-    @Column(name = "image_url", length = 500)
+    // ✅ FIXED: Changed from length=500 to TEXT to support long URLs (base64, etc.)
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
-    @Column(name = "additional_images", length = 2000)
+    // ✅ FIXED: Changed from length=2000 to TEXT
+    @Column(name = "additional_images", columnDefinition = "TEXT")
     private String additionalImages;
 
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
@@ -89,7 +91,7 @@ public class SellerProductRequest {
         private final String description;
 
         RequestStatus(String description) {
-            this. description = description;
+            this.description = description;
         }
 
         public String getDescription() {

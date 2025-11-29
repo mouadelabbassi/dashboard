@@ -11,7 +11,11 @@ const SellerOrders: React.FC = () => {
 
     useEffect(() => {
         fetchOrders();
+
+        const interval = setInterval(fetchOrders, 30000);
+        return () => clearInterval(interval);
     }, [currentPage]);
+
 
     const fetchOrders = async () => {
         try {
@@ -25,6 +29,11 @@ const SellerOrders: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    // ✅ FIX: Add manual refresh
+    const handleRefresh = () => {
+        fetchOrders();
     };
 
     const getStatusBadge = (status: string) => {
@@ -53,11 +62,22 @@ const SellerOrders: React.FC = () => {
 
     return (
         <div className="p-6">
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Mes Ventes</h1>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                    Historique de toutes vos ventes ({totalElements} ventes)
-                </p>
+            <div className="mb-6 flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Mes Ventes</h1>
+                    <p className="text-gray-600 dark:text-gray-400 mt-1">
+                        Historique de toutes vos ventes ({totalElements} ventes)
+                    </p>
+                </div>
+
+                {/* ✅ FIX: Add refresh button */}
+                <button
+                    onClick={handleRefresh}
+                    disabled={loading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                    {loading ? 'Refreshing...' : 'Refresh'}
+                </button>
             </div>
 
             {loading ? (
@@ -134,7 +154,7 @@ const SellerOrders: React.FC = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <span className="text-sm font-semibold text-green-600">
-                        {order.subtotal.toLocaleString('fr-FR')} MAD
+                          ${order.subtotal?.toFixed(2) || '0.00'}
                       </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-center">

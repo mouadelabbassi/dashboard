@@ -2,14 +2,14 @@ package com.dashboard.service;
 
 import com.dashboard.entity.*;
 import com.dashboard.repository.*;
-import lombok.RequiredArgsConstructor;
+import lombok. RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
+import java. util.List;
 
 @Slf4j
 @Service
@@ -18,77 +18,111 @@ public class SellerRevenueService {
 
     private final OrderItemRepository orderItemRepository;
     private final SellerRevenueRepository revenueRepository;
-    private final NotificationService notificationService;
 
-    private static final BigDecimal PLATFORM_FEE_RATE = new BigDecimal("0.10"); // 10% platform fee
+    private static final BigDecimal PLATFORM_FEE_RATE = new BigDecimal("0.10");
 
     @Transactional
     public void processConfirmedOrderItems(Order order) {
+        log.info("Processing revenue for order: {} with {} items",
+                order.getOrderNumber(), order. getItems().size());
+
         for (OrderItem item : order.getItems()) {
+            log.info("Processing item ID: {}, Seller: {}, Already processed: {}",
+                    item.getId(),
+                    item. getSeller() != null ? item. getSeller().getEmail() : "NO SELLER",
+                    item.getSellerRevenueCalculated());
+
             // Skip if already processed
-            if (item.getSellerRevenueCalculated() != null && item.getSellerRevenueCalculated()) {
+            if (Boolean.TRUE.equals(item.getSellerRevenueCalculated())) {
+                log.info("Skipping item {} - already processed", item. getId());
                 continue;
             }
 
-            // Only process items from sellers (not MouadVision products)
+            // Skip if no seller (MouadVision product)
             if (item.getSeller() == null) {
+                log.info("Skipping item {} - no seller (platform product)", item.getId());
+                item.setSellerRevenueCalculated(true);
+                orderItemRepository.save(item);
                 continue;
             }
 
-            // Calculate revenue
-            BigDecimal grossAmount = item.getSubtotal();
-            BigDecimal platformFee = grossAmount.multiply(PLATFORM_FEE_RATE);
-            BigDecimal netAmount = grossAmount.subtract(platformFee);
+            // Check if revenue already exists
+            if (revenueRepository.existsByOrderItemId(item.getId())) {
+                log.info("Skipping item {} - revenue already exists", item. getId());
+                item.setSellerRevenueCalculated(true);
+                orderItemRepository.save(item);
+                continue;
+            }
 
-            // Create revenue record
-            SellerRevenue revenue = SellerRevenue.builder()
-                    .seller(item.getSeller())
-                    .product(item.getProduct())
-                    .orderItem(item)
-                    .revenueDate(LocalDate.now())
-                    .quantitySold(item.getQuantity())
-                    .grossAmount(grossAmount)
-                    .platformFee(platformFee)
-                    .netAmount(netAmount)
-                    .build();
+            try {
+                BigDecimal grossAmount = item.getSubtotal();
+                BigDecimal platformFee = grossAmount.multiply(PLATFORM_FEE_RATE);
+                BigDecimal netAmount = grossAmount. subtract(platformFee);
 
-            revenueRepository.save(revenue);
+                SellerRevenue revenue = SellerRevenue.builder()
+                        .seller(item.getSeller())
+                        . product(item.getProduct())
+                        . order(order)
+                        .orderItem(item)
+                        .revenueDate(LocalDate.now())
+                        . quantitySold(item.getQuantity())
+                        .unitPrice(item.getUnitPrice())
+                        .grossAmount(grossAmount)
+                        .platformFee(platformFee)
+                        . netAmount(netAmount)
+                        . build();
 
-            // Mark as processed
-            item.setSellerRevenueCalculated(true);
-            orderItemRepository.save(item);
+                revenueRepository.save(revenue);
 
-            // Send notification to seller
-            notificationService.notifySellerProductPurchased(
-                    item.getSeller(),
-                    item.getProduct(),
-                    order,
-                    item.getQuantity()
-            );
+                item.setSellerRevenueCalculated(true);
+                orderItemRepository.save(item);
 
-            log.info("Created revenue record for seller {} - Product {} - Amount: {}",
-                    item.getSeller().getId(),
-                    item.getProduct().getAsin(),
-                    netAmount);
+                log.info("SUCCESS: Created revenue for seller {} - Product {} - Net: ${}",
+                        item.getSeller(). getEmail(),
+                        item. getProduct().getAsin(),
+                        netAmount);
+
+            } catch (Exception e) {
+                log.error("FAILED to create revenue for item {}: {}", item. getId(), e.getMessage(), e);
+                throw e;
+            }
         }
+
+        log.info("Revenue processing completed for order: {}", order.getOrderNumber());
     }
 
     @Transactional
     public void processAllUnprocessedRevenue() {
-        List<User> sellers = orderItemRepository.findAll().stream()
-                .map(OrderItem::getSeller)
+        log.info("Processing all unprocessed revenue...");
+
+        List<User> sellers = orderItemRepository.findAll(). stream()
+                . map(OrderItem::getSeller)
                 .filter(seller -> seller != null)
-                .distinct()
+                . distinct()
                 .toList();
 
         for (User seller : sellers) {
             List<OrderItem> unprocessedItems = orderItemRepository.findUnprocessedRevenueItems(seller);
-
             for (OrderItem item : unprocessedItems) {
-                if (item.getOrder().getStatus() == Order.OrderStatus.CONFIRMED) {
+                if (item.getOrder().getStatus() == Order.OrderStatus. CONFIRMED) {
                     processConfirmedOrderItems(item.getOrder());
                 }
             }
         }
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getSellerTotalRevenue(User seller) {
+        return revenueRepository.calculateTotalRevenueBySeller(seller);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getSellerRevenueForPeriod(User seller, LocalDate startDate, LocalDate endDate) {
+        return revenueRepository.calculateRevenueBetweenDates(seller, startDate, endDate);
+    }
+
+    @Transactional(readOnly = true)
+    public Long getSellerTotalUnitsSold(User seller) {
+        return revenueRepository.countTotalUnitsSold(seller);
     }
 }

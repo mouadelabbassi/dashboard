@@ -23,20 +23,24 @@ public class ProductResponse {
     private Integer ranking;
     private Integer noOfSellers;
     private String productLink;
+
     private String imageUrl;
     private Long categoryId;
     private String categoryName;
-    private Boolean isBestseller;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
-    // NEW: Seller-related fields
+    private Integer stockQuantity;
     private Integer salesCount;
     private String approvalStatus;
     private String sellerName;
     private Long sellerId;
 
-    private Integer stockQuantity;
+    private String sellerStoreName;     // Store name (for sellers)
+    private Boolean isMouadVisionProduct; // TRUE if seller_id is NULL
+
+    private Boolean isBestseller;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
     private Boolean inStock;
 
     public static ProductResponse fromEntity(Product product) {

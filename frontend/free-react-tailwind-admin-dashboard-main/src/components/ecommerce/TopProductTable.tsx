@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getTopProducts, Product } from "../../service/api";
+import { dashboardAPI, Product } from "../../service/api";
 
 const TopProductTable: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -11,8 +11,10 @@ const TopProductTable: React.FC = () => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await getTopProducts(10);
-                setProducts(data);
+                const response = await dashboardAPI.getTopProducts(10);
+                if (response.data.success) {
+                    setProducts(response.data.data);
+                }
             } catch (err: any) {
                 console.error("Error fetching top products:", err);
                 setError(err.message || "Failed to load products");
@@ -60,6 +62,9 @@ const TopProductTable: React.FC = () => {
                 <h4 className="text-xl font-bold text-black dark:text-white flex items-center">
                     🏆 Top 10 Best Sellers
                 </h4>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Ranked by sales, reviews & rating
+                </span>
             </div>
 
             <div className="overflow-x-auto">
@@ -84,16 +89,17 @@ const TopProductTable: React.FC = () => {
                         <th className="min-w-[100px] px-4 py-4 font-medium text-black dark:text-white">
                             Rating
                         </th>
-                        <th className="min-w-[120px] px-4 py-4 font-medium text-black dark:text-white">
+                        <th className="min-w-[100px] px-4 py-4 font-medium text-black dark:text-white">
                             Reviews
+                        </th>
+                        <th className="min-w-[80px] px-4 py-4 font-medium text-black dark:text-white">
+                            Sales
                         </th>
                     </tr>
                     </thead>
                     <tbody>
                     {products.map((product, index) => {
-                        // Use ranking from API, or fallback to index + 1
-                        const productRank = product.ranking || product.rank || index + 1;
-                        // Use categoryName from API, or fallback to category
+                        const productRank = product.ranking || index + 1;
                         const productCategory = product.categoryName || product.category || 'N/A';
 
                         return (
@@ -155,6 +161,11 @@ const TopProductTable: React.FC = () => {
                                 <td className="px-4 py-4">
                                     <p className="text-sm text-black dark:text-white">
                                         {product.reviewsCount?.toLocaleString() || '0'}
+                                    </p>
+                                </td>
+                                <td className="px-4 py-4">
+                                    <p className="text-sm font-semibold text-purple-600 dark:text-purple-400">
+                                        {product.salesCount || 0}
                                     </p>
                                 </td>
                             </tr>

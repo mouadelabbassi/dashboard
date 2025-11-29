@@ -1,18 +1,19 @@
-package com. dashboard.entity;
+package com.dashboard.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate. annotations.CreationTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.math. BigDecimal;
-import java.time. LocalDate;
-import java.time. LocalDateTime;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "seller_revenues", indexes = {
         @Index(name = "idx_sr_seller", columnList = "seller_id"),
         @Index(name = "idx_sr_date", columnList = "revenue_date"),
-        @Index(name = "idx_sr_order", columnList = "order_id")
+        @Index(name = "idx_sr_order", columnList = "order_id"),
+        @Index(name = "idx_sr_order_item", columnList = "order_item_id")
 })
 @Getter
 @Setter
@@ -25,19 +26,19 @@ public class SellerRevenue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     private User seller;
 
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_item_id", nullable = false)
     private OrderItem orderItem;
 
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_asin", nullable = false)
     private Product product;
 
@@ -72,7 +73,7 @@ public class SellerRevenue {
         if (this.grossAmount != null && this.platformFeePercent != null) {
             this.platformFee = this.grossAmount.multiply(this.platformFeePercent)
                     .divide(new BigDecimal("100"), 2, java.math.RoundingMode.HALF_UP);
-            this. netAmount = this.grossAmount.subtract(this.platformFee);
+            this.netAmount = this.grossAmount.subtract(this.platformFee);
         }
         if (this.revenueDate == null) {
             this.revenueDate = LocalDate.now();

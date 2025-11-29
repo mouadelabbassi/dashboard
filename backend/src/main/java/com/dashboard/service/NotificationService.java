@@ -89,8 +89,8 @@ public class NotificationService {
         createNotification(
                 seller,
                 Notification.NotificationType.PRODUCT_PURCHASED,
-                "Nouvelle vente!  💰",
-                String.format("Votre produit '%s' a été acheté (x%d).Commande #%s",
+                "Nouvelle vente! 💰",
+                String.format("Votre produit '%s' a été acheté (x%d). Commande #%s",
                         product.getProductName(), quantity, order.getOrderNumber()),
                 order.getOrderNumber(),
                 "ORDER",

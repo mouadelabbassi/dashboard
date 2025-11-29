@@ -2,9 +2,9 @@ package com.dashboard.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations. CreationTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time. LocalDateTime;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications", indexes = {
@@ -21,10 +21,10 @@ import java.time. LocalDateTime;
 public class Notification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType. IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_id", nullable = false)
     private User recipient;
 
@@ -76,7 +76,7 @@ public class Notification {
         private final String description;
 
         NotificationType(String description) {
-            this. description = description;
+            this.description = description;
         }
 
         public String getDescription() {

@@ -30,9 +30,13 @@ public class OrderItem {
     @JoinColumn(name = "product_asin", nullable = false)
     private Product product;
 
+    // ✅ CRITICAL: Seller reference must be set when order is created
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private User seller;
+
+    @Column(name = "seller_revenue_calculated")
+    private Boolean sellerRevenueCalculated = false;
 
     @Column(nullable = false)
     private Integer quantity;
@@ -51,9 +55,6 @@ public class OrderItem {
 
     @Column(name = "seller_name", length = 255)
     private String sellerName;
-
-    @Column(name = "seller_revenue_calculated")
-    private Boolean sellerRevenueCalculated = false;
 
     @PrePersist
     @PreUpdate

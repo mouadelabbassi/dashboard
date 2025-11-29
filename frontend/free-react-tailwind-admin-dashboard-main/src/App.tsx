@@ -99,10 +99,10 @@ function App() {
                             <Route path="product-approvals" element={<ProductApprovals />} />
                             <Route path="notifications" element={<NotificationsPage />} />
                             <Route path="profile" element={<UserProfiles />} />
-                            <Route path="/admin/sellers" element={<SellerManagement />} />
+                            <Route path="sellers" element={<SellerManagement />} />
                         </Route>
 
-                        {/* Seller Routes */}
+                        {/* Seller Routes - Including Shop Access */}
                         <Route
                             path="/seller"
                             element={
@@ -120,6 +120,14 @@ function App() {
                             <Route path="reviews" element={<SellerReviews />} />
                             <Route path="profile" element={<SellerProfile />} />
                             <Route path="notifications" element={<NotificationsPage />} />
+
+                            {/* ✅ NEW: Seller can shop as buyer */}
+                            <Route path="shop" element={<ShopPage />} />
+                            <Route path="shop/product/:asin" element={<ProductDetailPage />} />
+                            <Route path="shop/cart" element={<CartPage />} />
+                            <Route path="shop/checkout" element={<CheckoutPage />} />
+                            <Route path="shop/orders" element={<OrderHistoryPage />} />
+                            <Route path="shop/my-reviews" element={<MyReviewsPage />} />
                         </Route>
 
                         {/* Buyer Routes */}

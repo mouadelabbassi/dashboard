@@ -215,11 +215,23 @@ public class ProductService {
                 .rating(product.getRating())
                 .reviewsCount(product.getReviewsCount())
                 .ranking(product.getRanking())
-                .noOfSellers(product.getNoOfSellers())
-                .productLink(product.getProductLink())
                 .imageUrl(product.getImageUrl())
+                .productLink(product.getProductLink())
                 .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
+
+                // ✅ Seller information
+                .sellerId(product.getSeller() != null ? product.getSeller().getId() : null)
+                .sellerName(product.getSellerName())  // Uses the helper method from Product entity
+                .sellerStoreName(product.getSeller() != null ? product.getSeller().getStoreName() : null)
+                .isMouadVisionProduct(product.isMouadVisionProduct())
+
+                // Stock & approval
+                .stockQuantity(product.getStockQuantity())
+                .salesCount(product.getSalesCount())
+                .approvalStatus(product.getApprovalStatus() != null ? product.getApprovalStatus().name() : null)
+
+                // Flags
                 .isBestseller(product.getIsBestseller())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())

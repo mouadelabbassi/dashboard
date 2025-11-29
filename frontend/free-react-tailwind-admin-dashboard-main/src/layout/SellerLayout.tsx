@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 const SellerLayout: React.FC = () => {
     const { user, logout } = useAuth();
+    const { items } = useCart();
     const location = useLocation();
     const navigate = useNavigate();
     const [isDark, setIsDark] = useState(true);
@@ -23,15 +25,23 @@ const SellerLayout: React.FC = () => {
     };
 
     const navLinks = [
-        { path: '/seller/dashboard', label: 'Dashboard' },
-        { path: '/seller/products', label: 'My Products' },
-        { path: '/seller/orders', label: 'Orders' },
-        { path: '/seller/reviews', label: 'Reviews' },
-        { path: '/seller/profile', label: 'Profile' },
-        { path: '/seller/notifications', label: 'Notifications' },
+        { path: '/seller/dashboard', label: 'Dashboard', icon: '📊' },
+        { path: '/seller/products', label: 'My Products', icon: '📦' },
+        { path: '/seller/orders', label: 'Orders', icon: '🛒' },
+        { path: '/seller/reviews', label: 'Reviews', icon: '⭐' },
+        { path: '/seller/profile', label: 'Profile', icon: '👤' },
+        { path: '/seller/notifications', label: 'Notifications', icon: '🔔' },
+    ];
+
+    // Shop links for seller to act as buyer
+    const shopLinks = [
+        { path: '/seller/shop', label: 'Shop', icon: '🏪' },
+        { path: '/seller/shop/orders', label: 'My Purchases', icon: '📋' },
     ];
 
     const isActive = (path: string) => location.pathname === path;
+
+    const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex">
@@ -55,17 +65,44 @@ const SellerLayout: React.FC = () => {
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+                    <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+                        {/* Seller Section */}
+                        <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            Seller
+                        </p>
                         {navLinks.map(link => (
                             <Link
                                 key={link.path}
                                 to={link.path}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                                     isActive(link.path)
-                                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25'
+                                        ?  'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25'
                                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                                 }`}
                             >
+                                <span>{link.icon}</span>
+                                <span>{link.label}</span>
+                            </Link>
+                        ))}
+
+                        {/* Divider */}
+                        <div className="my-4 border-t border-gray-200 dark:border-gray-700"></div>
+
+                        {/* Shop Section - Seller as Buyer */}
+                        <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            Shop as Buyer
+                        </p>
+                        {shopLinks.map(link => (
+                            <Link
+                                key={link.path}
+                                to={link.path}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                    isActive(link.path) || location.pathname.startsWith(link.path)
+                                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/25'
+                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                }`}
+                            >
+                                <span>{link.icon}</span>
                                 <span>{link.label}</span>
                             </Link>
                         ))}
@@ -113,6 +150,21 @@ const SellerLayout: React.FC = () => {
                     </button>
 
                     <div className="flex items-center gap-4">
+                        {/* Cart Icon */}
+                        <Link
+                            to="/seller/shop/cart"
+                            className="relative p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            {cartItemCount > 0 && (
+                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                                    {cartItemCount}
+                                </span>
+                            )}
+                        </Link>
+
                         <button
                             onClick={() => setIsDark(!isDark)}
                             className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"

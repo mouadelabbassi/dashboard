@@ -39,7 +39,8 @@ export interface DashboardStats {
     avgPrice: number;
     avgRating: number;
     totalReviews: number;
-    totalRevenue: number;
+    totalRevenue: number;      // AJOUTE SI MANQUANT
+    totalSales: number;        // AJOUTE CETTE LIGNE
     totalInventoryValue: number;
 }
 
@@ -268,7 +269,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 
 export const getAdminDashboard = async (): Promise<AdminDashboard> => {
     const response = await api.get<ApiResponse<AdminDashboard>>('/admin/product-approvals/dashboard');
-    return response.data. data;
+    return response.data.data;
 };
 
 // Get Pending Products
@@ -276,7 +277,7 @@ export const getPendingProducts = async (page: number = 0, size: number = 10): P
     const response = await api.get<ApiResponse<PagedResponse<PendingProduct>>>('/admin/product-approvals/pending', {
         params: { page, size }
     });
-    return response.data. data;
+    return response.data.data;
 };
 
 // Approve Product
@@ -326,12 +327,12 @@ export const getProductByAsin = async (asin: string): Promise<Product | null> =>
 
 export const createOrder = async (order: OrderRequest): Promise<OrderResponse> => {
     const response = await api.post<ApiResponse<OrderResponse>>('/orders', order);
-    return response.data. data;
+    return response.data.data;
 };
 
 // Confirm Order
 export const confirmOrder = async (orderId: number): Promise<OrderResponse> => {
-    const response = await api. post<ApiResponse<OrderResponse>>(`/orders/${orderId}/confirm`);
+    const response = await api.post<ApiResponse<OrderResponse>>(`/orders/${orderId}/confirm`);
     return response.data.data;
 };
 
@@ -348,7 +349,7 @@ export const getMyOrders = async (): Promise<OrderResponse[]> => {
 };
 
 export const getSellerDashboard = async (): Promise<SellerDashboard> => {
-    const response = await api. get<ApiResponse<SellerDashboard>>('/seller/dashboard');
+    const response = await api.get<ApiResponse<SellerDashboard>>('/seller/dashboard');
     return response.data.data;
 };
 
@@ -375,15 +376,15 @@ export const getMySoldOrders = async (page: number = 0, size: number = 10): Prom
 // Get Order by ID
 export const getOrderById = async (orderId: number): Promise<OrderResponse> => {
     const response = await api.get<ApiResponse<OrderResponse>>(`/orders/${orderId}`);
-    return response. data.data;
+    return response.data.data;
 };
 
 // Get All Orders (Admin)
 export const getAllOrders = async (page: number = 0, size: number = 20): Promise<PagedResponse<OrderResponse>> => {
-    const response = await api. get<ApiResponse<PagedResponse<OrderResponse>>>('/orders', {
+    const response = await api.get<ApiResponse<PagedResponse<OrderResponse>>>('/orders', {
         params: { page, size }
     });
-    return response. data.data;
+    return response.data.data;
 };
 
 // Get Recent Orders (Admin)
@@ -459,7 +460,7 @@ export const getNotifications = async (): Promise<NotificationResponse[]> => {
 // Get Unread Notifications
 export const getUnreadNotifications = async (): Promise<NotificationResponse[]> => {
     const response = await api.get<ApiResponse<NotificationResponse[]>>('/notifications/unread');
-    return response.data. data;
+    return response.data.data;
 };
 
 // Get Unread Count
@@ -494,6 +495,7 @@ export const dashboardAPI = {
     getBestsellers: async () => api.get<ApiResponse<Product[]>>('/dashboard/bestsellers'),
     getCorrelationData: async () => api.get<ApiResponse<CorrelationPoint[]>>('/dashboard/reviews-ranking-correlation'),
     getTrends: async () => api.get('/dashboard/trends'),
+    getTopProducts: (limit: number = 10) => api.get(`/dashboard/top-products? limit=${limit}`),
 };
 
 // Sales API

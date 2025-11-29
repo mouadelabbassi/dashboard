@@ -1,13 +1,13 @@
-package com.dashboard. entity;
+package com.dashboard.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations. CreationTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util. ArrayList;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -53,13 +53,13 @@ public class Product {
     @Column(name = "no_of_sellers")
     private Integer noOfSellers;
 
-    @Column(name = "product_link", length = 500)
+    @Column(name = "product_link", columnDefinition = "TEXT")
     private String productLink;
 
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
@@ -72,7 +72,7 @@ public class Product {
     private Integer likesCount = 0;
 
     @Column(name = "dislikes_count")
-    @Builder. Default
+    @Builder.Default
     private Integer dislikesCount = 0;
 
     @Column(name = "sales_count")
@@ -80,7 +80,7 @@ public class Product {
     private Integer salesCount = 0;
 
     // NEW: Seller reference
-    @ManyToOne(fetch = FetchType. LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private User seller;
 
@@ -115,7 +115,7 @@ public class Product {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    @Builder. Default
+    @Builder.Default
     private List<Sale> sales = new ArrayList<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -162,18 +162,24 @@ public class Product {
         }
         this.stockQuantity = Math.max(0, this.stockQuantity - quantity);
     }
-
-    // NEW: Get seller name
     public String getSellerName() {
-        if (seller == null) {
-            return "MouadVision";
+        if (this.seller != null) {
+            return this.seller.getStoreName() != null
+                    ? this.seller.getStoreName()
+                    : this.seller.getFullName();
+        } else {
+            // MouadVision product (platform-owned)
+            return "MouadVision Store";
         }
-        return seller.getStoreName() != null ? seller.getStoreName() : seller.getFullName();
     }
 
-    // NEW: Check if MouadVision product
+
     public boolean isMouadVisionProduct() {
-        return seller == null;
+        return this.seller == null;
+    }
+
+    public boolean isSellerProduct() {
+        return this.seller != null;
     }
 
     public String getSellerDisplayName() {
@@ -184,7 +190,7 @@ public class Product {
     @PreUpdate
     public void updateBestsellerStatus() {
         boolean highRanking = this.ranking != null && this.ranking <= 10;
-        boolean highSales = this.salesCount != null && this. salesCount >= 50;
+        boolean highSales = this.salesCount != null && this.salesCount >= 50;
         this.isBestseller = highRanking || highSales;
     }
 

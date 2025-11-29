@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
+import { createOrder, confirmOrder } from '../../service/api';
 import Toast from '../../components/common/Toast';
 import jsPDF from 'jspdf';
 
@@ -47,23 +48,20 @@ const CheckoutPage: React.FC = () => {
         if (!orderDetails) return;
 
         const doc = new jsPDF();
-        const pageWidth = doc.internal. pageSize.getWidth();
-
-        // Header
+        const pageWidth = doc.internal.pageSize.getWidth();
 
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'normal');
+        doc. setFont('helvetica', 'normal');
         doc.text('Order Receipt', pageWidth - 20, 25, { align: 'right' });
 
-        // Order Info
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(14);
         doc. setFont('helvetica', 'bold');
-        doc. text('Order Confirmation', 20, 55);
+        doc.text('Order Confirmation', 20, 55);
 
         doc.setFontSize(10);
-        doc. setFont('helvetica', 'normal');
-        doc.setTextColor(100, 100, 100);
+        doc.setFont('helvetica', 'normal');
+        doc. setTextColor(100, 100, 100);
         doc.text(`Order Number: ${orderDetails. orderNumber}`, 20, 65);
         doc. text(`Date: ${new Date(orderDetails.orderDate).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -73,51 +71,47 @@ const CheckoutPage: React.FC = () => {
             minute: '2-digit'
         })}`, 20, 72);
 
-        // Customer Info
-        doc. setTextColor(0, 0, 0);
+        doc.setTextColor(0, 0, 0);
         doc.setFontSize(12);
         doc. setFont('helvetica', 'bold');
-        doc. text('Customer Information', 20, 90);
-
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(60, 60, 60);
-        doc.text(`Name: ${orderDetails.shippingAddress.fullName}`, 20, 100);
-        doc.text(`Email: ${orderDetails.shippingAddress.email}`, 20, 107);
-        doc. text(`Phone: ${orderDetails.shippingAddress.phone}`, 20, 114);
-
-        // Shipping Address
-        doc.setTextColor(0, 0, 0);
-        doc. setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc. text('Shipping Address', 110, 90);
+        doc.text('Customer Information', 20, 90);
 
         doc. setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc. setTextColor(60, 60, 60);
+        doc.text(`Name: ${orderDetails.shippingAddress.fullName}`, 20, 100);
+        doc.text(`Email: ${orderDetails.shippingAddress.email}`, 20, 107);
+        doc. text(`Phone: ${orderDetails.shippingAddress.phone}`, 20, 114);
+
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Shipping Address', 110, 90);
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60, 60, 60);
         doc.text(orderDetails.shippingAddress.address, 110, 100);
         doc.text(`${orderDetails.shippingAddress.city}, ${orderDetails.shippingAddress.postalCode}`, 110, 107);
 
-        // Order Items Table Header
         let yPos = 135;
         doc. setFillColor(245, 245, 245);
         doc.rect(20, yPos - 5, pageWidth - 40, 10, 'F');
 
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
+        doc. setFont('helvetica', 'bold');
         doc. text('Product', 25, yPos + 2);
-        doc. text('Qty', 120, yPos + 2);
-        doc.text('Price', 140, yPos + 2);
+        doc.text('Qty', 120, yPos + 2);
+        doc. text('Price', 140, yPos + 2);
         doc.text('Subtotal', 165, yPos + 2, { align: 'right' });
 
-        // Order Items
         yPos += 15;
         doc. setFont('helvetica', 'normal');
         doc.setTextColor(60, 60, 60);
 
         orderDetails.items.forEach((item: any) => {
-            const productName = item.productName. length > 40
+            const productName = item. productName. length > 40
                 ? item.productName.substring(0, 40) + '...'
                 : item.productName;
             doc.text(productName, 25, yPos);
@@ -127,15 +121,14 @@ const CheckoutPage: React.FC = () => {
             yPos += 10;
         });
 
-        // Totals
         yPos += 10;
-        doc. setDrawColor(200, 200, 200);
+        doc.setDrawColor(200, 200, 200);
         doc.line(20, yPos, pageWidth - 20, yPos);
         yPos += 10;
 
-        doc.setTextColor(60, 60, 60);
+        doc. setTextColor(60, 60, 60);
         doc.text('Subtotal:', 130, yPos);
-        doc.text(`$${orderDetails.subtotal. toFixed(2)}`, 165, yPos, { align: 'right' });
+        doc.text(`$${orderDetails.subtotal.toFixed(2)}`, 165, yPos, { align: 'right' });
 
         yPos += 8;
         doc. text('Tax (10%):', 130, yPos);
@@ -143,8 +136,8 @@ const CheckoutPage: React.FC = () => {
 
         yPos += 8;
         doc.text('Shipping:', 130, yPos);
-        doc.setTextColor(34, 197, 94); // Green
-        doc.text('Free', 165, yPos, { align: 'right' });
+        doc.setTextColor(34, 197, 94);
+        doc. text('Free', 165, yPos, { align: 'right' });
 
         yPos += 12;
         doc. setDrawColor(200, 200, 200);
@@ -153,56 +146,74 @@ const CheckoutPage: React.FC = () => {
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(14);
         doc. setFont('helvetica', 'bold');
-        doc. text('Total:', 130, yPos + 3);
+        doc.text('Total:', 130, yPos + 3);
         doc. text(`$${orderDetails.total.toFixed(2)}`, 165, yPos + 3, { align: 'right' });
 
-        // Payment Method
         yPos += 25;
         doc. setFontSize(10);
-        doc.setFont('helvetica', 'normal');
+        doc. setFont('helvetica', 'normal');
         doc.setTextColor(100, 100, 100);
         doc.text(`Payment Method: ${orderDetails.shippingAddress.paymentMethod === 'cod' ?  'Cash on Delivery' : 'Credit/Debit Card'}`, 20, yPos);
 
-        // Footer
         const footerY = doc.internal.pageSize.getHeight() - 20;
         doc.setFontSize(9);
         doc. setTextColor(150, 150, 150);
         doc.text('Thank you for shopping with MouadVision!', pageWidth / 2, footerY, { align: 'center' });
         doc.text('For support, contact: support@mouadvision.com', pageWidth / 2, footerY + 7, { align: 'center' });
 
-        // Save PDF
-        doc. save(`MouadVision-Receipt-${orderDetails.orderNumber}. pdf`);
+        doc.save(`MouadVision-Receipt-${orderDetails.orderNumber}. pdf`);
         setToast({ message: 'Receipt downloaded successfully!', type: 'success' });
     };
 
-    const handleSubmit = async (e: React. FormEvent) => {
+    // ✅ FIXED: Actually call the backend API to create and confirm the order
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsProcessing(true);
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            const order = {
-                orderNumber: `ORD-${Date.now()}`,
-                items: items. map(item => ({
-                    productName: item.product.productName,
-                    quantity: item.quantity,
-                    price: item.product.price,
-                    subtotal: item. product.price * item.quantity
+            // Step 1: Create order in backend
+            const orderRequest = {
+                items: items.map(item => ({
+                    productAsin: item.product.asin,
+                    quantity: item.quantity
                 })),
-                subtotal,
-                tax,
-                total,
+                notes: `Shipping: ${formData.address}, ${formData. city}, ${formData.postalCode}`
+            };
+
+            console.log('Creating order... ', orderRequest);
+            const createdOrder = await createOrder(orderRequest);
+            console.log('Order created:', createdOrder);
+
+            // Step 2: Confirm the order immediately
+            console.log('Confirming order...', createdOrder.id);
+            const confirmedOrder = await confirmOrder(createdOrder.id);
+            console.log('Order confirmed:', confirmedOrder);
+
+            // Step 3: Prepare order details for display
+            const order = {
+                orderNumber: confirmedOrder.orderNumber,
+                items: confirmedOrder.items. map((item: any) => ({
+                    productName: item.productName,
+                    quantity: item.quantity,
+                    price: item.unitPrice,
+                    subtotal: item. subtotal
+                })),
+                subtotal: subtotal,
+                tax: tax,
+                total: total,
                 shippingAddress: formData,
-                orderDate: new Date(). toISOString()
+                orderDate: confirmedOrder.createdAt || new Date().toISOString()
             };
 
             setOrderDetails(order);
             setOrderComplete(true);
             clearCart();
-            setToast({ message: 'Order placed successfully!', type: 'success' });
-        } catch (error) {
-            setToast({ message: 'Failed to place order. Please try again.', type: 'error' });
+            setToast({ message: 'Order placed and confirmed successfully!', type: 'success' });
+
+        } catch (error: any) {
+            console.error('Order failed:', error);
+            const errorMessage = error. response?.data?.message || error.message || 'Failed to place order.  Please try again.';
+            setToast({ message: errorMessage, type: 'error' });
         } finally {
             setIsProcessing(false);
         }
@@ -222,7 +233,7 @@ const CheckoutPage: React.FC = () => {
 
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Order Confirmed!</h1>
                 <p className="text-gray-600 dark:text-gray-400 mb-6">
-                    Thank you for your purchase.  Your order number is:
+                    Thank you for your purchase. Your order number is:
                 </p>
                 <p className="text-2xl font-mono font-bold text-blue-600 dark:text-blue-400 mb-8">
                     {orderDetails.orderNumber}
@@ -244,7 +255,7 @@ const CheckoutPage: React.FC = () => {
                         <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
                             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                                 <span>Subtotal</span>
-                                <span>${orderDetails.subtotal.toFixed(2)}</span>
+                                <span>${orderDetails.subtotal. toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                                 <span>Tax (10%)</span>
@@ -262,7 +273,6 @@ const CheckoutPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* DOWNLOAD PDF BUTTON */}
                 <button
                     onClick={generatePDFReceipt}
                     className="w-full mb-4 py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-bold hover:from-red-600 hover:to-pink-600 transition-all shadow-lg shadow-red-500/25 flex items-center justify-center gap-2"
@@ -276,7 +286,7 @@ const CheckoutPage: React.FC = () => {
                 <div className="flex flex-col sm:flex-row gap-3">
                     <Link
                         to="/shop/orders"
-                        className="flex-1 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+                        className="flex-1 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -306,7 +316,6 @@ const CheckoutPage: React.FC = () => {
         );
     }
 
-    // CHECKOUT FORM (same as before)
     return (
         <div className="max-w-4xl mx-auto">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
@@ -315,7 +324,6 @@ const CheckoutPage: React.FC = () => {
 
             <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Shipping Info */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Shipping Information</h2>
 
@@ -347,7 +355,7 @@ const CheckoutPage: React.FC = () => {
                                 <input
                                     type="tel"
                                     name="phone"
-                                    value={formData. phone}
+                                    value={formData.phone}
                                     onChange={handleInputChange}
                                     required
                                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
@@ -381,7 +389,7 @@ const CheckoutPage: React.FC = () => {
                                     <input
                                         type="text"
                                         name="postalCode"
-                                        value={formData.postalCode}
+                                        value={formData. postalCode}
                                         onChange={handleInputChange}
                                         required
                                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
@@ -391,7 +399,6 @@ const CheckoutPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Order Summary */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Order Summary</h2>
 
@@ -402,7 +409,7 @@ const CheckoutPage: React.FC = () => {
                                         {item.product.productName} × {item.quantity}
                                     </span>
                                     <span className="font-medium text-gray-900 dark:text-white">
-                                        ${(item.product.price * item.quantity). toFixed(2)}
+                                        ${(item.product.price * item. quantity).toFixed(2)}
                                     </span>
                                 </div>
                             ))}
@@ -430,13 +437,13 @@ const CheckoutPage: React.FC = () => {
                         <button
                             type="submit"
                             disabled={isProcessing}
-                            className="w-full mt-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-bold hover:from-green-600 hover:to-emerald-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full mt-6 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-bold hover:from-green-600 hover:to-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {isProcessing ? (
                                 <>
                                     <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5. 373 0 12h4z" />
                                     </svg>
                                     Processing...
                                 </>

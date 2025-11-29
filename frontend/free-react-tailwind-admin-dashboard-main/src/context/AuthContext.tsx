@@ -14,13 +14,22 @@ interface AuthContextType {
     user: User | null;
     token: string | null;
     login: (email: string, password: string) => Promise<void>;
-    register: (email: string, password: string, fullName: string, role: string, securityQuestion: string, securityAnswer: string) => Promise<void>;
+    register: (
+        email: string,
+        password: string,
+        fullName: string,
+        role: string,
+        securityQuestion: string,
+        securityAnswer: string,
+        storeName?: string  // AJOUTE CETTE LIGNE
+    ) => Promise<void>;
     logout: () => void;
     updateUserProfile: (fullName: string, phone?: string, bio?: string) => Promise<void>;
     refreshUserData: () => Promise<void>;
     isAuthenticated: boolean;
     isLoading: boolean;
 }
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -75,19 +84,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fullName: string,
         role: string,
         securityQuestion: string,
-        securityAnswer: string
+        securityAnswer: string,
+        storeName?: string  // AJOUTE CE PARAMÈTRE
     ) => {
         try {
-            const response = await axios.post('http://localhost:8080/api/auth/register', {
+            const response = await axios. post('http://localhost:8080/api/auth/register', {
                 email,
                 password,
                 fullName,
                 role,
                 securityQuestion,
-                securityAnswer
+                securityAnswer,
+                storeName  // AJOUTE CETTE LIGNE
             });
 
-            if (response.data.success) {
+            if (response.data. success) {
                 const { token: authToken, id, email: userEmail, fullName: userName, role: userRole } = response.data.data;
 
                 const userData: User = { id, email: userEmail, fullName: userName, role: userRole };
@@ -95,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setToken(authToken);
                 setUser(userData);
 
-                localStorage.setItem('token', authToken);
+                localStorage. setItem('token', authToken);
                 localStorage.setItem('user', JSON.stringify(userData));
                 axios.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
             } else {

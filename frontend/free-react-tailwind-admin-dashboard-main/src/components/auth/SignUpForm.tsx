@@ -25,6 +25,7 @@ export default function SignUpForm() {
         email: "",
         password: "",
         role: "BUYER",
+        storeName: "", // NEW: Store name for sellers
         securityQuestion: securityQuestions[0],
         securityAnswer: ""
     });
@@ -34,27 +35,18 @@ export default function SignUpForm() {
     const { register } = useAuth();
     const navigate = useNavigate();
 
-    // ✅ UPDATED: Added SELLER role
     const roles = [
         {
             value: "BUYER",
             label: "Buyer",
-            icon: "🛒"
         },
         {
             value: "SELLER",
             label: "Seller",
-            icon: "🏪"
         },
         {
             value: "ANALYST",
             label: "Analyst",
-            icon: "📊"
-        },
-        {
-            value: "ADMIN",
-            label: "Admin",
-            icon: "👑"
         }
     ];
 
@@ -69,13 +61,19 @@ export default function SignUpForm() {
         e.preventDefault();
         setError("");
 
-        if (!isChecked) {
+        if (! isChecked) {
             setError("Please accept the terms and conditions");
             return;
         }
 
-        if (!formData.securityAnswer.trim()) {
+        if (! formData.securityAnswer.trim()) {
             setError("Please provide an answer to the security question");
+            return;
+        }
+
+        // NEW: Validate store name for sellers
+        if (formData.role === "SELLER" && !formData.storeName.trim()) {
+            setError("Please enter your store/boutique name");
             return;
         }
 
@@ -89,11 +87,12 @@ export default function SignUpForm() {
                 fullName,
                 formData.role,
                 formData.securityQuestion,
-                formData.securityAnswer
+                formData.securityAnswer,
+                formData.role === "SELLER" ? formData.storeName : undefined
             );
             navigate("/", { replace: true });
         } catch (err: any) {
-            setError(err.message || "Registration failed. Please try again.");
+            setError(err.message || "Registration failed.Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -173,7 +172,7 @@ export default function SignUpForm() {
                                         <Input
                                             name="password"
                                             placeholder="Enter your password (min 6 characters)"
-                                            type={showPassword ? "text" : "password"}
+                                            type={showPassword ?  "text" : "password"}
                                             value={formData.password}
                                             onChange={handleChange}
                                             required
@@ -200,7 +199,7 @@ export default function SignUpForm() {
                                                 key={role.value}
                                                 className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${
                                                     formData.role === role.value
-                                                        ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10'
+                                                        ?  'border-brand-500 bg-brand-50 dark:bg-brand-500/10'
                                                         : 'border-gray-200 dark:border-gray-700 hover:border-brand-300'
                                                 }`}
                                             >
@@ -214,16 +213,34 @@ export default function SignUpForm() {
                                                 />
                                                 <div className="ml-3 flex-1">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-2xl">{role.icon}</span>
                                                         <span className="font-medium text-gray-800 dark:text-white">
                                                             {role.label}
                                                         </span>
                                                     </div>
+
                                                 </div>
                                             </label>
                                         ))}
                                     </div>
                                 </div>
+
+                                {/* NEW: Store Name - Only visible when SELLER is selected */}
+                                {formData.role === "SELLER" && (
+                                    <div className="animate-fadeIn">
+                                        <Label>Store/Boutique Name<span className="text-error-500">*</span></Label>
+                                        <Input
+                                            type="text"
+                                            name="storeName"
+                                            placeholder="Enter your store name (e.g., My Awesome Shop)"
+                                            value={formData.storeName}
+                                            onChange={handleChange}
+                                            required
+                                        />
+                                        <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                                            This name will be displayed to buyers on your products
+                                        </p>
+                                    </div>
+                                )}
 
                                 {/* Security Question */}
                                 <div>
@@ -232,7 +249,7 @@ export default function SignUpForm() {
                                         name="securityQuestion"
                                         value={formData.securityQuestion}
                                         onChange={handleChange}
-                                        className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                                        className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm shadow-theme-xs focus:outline-hidden focus:ring-3 focus:border-brand-300 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
                                         required
                                     >
                                         {securityQuestions.map((question, index) => (
@@ -293,7 +310,7 @@ export default function SignUpForm() {
 
                         <div className="mt-5">
                             <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                                Already have an account?{" "}
+                                Already have an account? {" "}
                                 <Link
                                     to="/signin"
                                     className="text-brand-500 hover:text-brand-600 dark:text-brand-400"

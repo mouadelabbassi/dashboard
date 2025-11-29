@@ -29,37 +29,31 @@ const EcommerceMetrics: React.FC = () => {
             title: 'Total Products',
             value: stats?.totalProducts?.toLocaleString() || '0',
             icon: '📦',
-            isPositive: true,
         },
         {
             title: 'Total Categories',
             value: stats?.totalCategories?.toString() || '0',
             icon: '📂',
-            isPositive: true,
         },
         {
-            title: 'Average Price',
-            value: `$${stats?.avgPrice?.toFixed(2) || '0.00'}`,
-            icon: '💰',
-            isPositive: false,
+            title: 'Total Sales',
+            value: stats?.totalSales?.toLocaleString() || '0',
+            icon: '🛒',
         },
         {
             title: 'Average Rating',
             value: stats?.avgRating?.toFixed(1) || '0.0',
             icon: '⭐',
-            isPositive: true,
         },
         {
             title: 'Total Reviews',
             value: stats?.totalReviews?.toLocaleString() || '0',
             icon: '💬',
-            isPositive: true,
         },
         {
-            title: 'Total Inventory Value',
-            value: `${stats?.totalInventoryValue?.toLocaleString() || '0'}`,
-            icon: '💵',
-            isPositive: true,
+            title: 'Platform Revenue',
+            value: `$${stats?.totalRevenue?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}`,
+            icon: '💰',
         },
     ];
 

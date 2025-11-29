@@ -255,17 +255,48 @@ const ProductDetailPage: React.FC = () => {
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                             {product.productName}
                         </h1>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                            Sold by:
-                            <span className={`font-medium ${isMouadVisionProduct ? 'text-purple-600 dark:text-purple-400' : 'text-blue-600 dark:text-blue-400'}`}>
-                                {sellerName}
-                            </span>
-                            {! isMouadVisionProduct && (
-                                <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs rounded-full">
-                                    Verified Seller
-                                </span>
+                        <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-gray-50 dark:bg-gray-700/50">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Sold by:</p>
+
+                            {isMouadVisionProduct ? (
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900 dark:text-white">MouadVision Store</h4>
+                                        <p className="text-xs text-purple-600 dark:text-purple-400 font-medium">✓ Official Store</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Your trusted e-commerce platform</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                                        <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                                            {product.sellerName?.charAt(0) || 'S'}
+                                        </span>
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-gray-900 dark:text-white">{sellerName}</h4>
+                                        <div className="flex items-center gap-2">
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 text-xs rounded-full">
+                                                  ✓ Verified Seller
+                                            </span>
+                                        </div>
+                                        {product.sellerId && (
+                                            <Link
+                                                to={`/seller/${product.sellerId}`}
+                                                className="text-xs text-blue-600 dark:text-blue-400 hover:underline mt-1 inline-block"
+                                            >
+                                                Visit Store →
+                                            </Link>
+                                        )}
+                                    </div>
+                                </div>
                             )}
-                        </p>
+                        </div>
                     </div>
 
                     {/* Rating */}

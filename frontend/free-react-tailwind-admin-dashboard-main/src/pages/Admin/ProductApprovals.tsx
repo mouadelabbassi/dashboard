@@ -24,7 +24,7 @@ const ProductApprovals: React.FC = () => {
             setLoading(true);
             const data = await adminService.getPendingProducts(currentPage, 10);
             setPendingProducts(data.content);
-            setTotalPages(data.totalPages);
+            setTotalPages(data. totalPages);
             setTotalElements(data.totalElements);
         } catch (error) {
             console.error('Error fetching pending products:', error);
@@ -44,7 +44,7 @@ const ProductApprovals: React.FC = () => {
     const handleAction = async () => {
         if (! selectedProduct) return;
 
-        if (modalAction === 'reject' && ! rejectionReason.trim()) {
+        if (modalAction === 'reject' && ! rejectionReason. trim()) {
             alert('Veuillez indiquer une raison de rejet');
             return;
         }
@@ -52,7 +52,7 @@ const ProductApprovals: React.FC = () => {
         try {
             setActionLoading(true);
             if (modalAction === 'approve') {
-                await adminService.approveProduct(selectedProduct.id, { adminNotes });
+                await adminService. approveProduct(selectedProduct.id, { adminNotes });
             } else {
                 await adminService.rejectProduct(selectedProduct.id, {
                     rejectionReason,
@@ -79,7 +79,7 @@ const ProductApprovals: React.FC = () => {
                 </p>
             </div>
 
-            {loading ? (
+            {loading ?  (
                 <div className="flex justify-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                 </div>
@@ -92,7 +92,7 @@ const ProductApprovals: React.FC = () => {
                         Aucun produit en attente
                     </h3>
                     <p className="text-gray-500 mt-2">
-                        Tous les produits ont été traités. Revenez plus tard.
+                        Tous les produits ont été traités.  Revenez plus tard.
                     </p>
                 </div>
             ) : (
@@ -107,7 +107,7 @@ const ProductApprovals: React.FC = () => {
                                     {/* Product Image */}
                                     <div className="lg:w-48 flex-shrink-0">
                                         <img
-                                            src={product.imageUrl || '/placeholder-product.png'}
+                                            src={product. imageUrl || '/placeholder-product. png'}
                                             alt={product.productName}
                                             className="w-full h-48 lg:h-full object-cover rounded-lg"
                                         />
@@ -125,8 +125,8 @@ const ProductApprovals: React.FC = () => {
                                                 </p>
                                             </div>
                                             <span className="text-2xl font-bold text-blue-600">
-                        {product.price.toLocaleString('fr-FR')} MAD
-                      </span>
+                                                ${product.price?.toFixed(2) || '0.00'}
+                                            </span>
                                         </div>
 
                                         <p className="mt-4 text-gray-600 dark:text-gray-400 line-clamp-3">
@@ -137,14 +137,14 @@ const ProductApprovals: React.FC = () => {
                                             <div>
                                                 <span className="text-gray-500">Stock:</span>
                                                 <span className="ml-2 font-semibold text-gray-900 dark:text-white">
-                          {product.stockQuantity}
-                        </span>
+                                                    {product.stockQuantity}
+                                                </span>
                                             </div>
                                             <div>
                                                 <span className="text-gray-500">Soumis le:</span>
                                                 <span className="ml-2 font-semibold text-gray-900 dark:text-white">
-                          {new Date(product.submittedAt).toLocaleDateString('fr-FR')}
-                        </span>
+                                                    {new Date(product.submittedAt).toLocaleDateString('fr-FR')}
+                                                </span>
                                             </div>
                                         </div>
 
@@ -161,8 +161,8 @@ const ProductApprovals: React.FC = () => {
                                                 <div>
                                                     <span className="text-gray-500">Boutique:</span>
                                                     <span className="ml-2 text-gray-900 dark:text-white">
-                            {product.sellerStoreName || 'N/A'}
-                          </span>
+                                                        {product.sellerStoreName || 'N/A'}
+                                                    </span>
                                                 </div>
                                                 <div>
                                                     <span className="text-gray-500">Email:</span>
@@ -209,10 +209,10 @@ const ProductApprovals: React.FC = () => {
                                 Précédent
                             </button>
                             <span className="px-4 py-2 text-gray-600 dark:text-gray-400">
-                Page {currentPage + 1} sur {totalPages}
-              </span>
+                                Page {currentPage + 1} sur {totalPages}
+                            </span>
                             <button
-                                onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+                                onClick={() => setCurrentPage((p) => Math. min(totalPages - 1, p + 1))}
                                 disabled={currentPage >= totalPages - 1}
                                 className="px-4 py-2 rounded-lg bg-white dark:bg-gray-800 shadow disabled:opacity-50"
                             >
@@ -227,16 +227,16 @@ const ProductApprovals: React.FC = () => {
             {showModal && selectedProduct && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full">
-                        <div className={`p-4 ${modalAction === 'approve' ?  'bg-green-600' : 'bg-red-600'} rounded-t-xl`}>
+                        <div className={`p-4 ${modalAction === 'approve' ? 'bg-green-600' : 'bg-red-600'} rounded-t-xl`}>
                             <h3 className="text-xl font-bold text-white">
-                                {modalAction === 'approve' ?  'Approuver le Produit' : 'Rejeter le Produit'}
+                                {modalAction === 'approve' ? 'Approuver le Produit' : 'Rejeter le Produit'}
                             </h3>
                         </div>
                         <div className="p-6">
                             <p className="text-gray-600 dark:text-gray-400 mb-4">
                                 {modalAction === 'approve'
-                                    ? `Êtes-vous sûr de vouloir approuver "${selectedProduct.productName}"?  Le produit sera immédiatement mis en vente.`
-                                    : `Êtes-vous sûr de vouloir rejeter "${selectedProduct.productName}"?`}
+                                    ?  `Êtes-vous sûr de vouloir approuver "${selectedProduct.productName}"?  Le produit sera immédiatement mis en vente.`
+                                    : `Êtes-vous sûr de vouloir rejeter "${selectedProduct.productName}"? `}
                             </p>
 
                             {modalAction === 'reject' && (
@@ -281,14 +281,14 @@ const ProductApprovals: React.FC = () => {
                                     disabled={actionLoading}
                                     className={`px-4 py-2 text-white rounded-lg flex items-center gap-2 ${
                                         modalAction === 'approve'
-                                            ? 'bg-green-600 hover:bg-green-700'
+                                            ?  'bg-green-600 hover:bg-green-700'
                                             : 'bg-red-600 hover:bg-red-700'
                                     } disabled:opacity-50`}
                                 >
                                     {actionLoading && (
                                         <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5. 373 0 0 5.373 0 12h4z" />
                                         </svg>
                                     )}
                                     Confirmer

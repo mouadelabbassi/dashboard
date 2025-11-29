@@ -9,9 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -71,6 +69,14 @@ public class DashboardController {
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getTopBestsellers() {
         List<ProductResponse> bestsellers = dashboardService.getTopBestsellers(3);
         return ResponseEntity.ok(ApiResponse.success("Bestsellers retrieved successfully", bestsellers));
+    }
+
+    @GetMapping("/top-products")
+    @Operation(summary = "Get top N products", description = "Returns top N products ranked by score (sales, reviews, rating)")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getTopProducts(
+            @RequestParam(defaultValue = "10") int limit) {
+        List<ProductResponse> products = dashboardService.getTopProducts(limit);
+        return ResponseEntity.ok(ApiResponse.success("Top products retrieved successfully", products));
     }
 
     @GetMapping("/reviews-ranking-correlation")

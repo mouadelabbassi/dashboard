@@ -182,7 +182,6 @@ const ShopPage: React.FC = () => {
                         key={product.asin}
                         className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group"
                     >
-                        {/* FIXED: Changed from /product/ to /shop/product/ */}
                         <Link to={`/shop/product/${product.asin}`} className="block relative">
                             <div className="aspect-square bg-gray-100 dark:bg-gray-700 overflow-hidden">
                                 {product.imageUrl ?  (
@@ -224,6 +223,24 @@ const ShopPage: React.FC = () => {
                             <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">
                                 {product.categoryName || 'Uncategorized'}
                             </p>
+                            {/* Seller Badge */}
+                            <div className="mb-2">
+                                {!product.sellerId ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 text-xs font-medium rounded-full">
+                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 2a8 8 0 100 16 8 8 0 000-16z" />
+                                        </svg>
+                                        MouadVision Store
+                                    </span>
+                                        ) : (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full">
+                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        {product.sellerName || 'Third-party Seller'}
+                                    </span>
+                                )}
+                            </div>
 
                             {/* FIXED: Changed from /product/ to /shop/product/ */}
                             <Link to={`/shop/product/${product.asin}`}>
