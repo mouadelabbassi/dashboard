@@ -13,6 +13,8 @@ import SellerLayout from './layout/SellerLayout';
 import SignIn from './pages/AuthPages/SignIn';
 import SignUp from './pages/AuthPages/SignUp';
 import ForgotPassword from './pages/AuthPages/ForgotPassword';
+import AdminOrdersPage from './pages/Admin/AdminOrdersPage';
+
 
 // Admin Pages
 import Home from './pages/Dashboard/Home';
@@ -98,6 +100,7 @@ function App() {
                             <Route path="products" element={<ProductsPage />} />
                             <Route path="product-approvals" element={<ProductApprovals />} />
                             <Route path="notifications" element={<NotificationsPage />} />
+                            <Route path="orders" element={<AdminOrdersPage />} />
                             <Route path="profile" element={<UserProfiles />} />
                             <Route path="sellers" element={<SellerManagement />} />
                         </Route>

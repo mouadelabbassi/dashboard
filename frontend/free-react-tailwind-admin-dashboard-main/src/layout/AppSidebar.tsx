@@ -1,19 +1,49 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronDownIcon, GridIcon, HorizontaLDots } from "../icons";
+import { ChevronDownIcon, HorizontaLDots } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
-const CheckCircleIcon = () => (
+const DashboardIcon = () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
     </svg>
 );
+
+const ProductApprovalsIcon = () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+    </svg>
+);
+
+const ProductsIcon = () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+    </svg>
+);
+
 const UsersIcon = () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
     </svg>
 );
 
+const NotificationsIcon = () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+    </svg>
+);
+
+const ProfileIcon = () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+);
+
+const OrdersIcon = () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+    </svg>
+);
 
 type NavItem = {
     name: string;
@@ -25,17 +55,17 @@ type NavItem = {
 
 const navItems: NavItem[] = [
     {
-        icon: <GridIcon />,
+        icon: <DashboardIcon />,
         name: "Dashboard",
         path: "/admin",
     },
     {
-        icon: <CheckCircleIcon />,
+        icon: <ProductApprovalsIcon />,
         name: "Product Approvals",
         path: "/admin/product-approvals",
     },
     {
-        icon: <GridIcon />,
+        icon: <ProductsIcon />,
         name: "Products Management",
         path: "/admin/products",
     },
@@ -44,16 +74,21 @@ const navItems: NavItem[] = [
         name: "Seller Management",
         path: "/admin/sellers",
     },
+    {
+        icon: <OrdersIcon  />,  // You can use a shopping cart or box icon
+        name: "Orders",
+        path: "/admin/orders",
+    },
 ];
 
 const othersItems: NavItem[] = [
     {
-        icon: <GridIcon />,
+        icon: <NotificationsIcon />,
         name: "Notifications",
         path: "/admin/notifications",
     },
     {
-        icon: <GridIcon />,
+        icon: <ProfileIcon />,
         name: "Profile",
         path: "/admin/profile",
     },
@@ -80,7 +115,7 @@ const AppSidebar: React.FC = () => {
         const fetchPendingCount = async () => {
             try {
                 const token = localStorage.getItem('token');
-                if (!token) return;
+                if (! token) return;
 
                 const response = await fetch('http://localhost:8080/api/admin/product-approvals/dashboard', {
                     headers: { Authorization: `Bearer ${token}` }
@@ -132,7 +167,7 @@ const AppSidebar: React.FC = () => {
                                     ? "menu-item-active"
                                     : "menu-item-inactive"
                             } cursor-pointer ${
-                                ! isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
+                                ! isExpanded && !isHovered ?  "lg:justify-center" : "lg:justify-start"
                             }`}
                         >
                             <span className={`menu-item-icon-size ${
@@ -148,7 +183,7 @@ const AppSidebar: React.FC = () => {
                                     <ChevronDownIcon
                                         className={`ml-auto w-5 h-5 transition-transform duration-200 ${
                                             openSubmenu?.type === menuType && openSubmenu?.index === index
-                                                ?  "rotate-180 text-brand-500"
+                                                ? "rotate-180 text-brand-500"
                                                 : ""
                                         }`}
                                     />
@@ -161,7 +196,7 @@ const AppSidebar: React.FC = () => {
                                 to={nav.path}
                                 className={`menu-item group ${
                                     isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                                } ${! isExpanded && ! isHovered ? "lg:justify-center" : "lg:justify-start"}`}
+                                } ${!isExpanded && !isHovered ?  "lg:justify-center" : "lg:justify-start"}`}
                             >
                                 <span className={`menu-item-icon-size ${
                                     isActive(nav.path) ? "menu-item-icon-active" : "menu-item-icon-inactive"
@@ -193,9 +228,9 @@ const AppSidebar: React.FC = () => {
             onMouseEnter={() => ! isExpanded && setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            <div className={`py-8 flex ${! isExpanded && ! isHovered ?  "lg:justify-center" : "justify-start"}`}>
+            <div className={`py-8 flex ${! isExpanded && ! isHovered ? "lg:justify-center" : "justify-start"}`}>
                 <Link to="/admin">
-                    {isExpanded || isHovered || isMobileOpen ?  (
+                    {isExpanded || isHovered || isMobileOpen ? (
                         <>
                             <img className="dark:hidden" src="/images/logo/MouadVision.png" alt="Logo" width={150} height={40} />
                             <img className="hidden dark:block" src="/images/logo/MouadVision.png" alt="Logo" width={150} height={40} />
@@ -210,7 +245,7 @@ const AppSidebar: React.FC = () => {
                     <div className="flex flex-col gap-4">
                         <div>
                             <h2 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                                ! isExpanded && ! isHovered ? "lg:justify-center" : "justify-start"
+                                !isExpanded && !isHovered ?  "lg:justify-center" : "justify-start"
                             }`}>
                                 {isExpanded || isHovered || isMobileOpen ? "Menu" : <HorizontaLDots className="size-6" />}
                             </h2>

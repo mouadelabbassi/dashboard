@@ -37,8 +37,8 @@ const Home: React.FC = () => {
     return (
         <>
             <PageMeta
-                title="Dashboard - Amazon Sales Analytics"
-                description="Amazon Sales Analytics Dashboard"
+                title="Dashboard - MouadVision Sales Analytics"
+                description="MouadVision Sales Analytics Dashboard"
             />
 
             <div className="p-4 sm:p-6 bg-gray-50 dark:bg-gray-950 min-h-screen">

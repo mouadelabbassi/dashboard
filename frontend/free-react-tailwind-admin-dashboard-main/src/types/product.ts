@@ -35,6 +35,7 @@ export interface Review {
     id: number;
     productAsin: string;
     productName: string;
+    productImage?: string;
     userId: number;
     userName: string;
     rating: number;
@@ -42,4 +43,5 @@ export interface Review {
     isLiked: boolean | null;
     helpfulCount: number;
     createdAt: string;
+    updatedAt?: string;
 }

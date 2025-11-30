@@ -99,7 +99,6 @@ public class OrderService {
             totalItems += quantity;
 
             product.reduceStock(quantity);
-            product.incrementSalesCount(quantity);
             productRepository.save(product);
             log.info("STOCK REDUCED for product {} by {} units.  New stock: {}.  Sales count: {}",
                     product.getAsin(), quantity, product.getStockQuantity(), product. getSalesCount());
