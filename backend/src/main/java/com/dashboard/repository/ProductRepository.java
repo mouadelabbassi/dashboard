@@ -1,5 +1,6 @@
 package com.dashboard.repository;
 
+import com.dashboard.entity.Category;
 import com.dashboard.entity.Product;
 import com.dashboard.entity.User;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,12 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, String>, JpaSpecificationExecutor<Product> {
 
     Optional<Product> findByAsin(String asin);
+
+    List<Product> findByCategory(Category category);
+
+    List<Product> findByApprovalStatus(Product.ApprovalStatus status);
+
+    List<Product> findBySeller(User seller);
 
     @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND " +
             "(LOWER(p.productName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +

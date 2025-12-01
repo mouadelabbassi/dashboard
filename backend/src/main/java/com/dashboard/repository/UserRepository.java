@@ -24,7 +24,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByRoleAndIsActiveTrue(User.Role role);
 
+    List<User> findAllByRole(User.Role role);
+
     Long countByRole(User.Role role);
+
 
     Long countByRoleAndIsActiveTrue(User.Role role);
 

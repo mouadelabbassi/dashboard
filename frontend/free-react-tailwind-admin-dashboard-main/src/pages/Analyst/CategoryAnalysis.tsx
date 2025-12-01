@@ -1,0 +1,436 @@
+import React, { useEffect, useState } from 'react';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    ArcElement,
+    RadialLinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler,
+} from 'chart.js';
+import { Bar, Doughnut, Radar } from 'react-chartjs-2';
+import { analystService, CategoryOverview } from '../../service/analystService';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    ArcElement,
+    RadialLinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
+);
+
+const CategoryAnalysis: React.FC = () => {
+    const [categories, setCategories] = useState<CategoryOverview[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<any>(null);
+    const [revenueContribution, setRevenueContribution] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [detailsLoading, setDetailsLoading] = useState(false);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const [categoriesData, contribution] = await Promise.all([
+                analystService.getCategoriesOverview(),
+                analystService.getCategoryRevenueContribution(),
+            ]);
+            setCategories(categoriesData);
+            setRevenueContribution(contribution);
+        } catch (error) {
+            console.error('Error fetching category data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCategorySelect = async (categoryId: number) => {
+        try {
+            setDetailsLoading(true);
+            const metrics = await analystService.getCategoryMetrics(categoryId);
+            setSelectedCategory(metrics);
+        } catch (error) {
+            console.error('Error fetching category metrics:', error);
+        } finally {
+            setDetailsLoading(false);
+        }
+    };
+
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(value);
+    };
+
+    // Revenue Contribution Chart
+    const contributionChartData = {
+        labels: revenueContribution.slice(0, 8).map(c => c.name),
+        datasets: [
+            {
+                data: revenueContribution.slice(0, 8).map(c => c.revenue),
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(236, 72, 153, 0.8)',
+                    'rgba(20, 184, 166, 0.8)',
+                    'rgba(251, 146, 60, 0.8)',
+                ],
+                borderWidth: 0,
+            },
+        ],
+    };
+
+    // Category Comparison Radar
+    const radarChartData = {
+        labels: ['Products', 'Avg Price', 'Avg Rating', 'Sales', 'Revenue'],
+        datasets: categories.slice(0, 5).map((cat, index) => {
+            const colors = [
+                'rgba(59, 130, 246, 0.5)',
+                'rgba(16, 185, 129, 0.5)',
+                'rgba(245, 158, 11, 0.5)',
+                'rgba(239, 68, 68, 0.5)',
+                'rgba(139, 92, 246, 0.5)',
+            ];
+            const borderColors = [
+                'rgb(59, 130, 246)',
+                'rgb(16, 185, 129)',
+                'rgb(245, 158, 11)',
+                'rgb(239, 68, 68)',
+                'rgb(139, 92, 246)',
+            ];
+
+            // Normalize values to 0-100 scale for radar
+            const maxProducts = Math.max(...categories.map(c => c.productCount));
+            const maxPrice = Math.max(...categories.map(c => c.avgPrice));
+            const maxSales = Math.max(...categories.map(c => c.totalSales));
+            const maxRevenue = Math.max(...categories.map(c => c.revenue));
+
+            return {
+                label: cat.name,
+                data: [
+                    (cat.productCount / maxProducts) * 100,
+                    (cat.avgPrice / maxPrice) * 100,
+                    (cat.avgRating / 5) * 100,
+                    (cat.totalSales / maxSales) * 100,
+                    (cat.revenue / maxRevenue) * 100,
+                ],
+                backgroundColor: colors[index],
+                borderColor: borderColors[index],
+                borderWidth: 2,
+            };
+        }),
+    };
+
+    // Products by Category Bar Chart
+    const productsChartData = {
+        labels: categories.map(c => c.name),
+        datasets: [
+            {
+                label: 'Products',
+                data: categories.map(c => c.productCount),
+                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                borderRadius: 6,
+            },
+        ],
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-96">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    🏷️ Category Analysis
+                </h1>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">
+                    Deep dive into category performance and metrics
+                </p>
+            </div>
+
+            {/* Category Selector */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    📊 Select Category for Detailed Analysis
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {categories.map((category) => (
+                        <button
+                            key={category.id}
+                            onClick={() => handleCategorySelect(category.id)}
+                            className={`p-4 rounded-xl border-2 transition-all text-left ${
+                                selectedCategory?.id === category.id
+                                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                                    : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700'
+                            }`}
+                        >
+                            <p className="font-medium text-gray-900 dark:text-white text-sm truncate">
+                                {category.name}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">{category.productCount} products</p>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Selected Category Details */}
+            {selectedCategory && (
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
+                    {detailsLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                        </div>
+                    ) : (
+                        <>
+                            <h3 className="text-xl font-bold mb-4">{selectedCategory.name} - Detailed Metrics</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="bg-white/10 rounded-xl p-4">
+                                    <p className="text-blue-200 text-sm">Products</p>
+                                    <p className="text-2xl font-bold mt-1">{selectedCategory.productCount}</p>
+                                </div>
+                                <div className="bg-white/10 rounded-xl p-4">
+                                    <p className="text-blue-200 text-sm">Avg Price</p>
+                                    <p className="text-2xl font-bold mt-1">{formatCurrency(selectedCategory.avgPrice || 0)}</p>
+                                </div>
+                                <div className="bg-white/10 rounded-xl p-4">
+                                    <p className="text-blue-200 text-sm">Price Range</p>
+                                    <p className="text-lg font-bold mt-1">
+                                        {formatCurrency(selectedCategory.minPrice || 0)} - {formatCurrency(selectedCategory.maxPrice || 0)}
+                                    </p>
+                                </div>
+                                <div className="bg-white/10 rounded-xl p-4">
+                                    <p className="text-blue-200 text-sm">Avg Rating</p>
+                                    <p className="text-2xl font-bold mt-1">⭐ {selectedCategory.avgRating || 'N/A'}</p>
+                                </div>
+                            </div>
+
+                            {/* Best Products */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                {selectedCategory.bestRated && (
+                                    <div className="bg-white/10 rounded-xl p-4">
+                                        <p className="text-blue-200 text-sm mb-2">🌟 Best Rated</p>
+                                        <p className="font-medium truncate">{selectedCategory.bestRated.name}</p>
+                                        <p className="text-sm text-blue-200">⭐ {selectedCategory.bestRated.rating}</p>
+                                    </div>
+                                )}
+                                {selectedCategory.bestSelling && (
+                                    <div className="bg-white/10 rounded-xl p-4">
+                                        <p className="text-blue-200 text-sm mb-2">🔥 Best Selling</p>
+                                        <p className="font-medium truncate">{selectedCategory.bestSelling.name}</p>
+                                        <p className="text-sm text-blue-200">{selectedCategory.bestSelling.sales} sold</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Rating Distribution */}
+                            {selectedCategory.ratingDistribution && (
+                                <div className="mt-4">
+                                    <p className="text-blue-200 text-sm mb-2">Rating Distribution</p>
+                                    <div className="grid grid-cols-5 gap-2">
+                                        {Object.entries(selectedCategory.ratingDistribution).map(([rating, count]) => (
+                                            <div key={rating} className="bg-white/10 rounded-lg p-2 text-center">
+                                                <p className="text-xs">{rating}</p>
+                                                <p className="font-bold">{count as number}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            )}
+
+            {/* Charts Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Revenue Contribution */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        💰 Revenue by Category
+                    </h3>
+                    <div className="h-80">
+                        <Doughnut
+                            data={contributionChartData}
+                            options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'right',
+                                        labels: { color: 'rgb(156, 163, 175)', padding: 10 },
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: (context) => {
+                                                const cat = revenueContribution[context.dataIndex];
+                                                return `${context.label}: ${formatCurrency(cat.revenue)} (${cat.percentage}%)`;
+                                            },
+                                        },
+                                    },
+                                },
+                                cutout: '50%',
+                            }}
+                        />
+                    </div>
+                </div>
+
+                {/* Category Comparison Radar */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        📈 Top 5 Categories Comparison
+                    </h3>
+                    <div className="h-80">
+                        <Radar
+                            data={radarChartData}
+                            options={{
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: { color: 'rgb(156, 163, 175)', padding: 10 },
+                                    },
+                                },
+                                scales: {
+                                    r: {
+                                        ticks: { display: false },
+                                        grid: { color: 'rgba(156, 163, 175, 0.2)' },
+                                        pointLabels: { color: 'rgb(156, 163, 175)' },
+                                    },
+                                },
+                            }}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Products by Category */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    📦 Products by Category
+                </h3>
+                <div className="h-80">
+                    <Bar
+                        data={productsChartData}
+                        options={{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                x: {
+                                    grid: { display: false },
+                                    ticks: { color: 'rgb(156, 163, 175)', maxRotation: 45, minRotation: 45 },
+                                },
+                                y: {
+                                    grid: { color: 'rgba(156, 163, 175, 0.1)' },
+                                    ticks: { color: 'rgb(156, 163, 175)' },
+                                },
+                            },
+                        }}
+                    />
+                </div>
+            </div>
+
+            {/* Categories Table */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    📋 All Categories Overview
+                </h3>
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                        <tr className="text-left text-sm text-gray-500 dark:text-gray-400">
+                            <th className="pb-4 font-medium">Category</th>
+                            <th className="pb-4 font-medium text-right">Products</th>
+                            <th className="pb-4 font-medium text-right">Avg Price</th>
+                            <th className="pb-4 font-medium text-right">Avg Rating</th>
+                            <th className="pb-4 font-medium text-right">Total Sales</th>
+                            <th className="pb-4 font-medium text-right">Revenue</th>
+                            <th className="pb-4 font-medium text-right">Share</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {categories.map((category, index) => (
+                            <tr key={category.id} className="border-t border-gray-100 dark:border-gray-700">
+                                <td className="py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold ${
+                                            index === 0 ?  'bg-blue-500' :
+                                                index === 1 ?  'bg-green-500' :
+                                                    index === 2 ? 'bg-yellow-500' :
+                                                        index === 3 ? 'bg-red-500' :
+                                                            'bg-purple-500'
+                                        }`}>
+                                            {index + 1}
+                                        </div>
+                                        <span className="font-medium text-gray-900 dark:text-white">
+                                                {category.name}
+                                            </span>
+                                    </div>
+                                </td>
+                                <td className="py-4 text-right text-gray-600 dark:text-gray-400">
+                                    {category.productCount}
+                                </td>
+                                <td className="py-4 text-right text-gray-600 dark:text-gray-400">
+                                    {formatCurrency(category. avgPrice)}
+                                </td>
+                                <td className="py-4 text-right">
+                                        <span className="inline-flex items-center gap-1 text-yellow-600">
+                                            ⭐ {category.avgRating}
+                                        </span>
+                                </td>
+                                <td className="py-4 text-right text-gray-600 dark:text-gray-400">
+                                    {category.totalSales. toLocaleString()}
+                                </td>
+                                <td className="py-4 text-right font-bold text-green-600">
+                                    {formatCurrency(category.revenue)}
+                                </td>
+                                <td className="py-4 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                        <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-blue-500 rounded-full"
+                                                style={{ width: `${category.percentage || 0}%` }}
+                                            ></div>
+                                        </div>
+                                        <span className="text-sm text-gray-500 w-12 text-right">
+                                                {(category.percentage || 0).toFixed(1)}%
+                                            </span>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default CategoryAnalysis;

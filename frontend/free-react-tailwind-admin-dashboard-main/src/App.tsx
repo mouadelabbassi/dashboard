@@ -15,6 +15,14 @@ import SignUp from './pages/AuthPages/SignUp';
 import ForgotPassword from './pages/AuthPages/ForgotPassword';
 import AdminOrdersPage from './pages/Admin/AdminOrdersPage';
 
+import AnalystLayout from './layout/AnalystLayout';
+import AnalystDashboard from './pages/Analyst/AnalystDashboard';
+import SalesAnalytics from './pages/Analyst/SalesAnalytics';
+import ProductAnalytics from './pages/Analyst/ProductAnalytics';
+import SellerAnalytics from './pages/Analyst/SellerAnalytics';
+import CategoryAnalysis from './pages/Analyst/CategoryAnalysis';
+import Reports from './pages/Analyst/Reports'
+
 
 // Admin Pages
 import Home from './pages/Dashboard/Home';
@@ -86,6 +94,23 @@ function App() {
                         <Route path="/signin" element={<SignIn />} />
                         <Route path="/signup" element={<SignUp />} />
                         <Route path="/forgot-password" element={<ForgotPassword />} />
+
+                        <Route
+                            path="/analyst"
+                            element={
+                                <PrivateRoute allowedRoles={['ANALYST', 'ADMIN']}>
+                                    <AnalystLayout />
+                                </PrivateRoute>
+                            }
+                        >
+                            <Route index element={<AnalystDashboard />} />
+                            <Route path="sales" element={<SalesAnalytics />} />
+                            <Route path="products" element={<ProductAnalytics />} />
+                            <Route path="sellers" element={<SellerAnalytics />} />
+                            <Route path="categories" element={<CategoryAnalysis />} />
+                            <Route path="reports" element={<Reports />} />
+                            <Route path="profile" element={<UserProfiles />} />
+                        </Route>
 
                         {/* Admin Routes */}
                         <Route

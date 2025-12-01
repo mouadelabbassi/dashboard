@@ -47,6 +47,7 @@ com\dashboard\dto\response\SellerReviewSummary$SellerReviewSummaryBuilder.class
 com\dashboard\entity\Notification$NotificationBuilder.class
 com\dashboard\config\CorsConfig.class
 com\dashboard\dto\request\SellerProductSubmissionRequest.class
+com\dashboard\controller\AnalystController.class
 com\dashboard\dto\response\CategoryStatsResponse$CategoryStatsResponseBuilder.class
 com\dashboard\dto\response\ProductDetailResponse$ProductDetailResponseBuilder.class
 com\dashboard\entity\ProductReview.class
@@ -71,6 +72,7 @@ com\dashboard\dto\response\SellerProductRequestResponse$SellerProductRequestResp
 com\dashboard\entity\StockUpdateRequest$RequestStatus.class
 com\dashboard\dto\request\LoginRequest$LoginRequestBuilder.class
 com\dashboard\repository\ProductRepository.class
+com\dashboard\service\AnalystService.class
 com\dashboard\controller\ProductController.class
 com\dashboard\controller\ExportController.class
 com\dashboard\service\DashboardService.class

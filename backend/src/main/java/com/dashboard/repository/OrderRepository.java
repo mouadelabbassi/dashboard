@@ -27,6 +27,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Find orders by user ID
     List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
+    
+    List<Order> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
 
     // Find orders by status
     List<Order> findByStatusOrderByCreatedAtDesc(Order.OrderStatus status);

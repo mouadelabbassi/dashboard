@@ -28,7 +28,7 @@ export default function SignInForm() {
             case 'BUYER':
                 return '/shop';
             case 'ANALYST':
-                return '/admin';
+                return '/analyst';
             default:
                 return '/signin';
         }
