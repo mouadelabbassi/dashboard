@@ -20,12 +20,15 @@ com\dashboard\security\JwtTokenProvider.class
 com\dashboard\service\NotificationService.class
 com\dashboard\dto\response\CategoryResponse$CategoryResponseBuilder.class
 com\dashboard\dto\request\CreateOrderRequest$OrderItemRequest.class
+com\dashboard\dto\request\ListFromStockRequest$ListFromStockRequestBuilder.class
 com\dashboard\entity\ProductReview$ProductReviewBuilder.class
+com\dashboard\dto\response\SellerStockResponse.class
 com\dashboard\entity\Category.class
 com\dashboard\dto\response\DashboardResponse$DashboardResponseBuilder.class
 com\dashboard\entity\User$UserBuilder.class
 com\dashboard\entity\Order$OrderStatus.class
 com\dashboard\entity\Product$ApprovalStatus.class
+com\dashboard\dto\response\SellerStockResponse$SellerStockResponseBuilder.class
 com\dashboard\repository\PlatformRevenueRepository.class
 com\dashboard\dto\response\SellerDashboardResponse.class
 com\dashboard\dto\response\SellerProductRequestResponse.class
@@ -40,6 +43,7 @@ com\dashboard\dto\response\NotificationResponse.class
 com\dashboard\entity\PlatformRevenue.class
 com\dashboard\exception\DuplicateResourceException.class
 com\dashboard\dto\request\ForgotPasswordRequest.class
+com\dashboard\dto\request\ListFromStockRequest.class
 com\dashboard\dto\response\ApiResponse$ApiResponseBuilder.class
 com\dashboard\dto\response\PendingProductResponse$PendingProductResponseBuilder.class
 com\dashboard\entity\Product$ProductBuilder.class
@@ -47,6 +51,7 @@ com\dashboard\dto\response\SellerReviewSummary$SellerReviewSummaryBuilder.class
 com\dashboard\entity\Notification$NotificationBuilder.class
 com\dashboard\config\CorsConfig.class
 com\dashboard\dto\request\SellerProductSubmissionRequest.class
+com\dashboard\dto\response\StockDashboardResponse.class
 com\dashboard\controller\AnalystController.class
 com\dashboard\dto\response\CategoryStatsResponse$CategoryStatsResponseBuilder.class
 com\dashboard\dto\response\ProductDetailResponse$ProductDetailResponseBuilder.class
@@ -55,12 +60,16 @@ com\dashboard\dto\request\UpdateProfileRequest$UpdateProfileRequestBuilder.class
 com\dashboard\dto\response\OrderResponse$OrderItemResponse.class
 com\dashboard\dto\response\OrderResponse$OrderResponseBuilder.class
 com\dashboard\entity\Order$OrderBuilder.class
+com\dashboard\repository\SellerStockRepository.class
 com\dashboard\service\AdminProductApprovalService.class
+com\dashboard\entity\SellerStock$SellerStockBuilder.class
 com\dashboard\repository\OrderItemRepository.class
 com\dashboard\dto\response\PendingProductResponse.class
 com\dashboard\entity\StockUpdateRequest$StockUpdateRequestBuilder.class
 com\dashboard\dto\response\SellerProfileResponse.class
 com\dashboard\service\CsvImportService.class
+com\dashboard\dto\response\StockDashboardResponse$StockDashboardResponseBuilder.class
+com\dashboard\entity\SellerStock$StockStatus.class
 com\dashboard\dto\request\RegisterRequest.class
 com\dashboard\dto\response\SellerOrderResponse.class
 com\dashboard\repository\SaleRepository.class
@@ -78,6 +87,7 @@ com\dashboard\controller\ExportController.class
 com\dashboard\service\DashboardService.class
 com\dashboard\dto\request\ForgotPasswordRequest$ForgotPasswordRequestBuilder.class
 com\dashboard\controller\SaleController.class
+com\dashboard\controller\SellerStockController.class
 com\dashboard\dto\request\ProductApprovalRequest.class
 com\dashboard\repository\NotificationRepository.class
 com\dashboard\dto\request\OrderRequest$OrderItemRequest$OrderItemRequestBuilder.class
@@ -90,6 +100,7 @@ com\dashboard\controller\AdminStockController.class
 com\dashboard\dto\request\OrderRequest$OrderRequestBuilder.class
 com\dashboard\dto\response\OrderResponse$OrderItemResponse$OrderItemResponseBuilder.class
 com\dashboard\dto\request\ReviewRequest$ReviewRequestBuilder.class
+com\dashboard\entity\SellerStock.class
 com\dashboard\entity\PlatformRevenue$RevenueType.class
 com\dashboard\controller\CategoryController.class
 com\dashboard\dto\response\ApiResponse.class
@@ -122,7 +133,9 @@ com\dashboard\config\SecurityConfig.class
 com\dashboard\dto\response\AdminDashboardResponse$AdminDashboardResponseBuilder.class
 com\dashboard\dto\response\SellerOrderResponse$SellerOrderResponseBuilder.class
 com\dashboard\entity\Category$CategoryBuilder.class
+com\dashboard\controller\AdminStockController$NotifySellerRequest.class
 com\dashboard\exception\GlobalExceptionHandler.class
+com\dashboard\service\SellerStockService.class
 com\dashboard\dto\response\SellerReviewSummary.class
 com\dashboard\dto\response\SellerDashboardResponse$TopProductRevenue.class
 com\dashboard\dto\response\SellerDashboardResponse$DailyRevenuePoint.class
@@ -147,6 +160,7 @@ com\dashboard\entity\User$Role.class
 com\dashboard\dto\request\ResetPasswordRequest.class
 com\dashboard\dto\response\SaleResponse.class
 com\dashboard\entity\Notification$NotificationType.class
+com\dashboard\controller\AdminStockController$StockUpdateAdminRequest.class
 com\dashboard\service\SellerService.class
 com\dashboard\dto\request\SaleRequest$SaleRequestBuilder.class
 com\dashboard\security\JwtAuthenticationFilter.class

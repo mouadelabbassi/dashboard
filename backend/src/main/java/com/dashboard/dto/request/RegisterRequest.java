@@ -33,4 +33,6 @@ public class RegisterRequest {
 
     @NotBlank(message = "Security answer is required")
     private String securityAnswer;
+    
+    private String storeName;
 }

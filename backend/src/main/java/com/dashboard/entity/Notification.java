@@ -70,6 +70,7 @@ public class Notification {
         NEW_ORDER("Nouvelle commande"),
         NEW_SELLER_PRODUCT("Nouveau produit vendeur"),
         NEW_SELLER_REGISTRATION("Nouvelle inscription vendeur"),
+        STOCK_ALERT("Stock Alert"),
         SYSTEM("Système"),
         PROMOTION("Promotion");
 

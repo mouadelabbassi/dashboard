@@ -5,12 +5,18 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import Toast from '../../components/common/Toast';
 
+interface Store {
+    id: number | null;
+    name: string;
+}
+
 const ShopPage: React.FC = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [selectedStore, setSelectedStore] = useState<string>('all');
     const [priceRange, setPriceRange] = useState<string>('all');
     const [sortBy, setSortBy] = useState<string>('ranking');
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -19,7 +25,6 @@ const ShopPage: React.FC = () => {
     const { user } = useAuth();
     const location = useLocation();
 
-    // Determine if we're in seller context or buyer context
     const isSellerContext = location.pathname.startsWith('/seller');
     const shopBasePath = isSellerContext ? '/seller/shop' : '/shop';
 
@@ -32,7 +37,6 @@ const ShopPage: React.FC = () => {
             setLoading(true);
             const data = await getAllProducts();
 
-            // Filter out the current seller's own products when they're shopping
             let availableProducts = data;
             if (isSellerContext && user?.id) {
                 availableProducts = data.filter((product: Product) => product.sellerId !== user.id);
@@ -61,6 +65,15 @@ const ShopPage: React.FC = () => {
         // Category filter
         if (selectedCategory !== 'all') {
             result = result.filter(p => p.categoryName === selectedCategory);
+        }
+
+        // Store filter
+        if (selectedStore !== 'all') {
+            if (selectedStore === 'mouadvision') {
+                result = result.filter(p => ! p.sellerId);
+            } else {
+                result = result.filter(p => p.sellerName === selectedStore);
+            }
         }
 
         // Price filter
@@ -95,9 +108,26 @@ const ShopPage: React.FC = () => {
         }
 
         setFilteredProducts(result);
-    }, [searchQuery, selectedCategory, priceRange, sortBy, products]);
+    }, [searchQuery, selectedCategory, selectedStore, priceRange, sortBy, products]);
 
     const categories = ['all', ...new Set(products.map(p => p.categoryName).filter(Boolean))];
+
+    // Get unique stores dynamically
+    const stores: Store[] = [
+        { id: null, name: 'all' },
+        { id: null, name: 'mouadvision' },
+        ... products
+            .filter((p): p is Product & { sellerId: number; sellerName: string } =>
+                p.sellerId !== null && p.sellerId !== undefined &&
+                p.sellerName !== null && p.sellerName !== undefined
+            )
+            .reduce<Store[]>((acc, p) => {
+                if (!acc.find(s => s.name === p.sellerName)) {
+                    acc.push({ id: p.sellerId, name: p.sellerName });
+                }
+                return acc;
+            }, [])
+    ];
 
     const handleAddToCart = (product: Product) => {
         addToCart(product);
@@ -126,7 +156,8 @@ const ShopPage: React.FC = () => {
 
             {/* Filters */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                    {/* Search */}
                     <div className="lg:col-span-2">
                         <div className="relative">
                             <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,11 +168,12 @@ const ShopPage: React.FC = () => {
                                 placeholder="Search products..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                     </div>
 
+                    {/* Category Filter */}
                     <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
@@ -154,6 +186,24 @@ const ShopPage: React.FC = () => {
                         ))}
                     </select>
 
+                    {/* Store Filter - NEW */}
+                    <select
+                        value={selectedStore}
+                        onChange={(e) => setSelectedStore(e.target.value)}
+                        className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    >
+                        {stores.map((store, index) => (
+                            <option key={index} value={store.name}>
+                                {store.name === 'all'
+                                    ?  '🏪 All Stores'
+                                    : store.name === 'mouadvision'
+                                        ? '🏢 MouadVision Official'
+                                        : `👤 ${store.name}`}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Price Filter */}
                     <select
                         value={priceRange}
                         onChange={(e) => setPriceRange(e.target.value)}
@@ -163,9 +213,12 @@ const ShopPage: React.FC = () => {
                         <option value="0-25">Under $25</option>
                         <option value="25-50">$25 - $50</option>
                         <option value="50-100">$50 - $100</option>
-                        <option value="100-">$100+</option>
+                        <option value="100-500">$100 - $500</option>
+                        <option value="500-1000">$500 - $1000</option>
+                        <option value="1000-">$1000+</option>
                     </select>
 
+                    {/* Sort */}
                     <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
@@ -178,6 +231,42 @@ const ShopPage: React.FC = () => {
                         <option value="reviews">Most Reviews</option>
                     </select>
                 </div>
+
+                {/* Active Filters Display */}
+                {(selectedCategory !== 'all' || selectedStore !== 'all' || priceRange !== 'all') && (
+                    <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <span className="text-sm text-gray-500">Active filters:</span>
+                        {selectedCategory !== 'all' && (
+                            <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm flex items-center gap-1">
+                                {selectedCategory}
+                                <button onClick={() => setSelectedCategory('all')} className="ml-1 hover:text-blue-600">×</button>
+                            </span>
+                        )}
+                        {selectedStore !== 'all' && (
+                            <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm flex items-center gap-1">
+                                {selectedStore === 'mouadvision' ?  'MouadVision' : selectedStore}
+                                <button onClick={() => setSelectedStore('all')} className="ml-1 hover:text-green-600">×</button>
+                            </span>
+                        )}
+                        {priceRange !== 'all' && (
+                            <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm flex items-center gap-1">
+                                ${priceRange.replace('-', ' - $')}
+                                <button onClick={() => setPriceRange('all')} className="ml-1 hover:text-purple-600">×</button>
+                            </span>
+                        )}
+                        <button
+                            onClick={() => {
+                                setSelectedCategory('all');
+                                setSelectedStore('all');
+                                setPriceRange('all');
+                                setSearchQuery('');
+                            }}
+                            className="text-sm text-red-600 hover:text-red-700 ml-2"
+                        >
+                            Clear all
+                        </button>
+                    </div>
+                )}
             </div>
 
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
@@ -232,18 +321,25 @@ const ShopPage: React.FC = () => {
                             <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">
                                 {product.categoryName || 'Uncategorized'}
                             </p>
-                            {/* Seller Badge */}
+
+                            {/* Store Badge - Clickable */}
                             <div className="mb-2">
-                                {! product.sellerId ?  (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                        🏪 MouadVision
-                                    </span>
-                                ) : (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                        👤 {product.sellerName || 'Seller'}
-                                    </span>
-                                )}
+                                <button
+                                    onClick={() => setSelectedStore(! product.sellerId ? 'mouadvision' : (product.sellerName || 'all'))}
+                                    className="inline-flex items-center hover:opacity-80 transition-opacity"
+                                >
+                                    {! product.sellerId ?  (
+                                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                            🏢 MouadVision
+                                        </span>
+                                    ) : (
+                                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                            👤 {product.sellerName || 'Seller'}
+                                        </span>
+                                    )}
+                                </button>
                             </div>
+
                             <Link to={`${shopBasePath}/product/${product.asin}`}>
                                 <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400 mb-2">
                                     {product.productName}

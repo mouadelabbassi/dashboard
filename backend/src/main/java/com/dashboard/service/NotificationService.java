@@ -1,11 +1,7 @@
 package com.dashboard.service;
 
 import com.dashboard.dto.response.NotificationResponse;
-import com.dashboard.entity.Notification;
-import com.dashboard.entity.Order;
-import com.dashboard.entity.Product;
-import com.dashboard.entity.ProductReview;
-import com.dashboard.entity.User;
+import com.dashboard.entity.*;
 import com.dashboard.exception.BadRequestException;
 import com.dashboard.exception.ResourceNotFoundException;
 import com.dashboard.repository.NotificationRepository;
@@ -77,7 +73,7 @@ public class NotificationService {
                 seller,
                 Notification.NotificationType.PRODUCT_REJECTED,
                 "Produit rejeté",
-                String.format("Votre produit '%s' a été rejeté. Raison: %s", product.getProductName(), reason),
+                String.format("Votre produit '%s' a été rejeté.Raison: %s", product.getProductName(), reason),
                 product.getAsin(),
                 "PRODUCT",
                 "/seller/products/" + product.getAsin()
@@ -89,7 +85,7 @@ public class NotificationService {
         createNotification(
                 seller,
                 Notification.NotificationType.PRODUCT_PURCHASED,
-                "Nouvelle vente! 💰",
+                "Nouvelle vente!  💰",
                 String.format("Votre produit '%s' a été acheté (x%d). Commande #%s",
                         product.getProductName(), quantity, order.getOrderNumber()),
                 order.getOrderNumber(),
@@ -106,7 +102,7 @@ public class NotificationService {
             createNotification(
                     admin,
                     Notification.NotificationType.NEW_ORDER,
-                    "New Order Received!  🛒",
+                    "New Order Received! 🛒",
                     String.format("'%s' purchased '%s' x%d for $%.2f.Order #%s",
                             buyerName, product.getProductName(), quantity, totalAmount, order.getOrderNumber()),
                     order.getOrderNumber(),
@@ -119,13 +115,15 @@ public class NotificationService {
     @Transactional
     public void notifySellerNewReview(User seller, Product product, ProductReview review) {
         String ratingStars = "⭐".repeat(review.getRating());
+        String commentPreview = review.getComment() != null && ! review.getComment().isEmpty()
+                ? review.getComment().substring(0, Math.min(50, review.getComment().length())) + "..."
+                : "No comment";
         createNotification(
                 seller,
                 Notification.NotificationType.REVIEW_RECEIVED,
                 "Nouvel avis reçu " + ratingStars,
                 String.format("Un acheteur a laissé un avis sur '%s': %s",
-                        product.getProductName(),
-                        review.getComment() != null ? review.getComment().substring(0, Math.min(50, review.getComment().length())) + "..." : "Aucun commentaire"),
+                        product.getProductName(), commentPreview),
                 product.getAsin(),
                 "PRODUCT",
                 "/seller/products/" + product.getAsin() + "/reviews"
@@ -146,7 +144,28 @@ public class NotificationService {
         );
     }
 
-    // Admin notifications
+    // Admin notifications - FIXED: Use getId() instead of getAsin()
+    @Transactional
+    public void notifyAdminsNewProductSubmission(SellerProductRequest productRequest) {
+        List<User> admins = userRepository.findByRoleAndIsActiveTrue(User.Role.ADMIN);
+        for (User admin : admins) {
+            createNotification(
+                    admin,
+                    Notification.NotificationType.NEW_SELLER_PRODUCT,
+                    "Nouveau produit à approuver 📦",
+                    String.format("Le vendeur '%s' a soumis un nouveau produit: %s",
+                            productRequest.getSeller().getStoreName() != null
+                                    ?  productRequest.getSeller().getStoreName()
+                                    : productRequest.getSeller().getFullName(),
+                            productRequest.getProductName()),
+                    String.valueOf(productRequest.getId()),
+                    "PRODUCT_REQUEST",
+                    "/admin/product-approvals"
+            );
+        }
+    }
+
+    // Overloaded method for Product entity
     @Transactional
     public void notifyAdminsNewProductSubmission(Product product) {
         List<User> admins = userRepository.findByRoleAndIsActiveTrue(User.Role.ADMIN);
@@ -156,7 +175,9 @@ public class NotificationService {
                     Notification.NotificationType.NEW_SELLER_PRODUCT,
                     "Nouveau produit à approuver",
                     String.format("Le vendeur '%s' a soumis un nouveau produit: %s",
-                            product.getSeller().getStoreName() != null ? product.getSeller().getStoreName() : product.getSeller().getFullName(),
+                            product.getSeller() != null && product.getSeller().getStoreName() != null
+                                    ?  product.getSeller().getStoreName()
+                                    : (product.getSeller() != null ? product.getSeller().getFullName() : "Unknown"),
                             product.getProductName()),
                     product.getAsin(),
                     "PRODUCT",
@@ -260,6 +281,46 @@ public class NotificationService {
                 product.getAsin(),
                 "PRODUCT",
                 "/seller/products/" + product.getAsin()
+        );
+    }
+
+    @Transactional
+    public void notifySellerLowStock(User seller, Product product, String customMessage) {
+        int stock = product.getStockQuantity() != null ? product. getStockQuantity() : 0;
+        String stockStatus = stock == 0 ? "OUT OF STOCK" : "LOW STOCK (" + stock + " units)";
+
+        String message = customMessage != null && ! customMessage.isEmpty()
+                ? customMessage
+                : String.format("Your product '%s' is %s. Please update your stock to continue selling.",
+                product. getProductName(), stockStatus);
+
+        createNotification(
+                seller,
+                Notification.NotificationType.STOCK_ALERT,
+                stock == 0 ? "⚠️ Product Out of Stock!" : "📦 Low Stock Alert",
+                message,
+                product.getAsin(),
+                "PRODUCT",
+                "/seller/products/" + product.getAsin() + "/edit"
+        );
+    }
+
+    @Transactional
+    public void notifySellerMultipleLowStock(User seller, List<Product> products) {
+        int outOfStock = (int) products.stream().filter(p -> p.getStockQuantity() == null || p.getStockQuantity() == 0).count();
+        int lowStock = products.size() - outOfStock;
+
+        String message = String.format("You have %d product(s) with low stock and %d product(s) out of stock.  Please update your inventory.",
+                lowStock, outOfStock);
+
+        createNotification(
+                seller,
+                Notification.NotificationType.STOCK_ALERT,
+                "📦 Stock Alert: " + products.size() + " Products Need Attention",
+                message,
+                String.valueOf(products.size()),
+                "STOCK_ALERT",
+                "/seller/products"
         );
     }
 

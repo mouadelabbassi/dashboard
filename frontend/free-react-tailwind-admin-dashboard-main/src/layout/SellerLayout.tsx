@@ -27,6 +27,7 @@ const SellerLayout: React.FC = () => {
     const navLinks = [
         { path: '/seller/dashboard', label: 'Dashboard' },
         { path: '/seller/products', label: 'My Products' },
+        { path: '/seller/stock', label: 'Stock Management', icon: '🏪' },
         { path: '/seller/orders', label: 'Orders'},
         { path: '/seller/reviews', label: 'Reviews' },
         { path: '/seller/profile', label: 'Profile' },

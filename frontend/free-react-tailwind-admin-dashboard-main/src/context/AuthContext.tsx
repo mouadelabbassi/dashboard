@@ -85,8 +85,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: string,
         securityQuestion: string,
         securityAnswer: string,
-        storeName?: string  // AJOUTE CE PARAMÈTRE
-    ) => {
+        storeName?: string
+) => {
         try {
             const response = await axios. post('http://localhost:8080/api/auth/register', {
                 email,
@@ -95,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 role,
                 securityQuestion,
                 securityAnswer,
-                storeName  // AJOUTE CETTE LIGNE
+                storeName
             });
 
             if (response.data. success) {

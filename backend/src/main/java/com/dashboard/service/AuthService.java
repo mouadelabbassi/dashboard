@@ -48,17 +48,26 @@ public class AuthService {
             throw new BadRequestException("Cannot register as admin");
         }
 
-        User user = User.builder()
+        // Build user with store name for sellers
+        User.UserBuilder userBuilder = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName())
                 .role(role)
                 .securityQuestion(request.getSecurityQuestion())
-                .securityAnswer(passwordEncoder.encode(request.getSecurityAnswer().toLowerCase()))
-                .build();
+                .securityAnswer(passwordEncoder.encode(request.getSecurityAnswer().toLowerCase()));
 
+        // Add store name for sellers
+        if (role == User.Role.SELLER && request.getStoreName() != null && !request.getStoreName().trim().isEmpty()) {
+            userBuilder.storeName(request.getStoreName().trim());
+            userBuilder.isVerifiedSeller(false);
+        }
+
+        User user = userBuilder.build();
         user = userRepository.save(user);
-        log.info("User registered: {} with role {}", user.getEmail(), user.getRole());
+
+        log.info("User registered: {} with role {}, storeName: {}",
+                user.getEmail(), user.getRole(), user.getStoreName());
 
         String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name());
 
@@ -69,6 +78,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .role(user.getRole().name())
+                .storeName(user.getStoreName())
                 .build();
     }
 

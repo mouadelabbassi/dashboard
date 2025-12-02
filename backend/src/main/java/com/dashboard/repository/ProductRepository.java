@@ -18,6 +18,20 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String>, JpaSpecificationExecutor<Product> {
 
+    Long countBySellerIsNull();
+
+    Page<Product> findBySellerIsNull(Pageable pageable);
+    Page<Product> findBySellerIsNullAndStockQuantityLessThan(Integer threshold, Pageable pageable);
+    Page<Product> findBySellerIsNullAndStockQuantityEquals(Integer quantity, Pageable pageable);
+    Page<Product> findBySellerIsNullAndStockQuantityGreaterThanEqual(Integer threshold, Pageable pageable);
+
+    Page<Product> findBySellerIsNotNull(Pageable pageable);
+    Page<Product> findBySellerIsNotNullAndStockQuantityLessThan(Integer threshold, Pageable pageable);
+    Page<Product> findBySellerIsNotNullAndStockQuantityEquals(Integer quantity, Pageable pageable);
+    Page<Product> findBySellerIsNotNullAndStockQuantityGreaterThanEqual(Integer threshold, Pageable pageable);
+
+    List<Product> findBySellerIsNotNullAndStockQuantityLessThan(Integer threshold);
+
     Optional<Product> findByAsin(String asin);
 
     List<Product> findByCategory(Category category);
@@ -25,6 +39,17 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     List<Product> findByApprovalStatus(Product.ApprovalStatus status);
 
     List<Product> findBySeller(User seller);
+
+    Page<Product> findByStockQuantityEquals(Integer quantity, Pageable pageable);
+
+    List<Product> findByStockQuantityLessThanOrderByStockQuantityAsc(Integer threshold);
+
+    List<Product> findByStockQuantityEquals(Integer quantity);
+
+    Page<Product> findByStockQuantityLessThan(Integer threshold, Pageable pageable);
+
+    Page<Product> findByStockQuantityGreaterThanEqual(Integer threshold, Pageable pageable);
+
 
     @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND " +
             "(LOWER(p.productName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
@@ -51,6 +76,8 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     BigDecimal calculateAveragePrice();
 
     @Query("SELECT AVG(p.rating) FROM Product p WHERE p.approvalStatus = 'APPROVED'")
+
+
     BigDecimal calculateAverageRating();
 
     // Seller-specific queries
@@ -94,4 +121,14 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
 
     // Check if ASIN exists
     boolean existsByAsin(String asin);
+
+    @Query("SELECT SUM(p.stockQuantity) FROM Product p")
+    Long sumAllStockQuantity();
+
+    // Search query
+    @Query("SELECT p FROM Product p WHERE LOWER(p.productName) LIKE LOWER(CONCAT('%', :query, '%')) OR p.asin LIKE CONCAT('%', :query, '%')")
+    List<Product> searchByNameOrAsin(@Param("query") String query);
+
+    @Query("SELECT p FROM Product p WHERE p.stockQuantity = :quantity")
+    Page<Product> findByStockQuantityEqualsPageable(@Param("quantity") Integer quantity, Pageable pageable);
 }

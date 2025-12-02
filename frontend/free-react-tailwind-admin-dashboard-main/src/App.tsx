@@ -22,6 +22,10 @@ import ProductAnalytics from './pages/Analyst/ProductAnalytics';
 import SellerAnalytics from './pages/Analyst/SellerAnalytics';
 import CategoryAnalysis from './pages/Analyst/CategoryAnalysis';
 import Reports from './pages/Analyst/Reports'
+import SellerStockManagement from './pages/Seller/SellerStockManagement';
+import AdminStockManagement from './pages/Admin/AdminStockManagement';
+
+
 
 
 // Admin Pages
@@ -126,6 +130,7 @@ function App() {
                             <Route path="product-approvals" element={<ProductApprovals />} />
                             <Route path="notifications" element={<NotificationsPage />} />
                             <Route path="orders" element={<AdminOrdersPage />} />
+                            <Route path="stock" element={<AdminStockManagement />} />
                             <Route path="profile" element={<UserProfiles />} />
                             <Route path="sellers" element={<SellerManagement />} />
                         </Route>
@@ -144,6 +149,7 @@ function App() {
                             <Route path="products" element={<SellerProducts />} />
                             <Route path="products/new" element={<SellerProductForm />} />
                             <Route path="products/:asin/edit" element={<SellerProductForm />} />
+                            <Route path="stock" element={<SellerStockManagement />} />
                             <Route path="orders" element={<SellerOrders />} />
                             <Route path="reviews" element={<SellerReviews />} />
                             <Route path="profile" element={<SellerProfile />} />

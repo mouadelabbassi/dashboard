@@ -82,6 +82,9 @@ public class SellerProductRequest {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "source_stock_id")
+    private Long sourceStockId;
+
     public enum RequestStatus {
         PENDING("En attente"),
         APPROVED("Approuvé"),

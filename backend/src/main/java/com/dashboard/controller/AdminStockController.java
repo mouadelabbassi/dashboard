@@ -1,61 +1,309 @@
 package com.dashboard.controller;
 
-import com.dashboard.dto.request.ProductApprovalRequest;
 import com.dashboard.dto.response.ApiResponse;
-import com.dashboard.entity.StockUpdateRequest;
-import com.dashboard.service.StockManagementService;
+import com.dashboard.entity.Product;
+import com.dashboard.entity.User;
+import com.dashboard.exception.BadRequestException;
+import com.dashboard.exception.ResourceNotFoundException;
+import com.dashboard.repository.ProductRepository;
+import com.dashboard.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
 @RestController
-@RequestMapping("/api/admin/stock-requests")
+@RequestMapping("/api/admin/stock")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-@Tag(name = "Admin Stock Management", description = "Manage seller stock update requests")
+@Tag(name = "Admin Stock Management", description = "Admin endpoints for managing product stock")
 public class AdminStockController {
 
-    private final StockManagementService stockManagementService;
+    private final ProductRepository productRepository;
+    private final NotificationService notificationService;
 
-    @GetMapping("/pending")
-    @Operation(summary = "Get pending stock requests")
-    public ResponseEntity<ApiResponse<Page<StockUpdateRequest>>> getPendingRequests(
-            @PageableDefault(size = 20) Pageable pageable) {
-        Page<StockUpdateRequest> requests = stockManagementService.getPendingStockRequests(pageable);
-        return ResponseEntity.ok(ApiResponse.success("Pending requests retrieved", requests));
+    @GetMapping("/dashboard")
+    @Operation(summary = "Get stock dashboard", description = "Returns stock overview statistics")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getStockDashboard() {
+        Map<String, Object> dashboard = new HashMap<>();
+
+        long totalProducts = productRepository.count();
+        dashboard.put("totalProducts", totalProducts);
+
+        // MouadVision products only
+        long mouadVisionProducts = productRepository.countBySellerIsNull();
+        dashboard.put("mouadVisionProducts", mouadVisionProducts);
+
+        // Seller products
+        long sellerProducts = totalProducts - mouadVisionProducts;
+        dashboard.put("sellerProducts", sellerProducts);
+
+        List<Product> lowStockProducts = productRepository.findByStockQuantityLessThanOrderByStockQuantityAsc(10);
+        dashboard.put("lowStockCount", lowStockProducts.size());
+
+        List<Product> outOfStockProducts = productRepository.findByStockQuantityEquals(0);
+        dashboard.put("outOfStockCount", outOfStockProducts.size());
+
+        long healthyStockCount = totalProducts - lowStockProducts.size();
+        dashboard.put("healthyStockCount", healthyStockCount);
+
+        Long totalUnits = productRepository.sumAllStockQuantity();
+        dashboard.put("totalUnitsInStock", totalUnits != null ? totalUnits : 0);
+
+        return ResponseEntity.ok(ApiResponse.success("Stock dashboard retrieved", dashboard));
     }
 
-    @PostMapping("/{requestId}/approve")
-    @Operation(summary = "Approve stock request")
-    public ResponseEntity<ApiResponse<String>> approveStockRequest(
-            @PathVariable Long requestId,
-            @RequestBody(required = false) ProductApprovalRequest approval) {
-        stockManagementService.approveStockRequest(requestId,
-                approval != null ? approval.getAdminNotes() : null);
-        return ResponseEntity.ok(ApiResponse.success("Stock request approved", "Success"));
+    @GetMapping("/products")
+    @Operation(summary = "Get all products with stock info", description = "Returns paginated products for stock management")
+    public ResponseEntity<ApiResponse<Page<Map<String, Object>>>> getAllProductsStock(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "asin") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(required = false) String filter,
+            @RequestParam(required = false) String owner) {  // NEW: filter by owner
+
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Product> products;
+
+        // Filter by owner first
+        if ("mouadvision".equalsIgnoreCase(owner)) {
+            products = getFilteredMouadVisionProducts(filter, pageable);
+        } else if ("sellers".equalsIgnoreCase(owner)) {
+            products = getFilteredSellerProducts(filter, pageable);
+        } else {
+            products = getFilteredAllProducts(filter, pageable);
+        }
+
+        Page<Map<String, Object>> result = products.map(this::mapProductToStockInfo);
+
+        return ResponseEntity.ok(ApiResponse.success("Products retrieved", result));
     }
 
-    @PostMapping("/{requestId}/reject")
-    @Operation(summary = "Reject stock request")
-    public ResponseEntity<ApiResponse<String>> rejectStockRequest(
-            @PathVariable Long requestId,
-            @RequestBody ProductApprovalRequest approval) {
-        stockManagementService.rejectStockRequest(requestId,
-                approval.getRejectionReason(),
-                approval.getAdminNotes());
-        return ResponseEntity.ok(ApiResponse.success("Stock request rejected", "Success"));
+    private Page<Product> getFilteredAllProducts(String filter, Pageable pageable) {
+        if ("low".equalsIgnoreCase(filter)) {
+            return productRepository.findByStockQuantityLessThan(10, pageable);
+        } else if ("out".equalsIgnoreCase(filter)) {
+            return productRepository.findByStockQuantityEqualsPageable(0, pageable);
+        } else if ("healthy".equalsIgnoreCase(filter)) {
+            return productRepository.findByStockQuantityGreaterThanEqual(10, pageable);
+        } else {
+            return productRepository.findAll(pageable);
+        }
     }
 
-    @GetMapping("/count")
-    @Operation(summary = "Get pending count")
-    public ResponseEntity<ApiResponse<Long>> getPendingCount() {
-        Long count = stockManagementService.getPendingStockRequestCount();
-        return ResponseEntity.ok(ApiResponse.success("Count retrieved", count));
+    private Page<Product> getFilteredMouadVisionProducts(String filter, Pageable pageable) {
+        if ("low".equalsIgnoreCase(filter)) {
+            return productRepository.findBySellerIsNullAndStockQuantityLessThan(10, pageable);
+        } else if ("out".equalsIgnoreCase(filter)) {
+            return productRepository.findBySellerIsNullAndStockQuantityEquals(0, pageable);
+        } else if ("healthy".equalsIgnoreCase(filter)) {
+            return productRepository.findBySellerIsNullAndStockQuantityGreaterThanEqual(10, pageable);
+        } else {
+            return productRepository.findBySellerIsNull(pageable);
+        }
+    }
+
+    private Page<Product> getFilteredSellerProducts(String filter, Pageable pageable) {
+        if ("low".equalsIgnoreCase(filter)) {
+            return productRepository.findBySellerIsNotNullAndStockQuantityLessThan(10, pageable);
+        } else if ("out".equalsIgnoreCase(filter)) {
+            return productRepository.findBySellerIsNotNullAndStockQuantityEquals(0, pageable);
+        } else if ("healthy".equalsIgnoreCase(filter)) {
+            return productRepository.findBySellerIsNotNullAndStockQuantityGreaterThanEqual(10, pageable);
+        } else {
+            return productRepository.findBySellerIsNotNull(pageable);
+        }
+    }
+
+    // UPDATE STOCK - ONLY FOR MOUADVISION PRODUCTS
+    @PutMapping("/products/{asin}")
+    @Operation(summary = "Update product stock (MouadVision only)", description = "Updates stock for MouadVision products only")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> updateProductStock(
+            @PathVariable String asin,
+            @Valid @RequestBody StockUpdateAdminRequest request) {
+
+        Product product = productRepository.findByAsin(asin)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "asin", asin));
+
+        // CHECK: Only allow updating MouadVision products
+        if (product.getSeller() != null) {
+            throw new BadRequestException("Cannot update stock for seller products. Please notify the seller instead.");
+        }
+
+        int oldQuantity = product.getStockQuantity() != null ? product.getStockQuantity() : 0;
+        product.setStockQuantity(request.getQuantity());
+        product = productRepository.save(product);
+
+        log.info("Admin updated MouadVision product stock {}: {} -> {}", asin, oldQuantity, request.getQuantity());
+
+        Map<String, Object> result = mapProductToStockInfo(product);
+        result.put("previousQuantity", oldQuantity);
+        result.put("quantityChange", request.getQuantity() - oldQuantity);
+
+        return ResponseEntity.ok(ApiResponse.success("Stock updated successfully", result));
+    }
+
+    @PutMapping("/products/{asin}/add")
+    @Operation(summary = "Add stock (MouadVision only)", description = "Adds stock for MouadVision products only")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> addProductStock(
+            @PathVariable String asin,
+            @RequestParam int quantity) {
+
+        if (quantity <= 0) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("Quantity must be positive"));
+        }
+
+        Product product = productRepository.findByAsin(asin)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "asin", asin));
+
+        // CHECK: Only allow for MouadVision products
+        if (product.getSeller() != null) {
+            throw new BadRequestException("Cannot update stock for seller products. Please notify the seller instead.");
+        }
+
+        int oldQuantity = product.getStockQuantity() != null ?  product.getStockQuantity() : 0;
+        int newQuantity = oldQuantity + quantity;
+        product.setStockQuantity(newQuantity);
+        product = productRepository.save(product);
+
+        log.info("Admin added {} units to MouadVision product {}: {} -> {}", quantity, asin, oldQuantity, newQuantity);
+
+        Map<String, Object> result = mapProductToStockInfo(product);
+        result.put("previousQuantity", oldQuantity);
+        result.put("addedQuantity", quantity);
+
+        return ResponseEntity.ok(ApiResponse.success("Stock added successfully", result));
+    }
+
+    // NOTIFY SELLER ABOUT LOW STOCK
+    @PostMapping("/products/{asin}/notify-seller")
+    @Operation(summary = "Notify seller about stock", description = "Sends notification to seller about low/out of stock")
+    public ResponseEntity<ApiResponse<String>> notifySellerAboutStock(
+            @PathVariable String asin,
+            @RequestBody(required = false) NotifySellerRequest request) {
+
+        Product product = productRepository.findByAsin(asin)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "asin", asin));
+
+        if (product.getSeller() == null) {
+            throw new BadRequestException("This is a MouadVision product. No seller to notify.");
+        }
+
+        User seller = product.getSeller();
+        String message = request != null && request.getMessage() != null
+                ? request.getMessage()
+                : null;
+
+        notificationService.notifySellerLowStock(seller, product, message);
+
+        log.info("Admin notified seller {} about stock for product {}", seller.getEmail(), asin);
+
+        return ResponseEntity.ok(ApiResponse.success(
+                "Notification sent to " + seller.getFullName(),
+                "Seller has been notified about the stock level"));
+    }
+
+    // BULK NOTIFY SELLERS ABOUT LOW STOCK
+    @PostMapping("/notify-low-stock-sellers")
+    @Operation(summary = "Notify all sellers with low stock", description = "Sends notifications to all sellers with low stock products")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> notifyAllLowStockSellers() {
+        List<Product> lowStockProducts = productRepository.findBySellerIsNotNullAndStockQuantityLessThan(10);
+
+        Map<User, List<Product>> sellerProducts = new HashMap<>();
+        for (Product product : lowStockProducts) {
+            sellerProducts.computeIfAbsent(product.getSeller(), k -> new java.util.ArrayList<>()).add(product);
+        }
+
+        int notificationsSent = 0;
+        for (Map.Entry<User, List<Product>> entry : sellerProducts.entrySet()) {
+            notificationService.notifySellerMultipleLowStock(entry.getKey(), entry.getValue());
+            notificationsSent++;
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("sellersNotified", notificationsSent);
+        result.put("productsAffected", lowStockProducts.size());
+
+        log.info("Admin sent low stock notifications to {} sellers for {} products", notificationsSent, lowStockProducts.size());
+
+        return ResponseEntity.ok(ApiResponse.success("Notifications sent", result));
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search products for stock management", description = "Search products by name or ASIN")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> searchProducts(
+            @RequestParam String query) {
+
+        List<Product> products = productRepository.searchByNameOrAsin(query);
+        List<Map<String, Object>> result = products.stream()
+                .map(this::mapProductToStockInfo)
+                .toList();
+
+        return ResponseEntity.ok(ApiResponse.success("Search results", result));
+    }
+
+    private Map<String, Object> mapProductToStockInfo(Product product) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("asin", product.getAsin());
+        map.put("productName", product.getProductName());
+        map.put("imageUrl", product.getImageUrl());
+        map.put("price", product.getPrice());
+        map.put("stockQuantity", product.getStockQuantity() != null ? product.getStockQuantity() : 0);
+        map.put("categoryName", product.getCategory() != null ? product.getCategory().getName() : null);
+        map.put("sellerName", product.getSellerName());
+        map.put("sellerId", product.getSeller() != null ? product.getSeller().getId() : null);
+        map.put("sellerEmail", product.getSeller() != null ?  product.getSeller().getEmail() : null);
+        map.put("isMouadVisionProduct", product.getSeller() == null);
+        map.put("salesCount", product.getSalesCount());
+        map.put("canAdminEdit", product.getSeller() == null);  // NEW: Can admin edit this product? 
+
+        int qty = product.getStockQuantity() != null ? product.getStockQuantity() : 0;
+        String stockStatus;
+        if (qty == 0) {
+            stockStatus = "OUT_OF_STOCK";
+        } else if (qty < 10) {
+            stockStatus = "LOW_STOCK";
+        } else {
+            stockStatus = "IN_STOCK";
+        }
+        map.put("stockStatus", stockStatus);
+
+        return map;
+    }
+
+    // Request classes
+    public static class StockUpdateAdminRequest {
+        private Integer quantity;
+        private String reason;
+
+        public Integer getQuantity() { return quantity; }
+        public void setQuantity(Integer quantity) { this.quantity = quantity; }
+        public String getReason() { return reason; }
+        public void setReason(String reason) { this.reason = reason; }
+    }
+
+    public static class NotifySellerRequest {
+        private String message;
+
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
     }
 }

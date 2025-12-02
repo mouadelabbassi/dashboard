@@ -14,7 +14,7 @@ import org.springframework. security.core.Authentication;
 import org. springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework. transaction.annotation. Transactional;
-
+import com. dashboard.service.SellerStockService;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class OrderService {
     private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
     private final SellerRevenueService sellerRevenueService;
-
+    private final SellerStockService sellerStockService;
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext(). getAuthentication();
         String email = authentication.getName();
@@ -137,6 +137,10 @@ public class OrderService {
         // 1. Update product sales count
         updateProductSalesCount(order);
 
+        if (order.getUser().getRole() == User.Role. SELLER) {
+            addPurchasedProductsToSellerStock(order);
+        }
+
         // 2.  CRITICAL: Process seller revenue
         try {
             log.info("Processing seller revenue for order: {}", order.getOrderNumber());
@@ -159,6 +163,24 @@ public class OrderService {
         createOrderNotification(order);
 
         return OrderResponse.fromEntity(order);
+    }
+
+    private void addPurchasedProductsToSellerStock(Order order) {
+        User seller = order.getUser();
+        for (OrderItem item : order. getItems()) {
+            try {
+                sellerStockService. addToStock(
+                        seller,
+                        item.getProduct(),
+                        order,
+                        item.getQuantity(),
+                        item.getUnitPrice()
+                );
+            } catch (Exception e) {
+                log.error("Failed to add product {} to seller stock: {}",
+                        item.getProduct().getAsin(), e. getMessage());
+            }
+        }
     }
 
     private void sendPurchaseNotificationsToSellers(Order order) {

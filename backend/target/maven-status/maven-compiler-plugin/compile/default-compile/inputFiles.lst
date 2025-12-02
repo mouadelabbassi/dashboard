@@ -10,8 +10,11 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\respo
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\OrderController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\ProductController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\SellerProductSubmissionRequest.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\SellerStockController.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ListFromStockRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ReviewRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ApiResponse.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\SellerStock.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\SellerController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\PendingProductResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\CreateOrderRequest.java
@@ -37,6 +40,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controlle
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\PlatformRevenue.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ForgotPasswordRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\SellerRevenueService.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\SellerStockService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ProductDetailResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\PlatformRevenueRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AdminStockController.java
@@ -78,10 +82,12 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controlle
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ProductRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\security\UserDetailsServiceImpl.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\StockUpdateRequest.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\SellerStockRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\ProductReviewRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\Order.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\DashboardStatsResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ProductResponse.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\SellerStockResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\User.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\SellerProductRequestRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AuthController.java
@@ -92,6 +98,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\exception
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\LoginRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\ProductRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\Category.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\StockDashboardResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\JwtConfig.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\CategoryController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ReviewResponse.java
