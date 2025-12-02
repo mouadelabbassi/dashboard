@@ -1,0 +1,1 @@
+from .french_patterns import FrenchPatterns

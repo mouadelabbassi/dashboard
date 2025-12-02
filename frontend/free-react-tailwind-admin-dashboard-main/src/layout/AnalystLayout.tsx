@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import SmartSearchBar from '../components/SmartSearch/SmartSearchBar';
 
 // Icons
 const DashboardIcon = () => (
@@ -75,6 +76,7 @@ const AnalystLayout: React.FC = () => {
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [isDark, setIsDark] = useState(true);
+    const [showMobileSearch, setShowMobileSearch] = useState(false);
 
     useEffect(() => {
         if (isDark) {
@@ -199,39 +201,67 @@ const AnalystLayout: React.FC = () => {
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-h-screen">
                 {/* Header */}
-                <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 sticky top-0 z-40">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setSidebarOpen(! sidebarOpen)}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                        >
-                            <MenuIcon />
-                        </button>
-                        <div>
-                            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Analytics Dashboard
-                            </h1>
-                            <p className="text-xs text-gray-500">
-                                Data-driven insights for smarter decisions
-                            </p>
+                <header className="h-auto min-h-[4rem] bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40">
+                    <div className="flex items-center justify-between px-6 py-3 gap-4">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => setSidebarOpen(!sidebarOpen)}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                            >
+                                <MenuIcon />
+                            </button>
+                            <div className="hidden sm:block">
+                                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    Analytics Dashboard
+                                </h1>
+                                <p className="text-xs text-gray-500">
+                                    Data-driven insights for smarter decisions
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Smart Search Bar - Desktop */}
+                        <div className="hidden md:block flex-1 max-w-xl mx-4">
+                            <SmartSearchBar
+                                placeholder="Recherche intelligente... (ex: 'ventes du mois')"
+                            />
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            {/* Mobile Search Toggle */}
+                            <button
+                                onClick={() => setShowMobileSearch(!showMobileSearch)}
+                                className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </button>
+
+                            <button
+                                onClick={() => setIsDark(!isDark)}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                            >
+                                {isDark ? <SunIcon /> : <MoonIcon />}
+                            </button>
+
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                                <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
+                                <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                                    Analyst
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => setIsDark(!isDark)}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                        >
-                            {isDark ? <SunIcon /> : <MoonIcon />}
-                        </button>
-
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-                            <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
-                            <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                                Analyst
-                            </span>
+                    {/* Mobile Search Bar */}
+                    {showMobileSearch && (
+                        <div className="md:hidden px-6 pb-3">
+                            <SmartSearchBar
+                                placeholder="Recherche intelligente..."
+                            />
                         </div>
-                    </div>
+                    )}
                 </header>
 
                 {/* Page Content */}
@@ -242,7 +272,7 @@ const AnalystLayout: React.FC = () => {
                 {/* Footer */}
                 <footer className="h-12 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-center">
                     <p className="text-sm text-gray-500">
-                        © 2025 MouadVision Analytics. All rights reserved.
+                        © 2025 MouadVision Analytics.All rights reserved.
                     </p>
                 </footer>
             </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import SmartSearchBar from '../components/SmartSearch/SmartSearchBar';
 
 const BuyerLayout: React.FC = () => {
     const { logout } = useAuth();
@@ -9,6 +10,7 @@ const BuyerLayout: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [isDark, setIsDark] = useState(true);
+    const [showMobileSearch, setShowMobileSearch] = useState(false);
 
     const itemCount = getItemCount();
 
@@ -37,8 +39,9 @@ const BuyerLayout: React.FC = () => {
             {/* Header */}
             <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        <Link to="/shop" className="flex items-center gap-3">
+                    <div className="flex items-center justify-between h-16 gap-4">
+                        {/* Logo */}
+                        <Link to="/shop" className="flex items-center gap-3 flex-shrink-0">
                             <img
                                 src="/images/logo/logo.png"
                                 alt="MouadVision"
@@ -49,7 +52,15 @@ const BuyerLayout: React.FC = () => {
                             </span>
                         </Link>
 
-                        <nav className="hidden md:flex items-center gap-1">
+                        {/* Smart Search Bar - Desktop */}
+                        <div className="hidden md:block flex-1 max-w-xl mx-4">
+                            <SmartSearchBar
+                                placeholder="Recherche intelligente... (ex: 'électronique pas cher')"
+                            />
+                        </div>
+
+                        {/* Navigation - Desktop */}
+                        <nav className="hidden lg:flex items-center gap-1">
                             {navLinks.map(link => (
                                 <Link
                                     key={link.path}
@@ -65,10 +76,22 @@ const BuyerLayout: React.FC = () => {
                             ))}
                         </nav>
 
-                        <div className="flex items-center gap-3">
+                        {/* Right Actions */}
+                        <div className="flex items-center gap-2">
+                            {/* Mobile Search Toggle */}
+                            <button
+                                onClick={() => setShowMobileSearch(!showMobileSearch)}
+                                className="md:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </button>
+
+                            {/* Cart */}
                             <Link
                                 to="/shop/cart"
-                                className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
+                                className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                                 title="Shopping Cart"
                             >
                                 <svg
@@ -76,7 +99,6 @@ const BuyerLayout: React.FC = () => {
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
                                 >
                                     <path
                                         strokeLinecap="round"
@@ -91,33 +113,44 @@ const BuyerLayout: React.FC = () => {
                                     </span>
                                 )}
                             </Link>
+
+                            {/* Theme Toggle */}
                             <button
                                 onClick={() => setIsDark(!isDark)}
                                 className="flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                                title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                             >
                                 {isDark ? (
-                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
                                     </svg>
                                 ) : (
-                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                                     </svg>
                                 )}
                             </button>
 
+                            {/* Logout */}
                             <button
                                 onClick={handleLogout}
                                 className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-red-500/25"
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                 </svg>
                                 <span className="hidden sm:inline">Logout</span>
                             </button>
                         </div>
                     </div>
+
+                    {/* Mobile Search Bar */}
+                    {showMobileSearch && (
+                        <div className="md:hidden pb-4">
+                            <SmartSearchBar
+                                placeholder="Recherche intelligente..."
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Mobile Navigation */}
@@ -170,7 +203,7 @@ const BuyerLayout: React.FC = () => {
                             </span>
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                            © 2025 MouadVision. All rights reserved.
+                            © 2025 MouadVision.All rights reserved.
                         </p>
                     </div>
                 </div>

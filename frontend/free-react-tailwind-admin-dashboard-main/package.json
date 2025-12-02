@@ -24,6 +24,7 @@
     "clsx": "^2.1.1",
     "flatpickr": "^4.6.13",
     "jspdf": "^3.0.4",
+    "lodash": "^4.17.21",
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",
     "react-chartjs-2": "^5.3.1",

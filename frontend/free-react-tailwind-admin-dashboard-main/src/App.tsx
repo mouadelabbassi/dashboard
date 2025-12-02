@@ -24,6 +24,7 @@ import CategoryAnalysis from './pages/Analyst/CategoryAnalysis';
 import Reports from './pages/Analyst/Reports'
 import SellerStockManagement from './pages/Seller/SellerStockManagement';
 import AdminStockManagement from './pages/Admin/AdminStockManagement';
+import SearchResultsPage from './pages/SearchResultsPage';
 
 
 
@@ -112,6 +113,7 @@ function App() {
                             <Route path="products" element={<ProductAnalytics />} />
                             <Route path="sellers" element={<SellerAnalytics />} />
                             <Route path="categories" element={<CategoryAnalysis />} />
+                            <Route path="search" element={<SearchResultsPage />} />
                             <Route path="reports" element={<Reports />} />
                             <Route path="profile" element={<UserProfiles />} />
                         </Route>
@@ -132,6 +134,7 @@ function App() {
                             <Route path="orders" element={<AdminOrdersPage />} />
                             <Route path="stock" element={<AdminStockManagement />} />
                             <Route path="profile" element={<UserProfiles />} />
+                            <Route path="search" element={<SearchResultsPage />} />
                             <Route path="sellers" element={<SellerManagement />} />
                         </Route>
 
@@ -152,6 +155,7 @@ function App() {
                             <Route path="stock" element={<SellerStockManagement />} />
                             <Route path="orders" element={<SellerOrders />} />
                             <Route path="reviews" element={<SellerReviews />} />
+                            <Route path="search" element={<SearchResultsPage />} />
                             <Route path="profile" element={<SellerProfile />} />
                             <Route path="notifications" element={<NotificationsPage />} />
 
@@ -180,6 +184,7 @@ function App() {
                             <Route path="orders" element={<OrderHistoryPage />} />
                             <Route path="profile" element={<BuyerProfilePage />} />
                             <Route path="my-reviews" element={<MyReviewsPage />} />
+                            <Route path="search" element={<SearchResultsPage />} />
                             <Route path="notifications" element={<NotificationsPage />} />
                         </Route>
 

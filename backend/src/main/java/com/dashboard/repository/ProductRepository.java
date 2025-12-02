@@ -131,4 +131,17 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
 
     @Query("SELECT p FROM Product p WHERE p.stockQuantity = :quantity")
     Page<Product> findByStockQuantityEqualsPageable(@Param("quantity") Integer quantity, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND " +
+            "(LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(p. description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(p.asin) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Product> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT DISTINCT p.productName FROM Product p WHERE " +
+            "LOWER(p.productName) LIKE LOWER(CONCAT(:prefix, '%')) AND p.approvalStatus = 'APPROVED'")
+    List<String> findProductNameSuggestions(@Param("prefix") String prefix, Pageable pageable);
+
+    Page<Product> findByApprovalStatus(String status, Pageable pageable);
+
 }
