@@ -24,14 +24,14 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/search")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000", "http://localhost:8000"})
+@CrossOrigin(origins = "*")
 @Tag(name = "Smart Search", description = "AI-powered intelligent search endpoints")
 public class SmartSearchController {
 
     private final SmartSearchService smartSearchService;
 
     @PostMapping("/smart")
-    @Operation(summary = "Perform AI-powered search", description = "Intelligent search with NLP understanding")
+    @Operation(summary = "Perform AI-powered search")
     public ResponseEntity<ApiResponse<SmartSearchResponse>> smartSearch(
             @RequestBody SmartSearchRequest request) {
 
@@ -51,7 +51,7 @@ public class SmartSearchController {
     }
 
     @GetMapping("/smart")
-    @Operation(summary = "Perform AI-powered search (GET)", description = "Intelligent search via GET request")
+    @Operation(summary = "Perform AI-powered search (GET)")
     public ResponseEntity<ApiResponse<SmartSearchResponse>> smartSearchGet(
             @RequestParam String query,
             @RequestParam(defaultValue = "0") int page,
@@ -80,7 +80,7 @@ public class SmartSearchController {
     }
 
     @GetMapping("/suggestions")
-    @Operation(summary = "Get search suggestions", description = "Autocomplete suggestions for search")
+    @Operation(summary = "Get search suggestions")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getSuggestions(
             @RequestParam String q,
             @RequestParam(defaultValue = "10") int limit) {
@@ -107,10 +107,8 @@ public class SmartSearchController {
     }
 
     @GetMapping("/trending")
-    @Operation(summary = "Get trending searches")
     public ResponseEntity<ApiResponse<List<String>>> getTrending(
             @RequestParam(defaultValue = "10") int limit) {
-
         try {
             List<String> trending = smartSearchService.getTrendingSearches(limit);
             return ResponseEntity.ok(ApiResponse.success("Trending searches", trending));
@@ -120,10 +118,8 @@ public class SmartSearchController {
     }
 
     @GetMapping("/recent")
-    @Operation(summary = "Get recent searches")
     public ResponseEntity<ApiResponse<List<String>>> getRecent(
             @RequestParam(defaultValue = "10") int limit) {
-
         try {
             List<String> recent = smartSearchService.getRecentSearches(limit);
             return ResponseEntity.ok(ApiResponse.success("Recent searches", recent));
@@ -132,7 +128,6 @@ public class SmartSearchController {
         }
     }
 
-    // PUBLIC Endpoint for AI service to call - NO AUTH REQUIRED
     @GetMapping("/products/search/smart")
     @Operation(summary = "Search products with filters (for AI service)")
     public ResponseEntity<ApiResponse<Map<String, Object>>> searchProductsForAI(
@@ -148,8 +143,7 @@ public class SmartSearchController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        log.info("AI Service calling searchProductsForAI - keyword: {}, category: {}, maxPrice: {}",
-                keyword, category, maxPrice);
+        log.info("AI Service search - keyword: {}, category: {}, maxPrice: {}", keyword, category, maxPrice);
 
         try {
             Page<Product> products = smartSearchService.searchWithFilters(
@@ -186,7 +180,7 @@ public class SmartSearchController {
         map.put("price", product.getPrice());
         map.put("rating", product.getRating());
         map.put("reviewsCount", product.getReviewsCount());
-        map.put("categoryName", product.getCategory() != null ? product.getCategory().getName() : null);
+        map.put("categoryName", product.getCategory() != null ?  product.getCategory().getName() : null);
         map.put("imageUrl", product.getImageUrl());
         map.put("sellerName", product.getSellerName());
         map.put("isBestseller", product.getIsBestseller());

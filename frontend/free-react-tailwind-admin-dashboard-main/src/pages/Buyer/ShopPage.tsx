@@ -55,19 +55,16 @@ const ShopPage: React.FC = () => {
     useEffect(() => {
         let result = [...products];
 
-        // Search filter
         if (searchQuery) {
             result = result.filter(p =>
                 p.productName.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
 
-        // Category filter
         if (selectedCategory !== 'all') {
             result = result.filter(p => p.categoryName === selectedCategory);
         }
 
-        // Store filter
         if (selectedStore !== 'all') {
             if (selectedStore === 'mouadvision') {
                 result = result.filter(p => ! p.sellerId);
@@ -76,7 +73,6 @@ const ShopPage: React.FC = () => {
             }
         }
 
-        // Price filter
         if (priceRange !== 'all') {
             const [min, max] = priceRange.split('-').map(Number);
             result = result.filter(p => {
@@ -87,7 +83,6 @@ const ShopPage: React.FC = () => {
             });
         }
 
-        // Sort
         switch (sortBy) {
             case 'price-low':
                 result.sort((a, b) => a.price - b.price);
@@ -112,26 +107,48 @@ const ShopPage: React.FC = () => {
 
     const categories = ['all', ...new Set(products.map(p => p.categoryName).filter(Boolean))];
 
-    // Get unique stores dynamically
     const stores: Store[] = [
         { id: null, name: 'all' },
         { id: null, name: 'mouadvision' },
-        ... products
+        ...products
             .filter((p): p is Product & { sellerId: number; sellerName: string } =>
                 p.sellerId !== null && p.sellerId !== undefined &&
                 p.sellerName !== null && p.sellerName !== undefined
             )
             .reduce<Store[]>((acc, p) => {
-                if (!acc.find(s => s.name === p.sellerName)) {
+                if (! acc.find(s => s.name === p.sellerName)) {
                     acc.push({ id: p.sellerId, name: p.sellerName });
                 }
                 return acc;
             }, [])
     ];
 
+    // ✅ MODIFIED: Handle add to cart with stock check
     const handleAddToCart = (product: Product) => {
-        addToCart(product);
-        setToast({ message: `${product.productName} added to cart! `, type: 'success' });
+        const stockQuantity = product.stockQuantity || 0;
+        const currentInCart = getItemQuantity(product.asin);
+
+        // Check if out of stock
+        if (stockQuantity <= 0) {
+            setToast({ message: `${product.productName} is out of stock! `, type: 'error' });
+            return;
+        }
+
+        // Check if already at max quantity
+        if (currentInCart >= stockQuantity) {
+            setToast({
+                message: `Maximum quantity reached!  Only ${stockQuantity} available.`,
+                type: 'error'
+            });
+            return;
+        }
+
+        const added = addToCart(product);
+        if (added) {
+            setToast({ message: `${product.productName} added to cart!`, type: 'success' });
+        } else {
+            setToast({ message: 'Could not add to cart', type: 'error' });
+        }
     };
 
     if (loading) {
@@ -157,7 +174,6 @@ const ShopPage: React.FC = () => {
             {/* Filters */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-                    {/* Search */}
                     <div className="lg:col-span-2">
                         <div className="relative">
                             <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +189,6 @@ const ShopPage: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Category Filter */}
                     <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
@@ -186,7 +201,6 @@ const ShopPage: React.FC = () => {
                         ))}
                     </select>
 
-                    {/* Store Filter - NEW */}
                     <select
                         value={selectedStore}
                         onChange={(e) => setSelectedStore(e.target.value)}
@@ -203,7 +217,6 @@ const ShopPage: React.FC = () => {
                         ))}
                     </select>
 
-                    {/* Price Filter */}
                     <select
                         value={priceRange}
                         onChange={(e) => setPriceRange(e.target.value)}
@@ -218,7 +231,6 @@ const ShopPage: React.FC = () => {
                         <option value="1000-">$1000+</option>
                     </select>
 
-                    {/* Sort */}
                     <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
@@ -232,7 +244,6 @@ const ShopPage: React.FC = () => {
                     </select>
                 </div>
 
-                {/* Active Filters Display */}
                 {(selectedCategory !== 'all' || selectedStore !== 'all' || priceRange !== 'all') && (
                     <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <span className="text-sm text-gray-500">Active filters:</span>
@@ -244,7 +255,7 @@ const ShopPage: React.FC = () => {
                         )}
                         {selectedStore !== 'all' && (
                             <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm flex items-center gap-1">
-                                {selectedStore === 'mouadvision' ?  'MouadVision' : selectedStore}
+                                {selectedStore === 'mouadvision' ? 'MouadVision' : selectedStore}
                                 <button onClick={() => setSelectedStore('all')} className="ml-1 hover:text-green-600">×</button>
                             </span>
                         )}
@@ -273,109 +284,163 @@ const ShopPage: React.FC = () => {
                 Showing {filteredProducts.length} of {products.length} products
             </p>
 
-            {/* Products Grid */}
+            {/* Products Grid - ✅ MODIFIED */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredProducts.map((product) => (
-                    <div
-                        key={product.asin}
-                        className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group"
-                    >
-                        <Link to={`${shopBasePath}/product/${product.asin}`} className="block relative">
-                            <div className="aspect-square bg-gray-100 dark:bg-gray-700 overflow-hidden">
-                                {product.imageUrl ?  (
-                                    <img
-                                        src={product.imageUrl}
-                                        alt={product.productName}
-                                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                )}
-                            </div>
+                {filteredProducts.map((product) => {
+                    // ✅ NEW: Stock calculations
+                    const stockQuantity = product.stockQuantity || 0;
+                    const isOutOfStock = stockQuantity <= 0;
+                    const isLowStock = stockQuantity > 0 && stockQuantity <= 5;
+                    const inCartQuantity = getItemQuantity(product.asin);
+                    const canAddMore = stockQuantity > inCartQuantity;
 
-                            <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                                {product.ranking && product.ranking <= 10 && (
-                                    <span className="px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
-                                        🏆 Top {product.ranking}
-                                    </span>
-                                )}
-                                {product.isBestseller && (
-                                    <span className="px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
-                                        Best Seller
-                                    </span>
-                                )}
-                            </div>
-
-                            {isInCart(product.asin) && (
-                                <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
-                                    ✓ In Cart ({getItemQuantity(product.asin)})
-                                </div>
-                            )}
-                        </Link>
-
-                        <div className="p-4">
-                            <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">
-                                {product.categoryName || 'Uncategorized'}
-                            </p>
-
-                            {/* Store Badge - Clickable */}
-                            <div className="mb-2">
-                                <button
-                                    onClick={() => setSelectedStore(! product.sellerId ? 'mouadvision' : (product.sellerName || 'all'))}
-                                    className="inline-flex items-center hover:opacity-80 transition-opacity"
-                                >
-                                    {! product.sellerId ?  (
-                                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                            🏢 MouadVision
-                                        </span>
+                    return (
+                        <div
+                            key={product.asin}
+                            className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow group ${
+                                isOutOfStock ? 'opacity-75' : ''
+                            }`}
+                        >
+                            <Link to={`${shopBasePath}/product/${product.asin}`} className="block relative">
+                                <div className="aspect-square bg-gray-100 dark:bg-gray-700 overflow-hidden relative">
+                                    {product.imageUrl ?  (
+                                        <img
+                                            src={product.imageUrl}
+                                            alt={product.productName}
+                                            className={`w-full h-full object-contain group-hover:scale-105 transition-transform duration-300 ${
+                                                isOutOfStock ? 'grayscale' : ''
+                                            }`}
+                                        />
                                     ) : (
-                                        <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                            👤 {product.sellerName || 'Seller'}
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                            <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                    )}
+
+                                    {/* ✅ NEW: Out of Stock Overlay */}
+                                    {isOutOfStock && (
+                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                            <span className="bg-red-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg">
+                                                ❌ OUT OF STOCK
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Badges Container */}
+                                <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                                    {product.ranking && product.ranking <= 10 && (
+                                        <span className="px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
+                                            🏆 Top {product.ranking}
                                         </span>
                                     )}
-                                </button>
-                            </div>
-
-                            <Link to={`${shopBasePath}/product/${product.asin}`}>
-                                <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400 mb-2">
-                                    {product.productName}
-                                </h3>
-                            </Link>
-
-                            <div className="flex items-center gap-2 mb-3">
-                                {product.rating && (
-                                    <div className="flex items-center">
-                                        <span className="text-yellow-500">★</span>
-                                        <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">
-                                            {product.rating.toFixed(1)}
+                                    {product.isBestseller && (
+                                        <span className="px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
+                                            Best Seller
                                         </span>
+                                    )}
+                                    {/* ✅ NEW: Low Stock Badge */}
+                                    {isLowStock && ! isOutOfStock && (
+                                        <span className="px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
+                                            ⚠️ Only {stockQuantity} left!
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* In Cart Badge */}
+                                {isInCart(product.asin) && (
+                                    <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
+                                        ✓ In Cart ({inCartQuantity})
                                     </div>
                                 )}
-                                {product.reviewsCount && (
-                                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                                        ({product.reviewsCount.toLocaleString()} reviews)
-                                    </span>
-                                )}
-                            </div>
+                            </Link>
 
-                            <div className="flex items-center justify-between">
-                                <span className="text-xl font-bold text-gray-900 dark:text-white">
-                                    ${product.price.toFixed(2)}
-                                </span>
+                            <div className="p-4">
+                                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">
+                                    {product.categoryName || 'Uncategorized'}
+                                </p>
+
+                                <div className="mb-2">
+                                    <button
+                                        onClick={() => setSelectedStore(! product.sellerId ? 'mouadvision' : (product.sellerName || 'all'))}
+                                        className="inline-flex items-center hover:opacity-80 transition-opacity"
+                                    >
+                                        {! product.sellerId ?  (
+                                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                                🏢 MouadVision
+                                            </span>
+                                        ) : (
+                                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                                👤 {product.sellerName || 'Seller'}
+                                            </span>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <Link to={`${shopBasePath}/product/${product.asin}`}>
+                                    <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-2 hover:text-blue-600 dark:hover:text-blue-400 mb-2">
+                                        {product.productName}
+                                    </h3>
+                                </Link>
+
+                                <div className="flex items-center gap-2 mb-3">
+                                    {product.rating && (
+                                        <div className="flex items-center">
+                                            <span className="text-yellow-500">★</span>
+                                            <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">
+                                                {product.rating.toFixed(1)}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {product.reviewsCount && (
+                                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                                            ({product.reviewsCount.toLocaleString()} reviews)
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* ✅ MODIFIED: Price and Stock Info */}
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="text-xl font-bold text-gray-900 dark:text-white">
+                                        ${product.price.toFixed(2)}
+                                    </span>
+                                    {/* ✅ NEW: Stock quantity display */}
+                                    {! isOutOfStock && stockQuantity <= 10 && (
+                                        <span className={`text-xs font-medium ${
+                                            isLowStock ? 'text-orange-500' : 'text-gray-500 dark:text-gray-400'
+                                        }`}>
+                                            {stockQuantity} in stock
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* ✅ MODIFIED: Add to Cart Button with stock handling */}
                                 <button
                                     onClick={() => handleAddToCart(product)}
-                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                                    disabled={isOutOfStock || ! canAddMore}
+                                    className={`w-full px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                                        isOutOfStock
+                                            ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                            : ! canAddMore
+                                                ? 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 cursor-not-allowed'
+                                                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                    }`}
                                 >
-                                    Add to Cart
+                                    {isOutOfStock
+                                        ?  '❌ Out of Stock'
+                                        : ! canAddMore
+                                            ? `✓ Max in Cart (${inCartQuantity}/${stockQuantity})`
+                                            : isInCart(product.asin)
+                                                ?  `+ Add More (${inCartQuantity} in cart)`
+                                                : '🛒 Add to Cart'
+                                    }
                                 </button>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {filteredProducts.length === 0 && (

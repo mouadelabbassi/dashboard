@@ -112,6 +112,12 @@ export const sellerService = {
         return response. data.data;
     },
 
+    deleteMyProduct: async (asin: string): Promise<void> => {
+        await axios.delete(`${API_URL}/seller/products/${asin}`, {
+            headers: getAuthHeader(),
+        });
+    },
+
     getReviewSummary: async (): Promise<SellerReviewSummary> => {
         const response = await axios.get(`${API_URL}/seller/reviews/summary`, {
             headers: getAuthHeader(),

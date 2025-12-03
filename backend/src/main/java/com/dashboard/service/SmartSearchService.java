@@ -16,12 +16,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
@@ -39,13 +37,6 @@ public class SmartSearchService {
     private final ProductRepository productRepository;
     private final SearchHistoryRepository searchHistoryRepository;
     private final UserRepository userRepository;
-    private final RestTemplate restTemplate;
-
-    @Value("${ai.service.url:http://localhost:8000}")
-    private String aiServiceUrl;
-
-    @Value("${ai.service.enabled:true}")
-    private boolean aiServiceEnabled;
 
     @Transactional
     public SmartSearchResponse smartSearch(SmartSearchRequest request) {
@@ -53,19 +44,7 @@ public class SmartSearchService {
 
         try {
             User currentUser = getCurrentUser();
-
-            SmartSearchResponse response;
-
-            if (aiServiceEnabled) {
-                response = callAiService(request);
-
-                if (response == null || ! response.isSuccess()) {
-                    log.warn("AI service failed, falling back to local search");
-                    response = performLocalSearch(request);
-                }
-            } else {
-                response = performLocalSearch(request);
-            }
+            SmartSearchResponse response = performLocalSearch(request);
 
             if (currentUser != null && response != null) {
                 saveSearchHistory(currentUser, request, response);
@@ -75,36 +54,11 @@ public class SmartSearchService {
 
         } catch (Exception e) {
             log.error("Smart search failed: {}", e.getMessage(), e);
-            return performLocalSearch(request);
-        }
-    }
-
-    private SmartSearchResponse callAiService(SmartSearchRequest request) {
-        try {
-            String url = aiServiceUrl + "/api/ai/search";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<SmartSearchRequest> entity = new HttpEntity<>(request, headers);
-
-            ResponseEntity<SmartSearchResponse> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    entity,
-                    SmartSearchResponse.class
-            );
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return response.getBody();
-            } else {
-                log.error("AI service returned status: {}", response.getStatusCode());
-                return null;
-            }
-
-        } catch (Exception e) {
-            log.error("AI service communication error: {}", e.getMessage());
-            return null;
+            return SmartSearchResponse.builder()
+                    .success(false)
+                    .results(Collections.emptyList())
+                    .totalResults(0)
+                    .build();
         }
     }
 
@@ -112,55 +66,69 @@ public class SmartSearchService {
         long startTime = System.currentTimeMillis();
 
         try {
-            String query = request.getQuery().toLowerCase().trim();
+            String originalQuery = request.getQuery().trim();
+            String query = originalQuery.toLowerCase();
 
-            // Parse basic filters from query
+            // Extract filters
             Double maxPrice = extractMaxPrice(query);
             Double minRating = extractMinRating(query);
             String category = extractCategory(query);
-            String cleanKeyword = cleanQuery(query);
 
-            Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), Sort.by("ranking").ascending());
+            // Extract clean search term (product name to search for)
+            String searchTerm = extractSearchTerm(query);
 
-            Page<Product> products;
-            if (cleanKeyword.isEmpty()) {
-                products = productRepository.findByApprovalStatus("APPROVED", pageable);
-            } else {
-                products = productRepository.searchByKeyword(cleanKeyword, pageable);
-            }
+            log.info("Original query: {}", originalQuery);
+            log.info("Search term: {}, maxPrice: {}, minRating: {}, category: {}",
+                    searchTerm, maxPrice, minRating, category);
 
-            // Apply additional filters
+            // Build specification for dynamic query
+            Specification<Product> spec = buildSpecification(searchTerm, category, maxPrice, minRating);
+
+            Pageable pageable = PageRequest.of(
+                    request.getPage(),
+                    request.getSize(),
+                    Sort.by("ranking").ascending()
+            );
+
+            Page<Product> products = productRepository.findAll(spec, pageable);
+
             List<SmartSearchResponse.ProductSearchResult> results = products.getContent().stream()
-                    .filter(p -> maxPrice == null || (p.getPrice() != null && p.getPrice().doubleValue() <= maxPrice))
-                    .filter(p -> minRating == null || (p.getRating() != null && p.getRating().doubleValue() >= minRating))
-                    .filter(p -> category == null || (p.getCategory() != null && p.getCategory().getName().equalsIgnoreCase(category)))
                     .map(this::mapProductToResult)
                     .collect(Collectors.toList());
 
             double searchTime = System.currentTimeMillis() - startTime;
-
             String intent = determineIntent(query);
+
+            // Build keywords list (only meaningful words)
+            List<String> keywords = new ArrayList<>();
+            if (! searchTerm.isEmpty()) {
+                keywords.addAll(Arrays.asList(searchTerm.split("\\s+")));
+            }
+            if (category != null) {
+                keywords.add(category);
+            }
 
             return SmartSearchResponse.builder()
                     .success(true)
                     .query(SmartSearchResponse.ParsedQuery.builder()
-                            .originalQuery(request.getQuery())
+                            .originalQuery(originalQuery)
                             .normalizedQuery(query)
                             .intent(intent)
                             .confidence(0.7)
                             .entities(SmartSearchResponse.ExtractedEntities.builder()
-                                    .keywords(Arrays.asList(cleanKeyword.split("\\s+")))
+                                    .keywords(keywords)
                                     .maxPrice(maxPrice)
                                     .minRating(minRating)
                                     .category(category)
                                     .build())
                             .build())
                     .results(results)
-                    .totalResults(results.size())
+                    .totalResults((int) products.getTotalElements())
                     .searchTimeMs(searchTime)
-                    .suggestions(generateBasicSuggestions(query))
-                    .filtersApplied(buildFiltersMap(cleanKeyword, maxPrice, minRating, category))
+                    .suggestions(generateSuggestions(originalQuery))
+                    .filtersApplied(buildFiltersMap(searchTerm, maxPrice, minRating, category))
                     .build();
+
         } catch (Exception e) {
             log.error("Local search failed: {}", e.getMessage(), e);
             return SmartSearchResponse.builder()
@@ -171,88 +139,181 @@ public class SmartSearchService {
         }
     }
 
-    private Double extractMaxPrice(String query) {
-        try {
-            // Pattern: "sous 50", "moins de 50", "under 100", "< 50"
-            String[] patterns = {
-                    "sous\\s*(\\d+)",
-                    "moins\\s*de\\s*(\\d+)",
-                    "under\\s*(\\d+)",
-                    "below\\s*(\\d+)",
-                    "max\\s*(\\d+)",
-                    "<\\s*(\\d+)"
-            };
+    private Specification<Product> buildSpecification(String searchTerm, String category,
+                                                      Double maxPrice, Double minRating) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-            for (String patternStr : patterns) {
-                Pattern p = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
-                Matcher m = p.matcher(query);
-                if (m.find()) {
+            // Only approved products
+            predicates.add(cb.equal(root.get("approvalStatus"), Product.ApprovalStatus.APPROVED));
+
+            // Search term in product name
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                String searchPattern = "%" + searchTerm.toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("productName")), searchPattern),
+                        cb.like(cb.lower(root.get("asin")), searchPattern)
+                ));
+            }
+
+            // Category filter
+            if (category != null && !category.isEmpty()) {
+                predicates.add(cb.like(
+                        cb.lower(root.get("category").get("name")),
+                        "%" + category.toLowerCase() + "%"
+                ));
+            }
+
+            // Max price filter
+            if (maxPrice != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("price"), BigDecimal.valueOf(maxPrice)));
+            }
+
+            // Min rating filter
+            if (minRating != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("rating"), BigDecimal.valueOf(minRating)));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    private String extractSearchTerm(String query) {
+        String cleaned = query;
+
+        // Remove price-related phrases
+        cleaned = cleaned.replaceAll("sous\\s*\\$? \\d+", "");
+        cleaned = cleaned.replaceAll("moins\\s*de\\s*\\$?\\d+", "");
+        cleaned = cleaned.replaceAll("under\\s*\\$?\\d+", "");
+        cleaned = cleaned.replaceAll("\\$\\d+", "");
+        cleaned = cleaned.replaceAll("<\\s*\\d+", "");
+        cleaned = cleaned.replaceAll("\\d+\\s*euros? ", "");
+        cleaned = cleaned.replaceAll("\\d+\\s*\\$", "");
+
+        // Remove rating phrases
+        cleaned = cleaned.replaceAll("\\d+\\s*[eé]toiles?", "");
+        cleaned = cleaned.replaceAll("\\d+\\s*stars?", "");
+        cleaned = cleaned.replaceAll("bien\\s*not[eé]", "");
+        cleaned = cleaned.replaceAll("mieux\\s*not[eé]", "");
+
+        // Remove common filter words (but keep product-related words)
+        String[] filterWords = {
+                "meilleur", "meilleurs", "meilleure", "meilleures",
+                "best", "top", "pas cher", "cheap", "budget",
+                "nouveau", "nouveaux", "new", "prix", "price",
+                "produit", "produits", "product", "products",
+                "avec", "pour", "les", "des", "une", "the", "with", "for"
+        };
+
+        for (String word : filterWords) {
+            cleaned = cleaned.replaceAll("\\b" + word + "\\b", " ");
+        }
+
+        // Remove category words (they're used as filter)
+        String[] categoryWords = {
+                "electronique", "électronique", "electronics",
+                "livre", "livres", "books", "book",
+                "vetement", "vêtement", "clothing",
+                "maison", "home", "kitchen",
+                "jouet", "jouets", "toys",
+                "sport", "sports", "beaute", "beauté", "beauty"
+        };
+
+        for (String word : categoryWords) {
+            cleaned = cleaned.replaceAll("\\b" + word + "s? \\b", " ");
+        }
+
+        // Clean up whitespace
+        cleaned = cleaned.trim().replaceAll("\\s+", " ");
+
+        return cleaned;
+    }
+
+    private Double extractMaxPrice(String query) {
+        // Pattern: sous $50, moins de 50, under 100, $50
+        Pattern[] patterns = {
+                Pattern.compile("sous\\s*\\$?(\\d+)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("moins\\s*de\\s*\\$?(\\d+)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("under\\s*\\$?(\\d+)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("below\\s*\\$?(\\d+)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("<\\s*\\$?(\\d+)", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("\\$(\\d+)", Pattern.CASE_INSENSITIVE)
+        };
+
+        for (Pattern p : patterns) {
+            Matcher m = p.matcher(query);
+            if (m.find()) {
+                try {
                     return Double.parseDouble(m.group(1));
+                } catch (NumberFormatException e) {
+                    // ignore
                 }
             }
+        }
 
-            // Check for keywords
-            if (query.contains("pas cher") || query.contains("cheap") || query.contains("budget")) {
-                return 50.0;
-            }
-        } catch (Exception e) {
-            log.debug("Error extracting max price: {}", e.getMessage());
+        // Keywords for cheap products
+        if (query.contains("pas cher") || query.contains("cheap") || query.contains("budget")) {
+            return 50.0;
         }
 
         return null;
     }
 
     private Double extractMinRating(String query) {
-        try {
-            // Pattern: "4 etoiles", "4 stars", "4+"
-            String[] patterns = {
-                    "(\\d)\\s*etoiles? ",
-                    "(\\d)\\s*stars?",
-                    "(\\d)\\+",
-                    "note\\s*(\\d)"
-            };
+        // Pattern: 4 étoiles, 4 stars, 4+
+        Pattern[] patterns = {
+                Pattern.compile("(\\d)\\s*[eé]toiles?", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("(\\d)\\s*stars?", Pattern.CASE_INSENSITIVE),
+                Pattern.compile("(\\d)\\+", Pattern.CASE_INSENSITIVE)
+        };
 
-            for (String patternStr : patterns) {
-                Pattern p = Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
-                Matcher m = p.matcher(query);
-                if (m.find()) {
-                    return Double.parseDouble(m.group(1));
+        for (Pattern p : patterns) {
+            Matcher m = p.matcher(query);
+            if (m.find()) {
+                try {
+                    double rating = Double.parseDouble(m.group(1));
+                    if (rating >= 1 && rating <= 5) {
+                        return rating;
+                    }
+                } catch (NumberFormatException e) {
+                    // ignore
                 }
             }
+        }
 
-            // Check for keywords
-            if (query.contains("bien note") || query.contains("mieux note") ||
-                    query.contains("top rated") || query.contains("highly rated")) {
-                return 4.0;
-            }
-        } catch (Exception e) {
-            log.debug("Error extracting min rating: {}", e.getMessage());
+        // Keywords for well-rated products
+        if (query.contains("bien not") || query.contains("mieux not") ||
+                query.contains("top rated") || query.contains("highly rated")) {
+            return 4.0;
         }
 
         return null;
     }
 
     private String extractCategory(String query) {
-        Map<String, String> categoryKeywords = new HashMap<>();
-        categoryKeywords.put("electronique", "Electronics");
-        categoryKeywords.put("electronics", "Electronics");
-        categoryKeywords.put("tech", "Electronics");
-        categoryKeywords.put("livre", "Books");
-        categoryKeywords.put("livres", "Books");
-        categoryKeywords.put("books", "Books");
-        categoryKeywords.put("vetement", "Clothing");
-        categoryKeywords.put("clothing", "Clothing");
-        categoryKeywords.put("mode", "Clothing");
-        categoryKeywords.put("maison", "Home & Kitchen");
-        categoryKeywords.put("home", "Home & Kitchen");
-        categoryKeywords.put("jouet", "Toys & Games");
-        categoryKeywords.put("toys", "Toys & Games");
-        categoryKeywords.put("sport", "Sports & Outdoors");
-        categoryKeywords.put("sports", "Sports & Outdoors");
-        categoryKeywords.put("beaute", "Beauty");
-        categoryKeywords.put("beauty", "Beauty");
+        Map<String, String> categoryMap = new LinkedHashMap<>();
+        categoryMap.put("electronique", "Electronics");
+        categoryMap.put("électronique", "Electronics");
+        categoryMap.put("electronics", "Electronics");
+        categoryMap.put("tech", "Electronics");
+        categoryMap.put("livre", "Books");
+        categoryMap.put("livres", "Books");
+        categoryMap.put("books", "Books");
+        categoryMap.put("vetement", "Clothing");
+        categoryMap.put("vêtement", "Clothing");
+        categoryMap.put("clothing", "Clothing");
+        categoryMap.put("maison", "Home");
+        categoryMap.put("home", "Home");
+        categoryMap.put("jouet", "Toys");
+        categoryMap.put("jouets", "Toys");
+        categoryMap.put("toys", "Toys");
+        categoryMap.put("sport", "Sports");
+        categoryMap.put("sports", "Sports");
+        categoryMap.put("beaute", "Beauty");
+        categoryMap.put("beauté", "Beauty");
+        categoryMap.put("beauty", "Beauty");
 
-        for (Map.Entry<String, String> entry : categoryKeywords.entrySet()) {
+        for (Map.Entry<String, String> entry : categoryMap.entrySet()) {
             if (query.contains(entry.getKey())) {
                 return entry.getValue();
             }
@@ -261,53 +322,42 @@ public class SmartSearchService {
         return null;
     }
 
-    private String cleanQuery(String query) {
-        // Remove price patterns
-        query = query.replaceAll("sous\\s*\\d+", "");
-        query = query.replaceAll("moins\\s*de\\s*\\d+", "");
-        query = query.replaceAll("under\\s*\\d+", "");
-        query = query.replaceAll("<\\s*\\d+", "");
-        query = query.replaceAll("\\d+\\s*euros?", "");
-        query = query.replaceAll("\\d+\\s*dollars?", "");
-
-        // Remove rating patterns
-        query = query.replaceAll("\\d\\s*etoiles?", "");
-        query = query.replaceAll("\\d\\s*stars?", "");
-        query = query.replaceAll("bien note", "");
-        query = query.replaceAll("mieux note", "");
-
-        // Remove common filter words
-        String[] filterWords = {"pas cher", "cheap", "budget", "premium", "luxe", "meilleur", "best", "top", "nouveau", "new"};
-        for (String word : filterWords) {
-            query = query.replace(word, "");
-        }
-
-        return query.trim().replaceAll("\\s+", " ");
-    }
-
     private String determineIntent(String query) {
+        if (query.contains("meilleur") && (query.contains("prix") || query.contains("rapport"))) {
+            return "best_value";
+        }
         if (query.contains("meilleur") || query.contains("best") || query.contains("top")) {
-            if (query.contains("prix") || query.contains("price") || query.contains("rapport")) {
-                return "best_value";
-            }
             return "top_rated";
         }
         if (query.contains("pas cher") || query.contains("cheap") || query.contains("sous") || query.contains("under")) {
             return "price_filter";
         }
-        if (query.contains("nouveau") || query.contains("new") || query.contains("recent")) {
+        if (query.contains("nouveau") || query.contains("new")) {
             return "new_arrivals";
         }
-        if (query.contains("populaire") || query.contains("bestseller") || query.contains("tendance")) {
+        if (query.contains("populaire") || query.contains("bestseller")) {
             return "bestsellers";
         }
         return "product_search";
     }
 
-    private Map<String, Object> buildFiltersMap(String keyword, Double maxPrice, Double minRating, String category) {
+    private List<String> generateSuggestions(String query) {
+        List<String> suggestions = new ArrayList<>();
+        // Generate simple, non-accumulating suggestions
+        String baseQuery = query.split("\\s+")[0]; // Just first word
+        if (baseQuery.length() > 2) {
+            suggestions.add(baseQuery + " pas cher");
+            suggestions.add(baseQuery + " meilleur prix");
+            suggestions.add(baseQuery + " bien noté");
+        }
+        return suggestions;
+    }
+
+    private Map<String, Object> buildFiltersMap(String searchTerm, Double maxPrice,
+                                                Double minRating, String category) {
         Map<String, Object> filters = new HashMap<>();
-        if (keyword != null && !keyword.isEmpty()) {
-            filters.put("keyword", keyword);
+        if (searchTerm != null && !searchTerm.isEmpty()) {
+            filters.put("searchTerm", searchTerm);
         }
         if (maxPrice != null) {
             filters.put("maxPrice", maxPrice);
@@ -322,22 +372,16 @@ public class SmartSearchService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Product> searchWithFilters(
-            String keyword,
-            String category,
-            Double minPrice,
-            Double maxPrice,
-            Double minRating,
-            Integer minReviews,
-            Boolean isBestseller,
-            String sortBy,
-            String sortOrder,
-            Pageable pageable) {
+    public Page<Product> searchWithFilters(String keyword, String category, Double minPrice,
+                                           Double maxPrice, Double minRating, Integer minReviews,
+                                           Boolean isBestseller, String sortBy, String sortOrder,
+                                           Pageable pageable) {
+
+        log.info("searchWithFilters - keyword: {}, category: {}, maxPrice: {}", keyword, category, maxPrice);
 
         Specification<Product> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-
-            predicates.add(cb.equal(root.get("approvalStatus"), "APPROVED"));
+            predicates.add(cb.equal(root.get("approvalStatus"), Product.ApprovalStatus.APPROVED));
 
             if (keyword != null && !keyword.trim().isEmpty()) {
                 String searchTerm = "%" + keyword.toLowerCase() + "%";
@@ -348,7 +392,8 @@ public class SmartSearchService {
             }
 
             if (category != null && !category.trim().isEmpty()) {
-                predicates.add(cb.equal(root.get("category").get("name"), category));
+                predicates.add(cb.like(cb.lower(root.get("category").get("name")),
+                        "%" + category.toLowerCase() + "%"));
             }
 
             if (minPrice != null) {
@@ -374,40 +419,24 @@ public class SmartSearchService {
         };
 
         Sort sort = Sort.by("ranking").ascending();
-        if (sortBy != null && !sortBy.isEmpty()) {
+        if (sortBy != null && ! sortBy.isEmpty()) {
             sort = "desc".equalsIgnoreCase(sortOrder)
                     ? Sort.by(sortBy).descending()
                     : Sort.by(sortBy).ascending();
         }
 
         Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-
         return productRepository.findAll(spec, sortedPageable);
     }
 
     @Transactional(readOnly = true)
     public List<String> getSuggestions(String prefix, int limit) {
-        List<String> suggestions = new ArrayList<>();
-
         try {
-            List<String> historySuggestions = searchHistoryRepository
-                    .findSuggestionsByPrefix(prefix, PageRequest.of(0, limit));
-            suggestions.addAll(historySuggestions);
+            return productRepository.findProductNameSuggestions(prefix, PageRequest.of(0, limit));
         } catch (Exception e) {
-            log.warn("Error fetching history suggestions: {}", e.getMessage());
+            log.warn("Error fetching suggestions: {}", e.getMessage());
+            return Collections.emptyList();
         }
-
-        if (suggestions.size() < limit) {
-            try {
-                List<String> productSuggestions = productRepository
-                        .findProductNameSuggestions(prefix, PageRequest.of(0, limit - suggestions.size()));
-                suggestions.addAll(productSuggestions);
-            } catch (Exception e) {
-                log.warn("Error fetching product suggestions: {}", e.getMessage());
-            }
-        }
-
-        return suggestions.stream().distinct().limit(limit).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -428,7 +457,6 @@ public class SmartSearchService {
             if (currentUser == null) {
                 return Collections.emptyList();
             }
-
             return searchHistoryRepository.findRecentQueriesByUser(currentUser, PageRequest.of(0, limit));
         } catch (Exception e) {
             log.warn("Error fetching recent searches: {}", e.getMessage());
@@ -441,28 +469,17 @@ public class SmartSearchService {
             SearchHistory history = SearchHistory.builder()
                     .user(user)
                     .query(request.getQuery())
-                    .normalizedQuery(response.getQuery() != null ? response.getQuery().getNormalizedQuery() : request.getQuery().toLowerCase())
+                    .normalizedQuery(response.getQuery() != null ?
+                            response.getQuery().getNormalizedQuery() : request.getQuery().toLowerCase())
                     .intent(response.getQuery() != null ? response.getQuery().getIntent() : "unknown")
                     .resultsCount(response.getTotalResults())
                     .searchTimeMs(response.getSearchTimeMs())
                     .userRole(request.getUserRole())
                     .build();
-
             searchHistoryRepository.save(history);
         } catch (Exception e) {
             log.error("Failed to save search history: {}", e.getMessage());
         }
-    }
-
-    private List<String> generateBasicSuggestions(String query) {
-        List<String> suggestions = new ArrayList<>();
-        if (query.length() > 2) {
-            suggestions.add(query + " pas cher");
-            suggestions.add(query + " meilleur prix");
-            suggestions.add(query + " bien note");
-            suggestions.add("meilleur " + query);
-        }
-        return suggestions;
     }
 
     private SmartSearchResponse.ProductSearchResult mapProductToResult(Product product) {
@@ -484,7 +501,8 @@ public class SmartSearchService {
     private User getCurrentUser() {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
+            if (authentication != null && authentication.isAuthenticated() &&
+                    !"anonymousUser".equals(authentication.getPrincipal())) {
                 String email = authentication.getName();
                 return userRepository.findByEmail(email).orElse(null);
             }

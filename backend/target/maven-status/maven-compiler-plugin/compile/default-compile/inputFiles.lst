@@ -106,7 +106,6 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\reque
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\ProductRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\Category.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\StockDashboardResponse.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\JwtConfig.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\CategoryController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ReviewResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\DashboardResponse.java

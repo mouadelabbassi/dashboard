@@ -2,23 +2,23 @@ package com.dashboard.config;
 
 import com.dashboard.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context. annotation.Bean;
-import org.springframework. context.annotation.Configuration;
-import org. springframework.security.authentication.AuthenticationManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org. springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config. annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation. web.builders.HttpSecurity;
-import org.springframework.security.config.annotation. web.configuration.EnableWebSecurity;
-import org.springframework. security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework. security.config.http.SessionCreationPolicy;
-import org. springframework.security.core.userdetails. UserDetailsService;
-import org.springframework. security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security. crypto.password. PasswordEncoder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication. UsernamePasswordAuthenticationFilter;
-import org.springframework. web.cors.CorsConfigurationSource;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -28,12 +28,12 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
-    private final CorsConfigurationSource corsConfigurationSource; // Inject from CorsConfig
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors. configurationSource(corsConfigurationSource))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
@@ -45,17 +45,13 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/actuator/**",
-                                // AI Service endpoints - PUBLIC
-                                "/api/search/products/search/smart",
-                                "/api/search/smart",
-                                "/api/search/suggestions",
-                                "/api/search/trending",
-                                "/api/search/recent"
+                                // Smart Search endpoints - PUBLIC for AI service
+                                "/api/search/**"
                         ).permitAll()
                         // All other requests need authentication
                         .anyRequest().authenticated()
                 )
-                . sessionManagement(session -> session
+                .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authenticationProvider())

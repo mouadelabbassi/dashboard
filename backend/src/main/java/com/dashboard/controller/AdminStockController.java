@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -225,17 +226,35 @@ public class AdminStockController {
     @PostMapping("/notify-low-stock-sellers")
     @Operation(summary = "Notify all sellers with low stock", description = "Sends notifications to all sellers with low stock products")
     public ResponseEntity<ApiResponse<Map<String, Object>>> notifyAllLowStockSellers() {
-        List<Product> lowStockProducts = productRepository.findBySellerIsNotNullAndStockQuantityLessThan(10);
+        // Change 10 to a higher threshold (e.g., 15 or 20)
+        List<Product> lowStockProducts = productRepository.findBySellerIsNotNullAndStockQuantityLessThan(15);
+
+        log.info("Found {} low stock products from sellers", lowStockProducts.size());
+
+        if (lowStockProducts.isEmpty()) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("sellersNotified", 0);
+            result.put("productsAffected", 0);
+            result.put("message", "No sellers have low stock products");
+            return ResponseEntity.ok(ApiResponse.success("No low stock products found", result));
+        }
 
         Map<User, List<Product>> sellerProducts = new HashMap<>();
         for (Product product : lowStockProducts) {
-            sellerProducts.computeIfAbsent(product.getSeller(), k -> new java.util.ArrayList<>()).add(product);
+            if (product.getSeller() != null) {
+                sellerProducts.computeIfAbsent(product.getSeller(), k -> new ArrayList<>()).add(product);
+            }
         }
 
         int notificationsSent = 0;
         for (Map.Entry<User, List<Product>> entry : sellerProducts.entrySet()) {
-            notificationService.notifySellerMultipleLowStock(entry.getKey(), entry.getValue());
-            notificationsSent++;
+            try {
+                notificationService.notifySellerMultipleLowStock(entry.getKey(), entry.getValue());
+                notificationsSent++;
+                log.info("Sent low stock notification to seller: {}", entry.getKey().getEmail());
+            } catch (Exception e) {
+                log.error("Failed to notify seller {}: {}", entry.getKey().getEmail(), e.getMessage());
+            }
         }
 
         Map<String, Object> result = new HashMap<>();

@@ -110,6 +110,13 @@ public class SellerController {
         return ResponseEntity.ok(ApiResponse.success("Product retrieved", product));
     }
 
+    @DeleteMapping("/products/{asin}")
+    @Operation(summary = "Delete my product", description = "Deletes a product owned by the seller")
+    public ResponseEntity<ApiResponse<String>> deleteMyProduct(@PathVariable String asin) {
+        sellerService.deleteMyProduct(asin);
+        return ResponseEntity.ok(ApiResponse.success("Product deleted successfully", asin));
+    }
+
     @PutMapping("/products/{asin}")
     @Operation(summary = "Update my product", description = "Updates a product owned by the seller")
     public ResponseEntity<ApiResponse<ProductResponse>> updateMyProduct(

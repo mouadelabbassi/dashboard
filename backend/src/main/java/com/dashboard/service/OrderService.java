@@ -122,7 +122,7 @@ public class OrderService {
         User currentUser = getCurrentUser();
 
         if (! order.getUser().getId().equals(currentUser.getId())
-                && currentUser.getRole() != User.Role.ADMIN) {
+                && currentUser.getRole() != User.Role. ADMIN) {
             throw new BadRequestException("You can only confirm your own orders");
         }
 
@@ -130,55 +130,79 @@ public class OrderService {
             throw new BadRequestException("Only pending orders can be confirmed");
         }
 
+        // 1. Confirm the order first
         order.confirm();
         order = orderRepository.save(order);
         log.info("Order confirmed: {}", order.getOrderNumber());
 
-        // 1. Update product sales count
-        updateProductSalesCount(order);
-
-        if (order.getUser().getRole() == User.Role. SELLER) {
-            addPurchasedProductsToSellerStock(order);
+        // 2. Update product sales count
+        try {
+            updateProductSalesCount(order);
+        } catch (Exception e) {
+            log. error("Failed to update sales count: {}", e.getMessage());
         }
 
-        // 2.  CRITICAL: Process seller revenue
+        // 3. Add to seller stock if buyer is a seller
+        if (currentUser.getRole() == User.Role. SELLER) {
+            try {
+                addPurchasedProductsToSellerStock(order);
+            } catch (Exception e) {
+                log.error("Failed to add products to seller stock: {}", e. getMessage());
+                // Don't fail the order confirmation
+            }
+        }
+
+        // 4. Process seller revenue
         try {
             log.info("Processing seller revenue for order: {}", order.getOrderNumber());
             sellerRevenueService.processConfirmedOrderItems(order);
             log.info("Seller revenue processed successfully");
         } catch (Exception e) {
-            log.error("Failed to process seller revenue: {}", e.getMessage(), e);
+            log.error("Failed to process seller revenue: {}", e. getMessage(), e);
         }
 
-        // 3. CRITICAL: Send notifications to sellers
+        // 5. Send notifications to sellers
         try {
             log.info("Sending notifications for order: {}", order.getOrderNumber());
             sendPurchaseNotificationsToSellers(order);
             log.info("Notifications sent successfully");
         } catch (Exception e) {
-            log.error("Failed to send notifications: {}", e. getMessage(), e);
+            log.error("Failed to send notifications: {}", e.getMessage(), e);
         }
 
-        // 4. Create notification for buyer
-        createOrderNotification(order);
+        // 6. Create notification for buyer
+        try {
+            createOrderNotification(order);
+        } catch (Exception e) {
+            log.error("Failed to create buyer notification: {}", e.getMessage());
+        }
 
         return OrderResponse.fromEntity(order);
     }
 
     private void addPurchasedProductsToSellerStock(Order order) {
         User seller = order.getUser();
+
+        if (seller.getRole() != User.Role.SELLER) {
+            log.info("Buyer {} is not a seller, skipping stock addition", seller.getEmail());
+            return;
+        }
+
         for (OrderItem item : order. getItems()) {
             try {
                 sellerStockService. addToStock(
                         seller,
-                        item.getProduct(),
+                        item. getProduct(),
                         order,
-                        item.getQuantity(),
-                        item.getUnitPrice()
+                        item. getQuantity(),
+                        item. getUnitPrice()
                 );
+                log.info("Successfully added product {} to seller {} stock",
+                        item. getProduct().getAsin(), seller.getEmail());
             } catch (Exception e) {
-                log.error("Failed to add product {} to seller stock: {}",
-                        item.getProduct().getAsin(), e. getMessage());
+                log. error("Failed to add product {} to seller stock: {}",
+                        item.getProduct().getAsin(), e.getMessage(), e);
+                // Don't throw - continue with other items and don't rollback the order
             }
         }
     }

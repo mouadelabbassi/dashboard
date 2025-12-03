@@ -37,6 +37,7 @@ public class SellerService {
     private final CategoryRepository categoryRepository;
     private final NotificationService notificationService;
     private final ProductReviewRepository reviewRepository;
+    private final SellerStockRepository sellerStockRepository;
 
     private User getCurrentSeller() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -213,6 +214,30 @@ public class SellerService {
                 .revenueTrend(revenueTrend)
                 .topProducts(topProducts)
                 .build();
+    }
+
+    @Transactional
+    public void deleteMyProduct(String asin) {
+        User seller = getCurrentSeller();
+
+        Product product = productRepository. findByAsin(asin)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "asin", asin));
+
+        // Verify ownership
+        if (product.getSeller() == null || ! product.getSeller(). getId().equals(seller. getId())) {
+            throw new BadRequestException("You can only remove your own products");
+        }
+
+        // 1. Delete the seller's stock entry for this product
+        sellerStockRepository.deleteBySellerAndOriginalProductAsin(seller, asin);
+
+        // 2.  Remove product from seller's store (soft delete)
+        product.setApprovalStatus(Product.ApprovalStatus.REJECTED);
+        product.setStockQuantity(0);
+        product.setSeller(null);
+        productRepository.save(product);
+
+        log.info("Seller {} removed product {} from their store and stock", seller.getEmail(), asin);
     }
 
     // ========== SELLER ORDERS ==========

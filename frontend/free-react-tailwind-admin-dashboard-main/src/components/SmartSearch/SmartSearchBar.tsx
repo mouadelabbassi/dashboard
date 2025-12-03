@@ -11,9 +11,9 @@ interface SmartSearchBarProps {
     onSearch?: (query: string, results: any) => void;
     placeholder?: string;
     className?: string;
+    initialQuery?: string;
 }
 
-// Custom debounce function to avoid lodash dependency
 function debounce<T extends (...args: any[]) => any>(
     func: T,
     wait: number
@@ -28,9 +28,10 @@ function debounce<T extends (...args: any[]) => any>(
 const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
                                                            onSearch,
                                                            placeholder = "Recherche intelligente... (ex: 'produits électroniques sous $50')",
-                                                           className = ""
+                                                           className = "",
+                                                           initialQuery = ""
                                                        }) => {
-    const [query, setQuery] = useState('');
+    const [query, setQuery] = useState(initialQuery);
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -41,7 +42,13 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Determine base path based on current route
+    // Update query when initialQuery changes
+    useEffect(() => {
+        if (initialQuery) {
+            setQuery(initialQuery);
+        }
+    }, [initialQuery]);
+
     const getSearchResultsPath = () => {
         if (location.pathname.startsWith('/admin')) return '/admin/search';
         if (location.pathname.startsWith('/seller')) return '/seller/search';
@@ -49,7 +56,6 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
         return '/shop/search';
     };
 
-    // Fetch suggestions with debounce
     const fetchSuggestionsDebounced = useCallback(
         debounce(async (searchQuery: string) => {
             if (searchQuery.length < 2) {
@@ -67,23 +73,20 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
                 const data = response.data?.data;
                 const allSuggestions: Suggestion[] = [];
 
-                // Add autocomplete suggestions
                 if (data?.suggestions) {
                     data.suggestions.forEach((s: string) => {
                         allSuggestions.push({ text: s, type: 'suggestion' });
                     });
                 }
 
-                // Add trending
                 if (data?.trending && allSuggestions.length < 8) {
                     data.trending.slice(0, 3).forEach((s: string) => {
-                        if (!allSuggestions.find(x => x.text === s)) {
+                        if (! allSuggestions.find(x => x.text === s)) {
                             allSuggestions.push({ text: s, type: 'trending' });
                         }
                     });
                 }
 
-                // Add recent
                 if (data?.recent && allSuggestions.length < 10) {
                     data.recent.slice(0, 3).forEach((s: string) => {
                         if (!allSuggestions.find(x => x.text === s)) {
@@ -108,13 +111,12 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
         }
     }, [query, fetchSuggestionsDebounced]);
 
-    // Close suggestions when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
                 suggestionsRef.current &&
                 ! suggestionsRef.current.contains(event.target as Node) &&
-                ! inputRef.current?.contains(event.target as Node)
+                !inputRef.current?.contains(event.target as Node)
             ) {
                 setShowSuggestions(false);
             }
@@ -125,7 +127,8 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
     }, []);
 
     const handleSearch = async (searchQuery: string) => {
-        if (! searchQuery.trim()) return;
+        const trimmedQuery = searchQuery.trim();
+        if (! trimmedQuery) return;
 
         setLoading(true);
         setShowSuggestions(false);
@@ -137,7 +140,7 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
             const response = await axios.post(
                 'http://localhost:8080/api/search/smart',
                 {
-                    query: searchQuery,
+                    query: trimmedQuery,
                     userId: user?.id,
                     userRole: user?.role || 'BUYER',
                     page: 0,
@@ -149,11 +152,10 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
             const searchResults = response.data?.data;
 
             if (onSearch) {
-                onSearch(searchQuery, searchResults);
+                onSearch(trimmedQuery, searchResults);
             } else {
-                // Navigate to search results page
                 navigate(getSearchResultsPath(), {
-                    state: { query: searchQuery, results: searchResults }
+                    state: { query: trimmedQuery, results: searchResults }
                 });
             }
         } catch (error) {
@@ -167,8 +169,9 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
         if (e.key === 'Enter') {
             e.preventDefault();
             if (selectedIndex >= 0 && suggestions[selectedIndex]) {
-                handleSearch(suggestions[selectedIndex].text);
-                setQuery(suggestions[selectedIndex].text);
+                const selectedSuggestion = suggestions[selectedIndex].text;
+                setQuery(selectedSuggestion);
+                handleSearch(selectedSuggestion);
             } else {
                 handleSearch(query);
             }
@@ -181,6 +184,16 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
         } else if (e.key === 'Escape') {
             setShowSuggestions(false);
         }
+    };
+
+    const handleSuggestionClick = (suggestionText: string) => {
+        setQuery(suggestionText);
+        handleSearch(suggestionText);
+    };
+
+    const handleExampleClick = (example: string) => {
+        setQuery(example);
+        handleSearch(example);
     };
 
     const getSuggestionIcon = (type: string) => {
@@ -209,9 +222,8 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
     return (
         <div className={`relative ${className}`}>
             <div className="relative">
-                {/* Search Icon */}
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    {loading ? (
+                    {loading ?  (
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
                     ) : (
                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,7 +232,6 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
                     )}
                 </div>
 
-                {/* Input */}
                 <input
                     ref={inputRef}
                     type="text"
@@ -232,7 +243,6 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
                     className="w-full pl-12 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
 
-                {/* AI Badge */}
                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
                     <span className="px-2 py-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs font-bold rounded-full">
                         AI
@@ -240,7 +250,6 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
                 </div>
             </div>
 
-            {/* Suggestions Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
                 <div
                     ref={suggestionsRef}
@@ -250,10 +259,7 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
                         {suggestions.map((suggestion, index) => (
                             <button
                                 key={index}
-                                onClick={() => {
-                                    setQuery(suggestion.text);
-                                    handleSearch(suggestion.text);
-                                }}
+                                onClick={() => handleSuggestionClick(suggestion.text)}
                                 className={`w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
                                     selectedIndex === index ? 'bg-gray-100 dark:bg-gray-700' : ''
                                 }`}
@@ -272,16 +278,14 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
                         ))}
                     </div>
 
-                    {/* AI Hint */}
                     <div className="px-4 py-3 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-t border-gray-200 dark:border-gray-700">
                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                            💡 <strong>Astuce:</strong> Essayez "produits sous $50", "mieux notés", ou "livres avec +1000 avis"
+                            💡 <strong>Astuce:</strong> Essayez "iphone", "laptop sous $500", ou "headphones"
                         </p>
                     </div>
                 </div>
             )}
 
-            {/* Empty state with examples */}
             {showSuggestions && query.length === 0 && (
                 <div
                     ref={suggestionsRef}
@@ -289,22 +293,19 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
                 >
                     <div className="p-4">
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                            🔍 Exemples de recherche intelligente:
+                            🔍 Exemples de recherche:
                         </p>
                         <div className="space-y-2">
                             {[
-                                "Produits électroniques sous $50",
-                                "Livres avec +1000 reviews",
-                                "Meilleur rapport qualité-prix",
-                                "Nouveautés cette semaine",
-                                "iPhone pas cher bien noté"
+                                "iphone",
+                                "laptop",
+                                "headphones",
+                                "electronics sous $100",
+                                "books"
                             ].map((example, index) => (
                                 <button
                                     key={index}
-                                    onClick={() => {
-                                        setQuery(example);
-                                        handleSearch(example);
-                                    }}
+                                    onClick={() => handleExampleClick(example)}
                                     className="w-full text-left px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-sm text-gray-700 dark:text-gray-300 transition-colors"
                                 >
                                     {example}

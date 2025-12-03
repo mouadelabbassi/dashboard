@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Modifying;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -17,6 +18,8 @@ import java.util.Optional;
 public interface SellerStockRepository extends JpaRepository<SellerStock, Long> {
 
     Page<SellerStock> findBySellerOrderByPurchasedAtDesc(User seller, Pageable pageable);
+
+    Optional<SellerStock> findBySellerAndOriginalProductAsin(User seller, String originalProductAsin);
 
     Page<SellerStock> findBySellerAndStatusOrderByPurchasedAtDesc(
             User seller, SellerStock.StockStatus status, Pageable pageable);
@@ -46,4 +49,8 @@ public interface SellerStockRepository extends JpaRepository<SellerStock, Long> 
             "LOWER(s.originalProductAsin) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<SellerStock> searchBySellerAndQuery(
             @Param("seller") User seller, @Param("query") String query, Pageable pageable);
+
+    @Modifying
+    @Query("DELETE FROM SellerStock s WHERE s.seller = :seller AND s.originalProductAsin = :asin")
+    void deleteBySellerAndOriginalProductAsin(@Param("seller") User seller, @Param("asin") String asin);
 }

@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import SmartSearchBar from '../components/SmartSearch/SmartSearchBar';
 import SearchResults from '../components/SmartSearch/SearchResults';
 
 const SearchResultsPage: React.FC = () => {
     const location = useLocation();
-    useNavigate();
     const [searchData, setSearchData] = useState<any>(location.state || null);
     const [loading, setLoading] = useState(false);
+    const [currentQuery, setCurrentQuery] = useState('');
 
-    // Determine base path for product links
+    // Update search data when location state changes
+    useEffect(() => {
+        if (location.state) {
+            setSearchData(location.state);
+            setCurrentQuery(location.state.query || '');
+        }
+    }, [location.state]);
+
     const getBasePath = () => {
         if (location.pathname.startsWith('/admin')) return '/admin';
         if (location.pathname.startsWith('/seller')) return '/seller/shop';
@@ -19,11 +26,14 @@ const SearchResultsPage: React.FC = () => {
     };
 
     const handleSearch = async (query: string, results?: any) => {
+        // If results are already provided, use them directly
         if (results) {
             setSearchData({ query, results });
+            setCurrentQuery(query);
             return;
         }
 
+        // Otherwise fetch new results
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -32,7 +42,7 @@ const SearchResultsPage: React.FC = () => {
             const response = await axios.post(
                 'http://localhost:8080/api/search/smart',
                 {
-                    query,
+                    query: query,  // Use the new query directly, not accumulated
                     userId: user?.id,
                     userRole: user?.role || 'BUYER',
                     page: 0,
@@ -42,6 +52,7 @@ const SearchResultsPage: React.FC = () => {
             );
 
             setSearchData({ query, results: response.data?.data });
+            setCurrentQuery(query);
         } catch (error) {
             console.error('Search error:', error);
         } finally {
@@ -49,7 +60,9 @@ const SearchResultsPage: React.FC = () => {
         }
     };
 
+    // When clicking a suggestion, use it as the NEW query (not append)
     const handleSuggestionClick = (suggestion: string) => {
+        setCurrentQuery(suggestion);
         handleSearch(suggestion);
     };
 
@@ -60,6 +73,7 @@ const SearchResultsPage: React.FC = () => {
                 <SmartSearchBar
                     onSearch={handleSearch}
                     placeholder="Continuez votre recherche..."
+                    initialQuery={currentQuery}
                 />
             </div>
 
@@ -94,7 +108,6 @@ const SearchResultsPage: React.FC = () => {
                     </h3>
                     <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
                         Utilisez la barre de recherche ci-dessus pour trouver des produits.
-                        Essayez des requêtes naturelles comme "produits électroniques sous $50" ou "livres bien notés".
                     </p>
                 </div>
             )}

@@ -14,10 +14,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -43,31 +46,66 @@ public class SellerStockService {
         return user;
     }
 
-    /**
-     * Add purchased product to seller's stock (called after order confirmation)
-     */
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public SellerStock addToStock(User seller, Product product, Order order, int quantity, BigDecimal purchasePrice) {
-        SellerStock stock = SellerStock.builder()
-                .seller(seller)
-                .originalProductAsin(product.getAsin())
-                .originalProductName(product.getProductName())
-                .originalProductImage(product.getImageUrl())
-                .originalPrice(product.getPrice())
-                .purchasePrice(purchasePrice)
-                .quantity(quantity)
-                .availableQuantity(quantity)
-                .orderId(order.getId())
-                .orderNumber(order.getOrderNumber())
-                .category(product.getCategory())
-                .description(product.getDescription())
-                .status(SellerStock.StockStatus.IN_STOCK)
-                .build();
+        // Check if seller already has this product in stock
+        Optional<SellerStock> existingStock = stockRepository.findBySellerAndOriginalProductAsin(seller, product.getAsin());
 
-        stock = stockRepository.save(stock);
-        log.info("Added {} units of {} to seller {} stock", quantity, product.getAsin(), seller.getEmail());
+        if (existingStock.isPresent()) {
+            // Update existing stock entry
+            SellerStock stock = existingStock.get();
+            int oldQuantity = stock.getQuantity();
+            int oldAvailable = stock.getAvailableQuantity();
 
-        return stock;
+            stock.setQuantity(oldQuantity + quantity);
+            stock.setAvailableQuantity(oldAvailable + quantity);
+
+            // Update purchase price to average if different
+            if (purchasePrice != null && stock.getPurchasePrice() != null) {
+                BigDecimal totalOldValue = stock.getPurchasePrice().multiply(BigDecimal.valueOf(oldQuantity));
+                BigDecimal totalNewValue = purchasePrice.multiply(BigDecimal.valueOf(quantity));
+                BigDecimal averagePrice = totalOldValue.add(totalNewValue)
+                        .divide(BigDecimal.valueOf(oldQuantity + quantity), 2, RoundingMode.HALF_UP);
+                stock.setPurchasePrice(averagePrice);
+            }
+
+            // Update status based on available quantity
+            if (stock.getAvailableQuantity() > 0) {
+                if (stock.getAvailableQuantity() < stock.getQuantity()) {
+                    stock.setStatus(SellerStock.StockStatus.PARTIALLY_LISTED);
+                } else {
+                    stock.setStatus(SellerStock.StockStatus.IN_STOCK);
+                }
+            }
+
+            stock = stockRepository.save(stock);
+            log.info("Updated existing stock for seller {}: product {} now has {} units (added {})",
+                    seller.getEmail(), product.getAsin(), stock.getQuantity(), quantity);
+
+            return stock;
+        } else {
+            // Create new stock entry
+            SellerStock stock = SellerStock.builder()
+                    .seller(seller)
+                    .originalProductAsin(product.getAsin())
+                    .originalProductName(product.getProductName())
+                    .originalProductImage(product.getImageUrl())
+                    .originalPrice(product.getPrice())
+                    .purchasePrice(purchasePrice)
+                    .quantity(quantity)
+                    .availableQuantity(quantity)
+                    .orderId(order.getId())
+                    .orderNumber(order.getOrderNumber())
+                    .category(product.getCategory())
+                    .description(product.getDescription())
+                    .status(SellerStock.StockStatus.IN_STOCK)
+                    .build();
+
+            stock = stockRepository.save(stock);
+            log.info("Added {} units of {} to seller {} stock (new entry)", quantity, product.getAsin(), seller.getEmail());
+
+            return stock;
+        }
     }
 
     /**

@@ -50,7 +50,6 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
 
     Page<Product> findByStockQuantityGreaterThanEqual(Integer threshold, Pageable pageable);
 
-
     @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND " +
             "(LOWER(p.productName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
             "LOWER(p.description) LIKE LOWER(CONCAT('%', :query, '%')))")
@@ -76,8 +75,6 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     BigDecimal calculateAveragePrice();
 
     @Query("SELECT AVG(p.rating) FROM Product p WHERE p.approvalStatus = 'APPROVED'")
-
-
     BigDecimal calculateAverageRating();
 
     // Seller-specific queries
@@ -132,16 +129,69 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     @Query("SELECT p FROM Product p WHERE p.stockQuantity = :quantity")
     Page<Product> findByStockQuantityEqualsPageable(@Param("quantity") Integer quantity, Pageable pageable);
 
+    // =====================================================
+    // SMART SEARCH METHODS - Added for AI Search feature
+    // =====================================================
+
+    // Find by approval status string (for SmartSearchService)
+    @Query("SELECT p FROM Product p WHERE p.approvalStatus = :status")
+    Page<Product> findByApprovalStatusString(@Param("status") String status, Pageable pageable);
+
+    // Search by keyword in product name and ASIN
     @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND " +
             "(LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(p. description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(p.asin) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Product> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
+    // Product name suggestions for autocomplete
     @Query("SELECT DISTINCT p.productName FROM Product p WHERE " +
             "LOWER(p.productName) LIKE LOWER(CONCAT(:prefix, '%')) AND p.approvalStatus = 'APPROVED'")
     List<String> findProductNameSuggestions(@Param("prefix") String prefix, Pageable pageable);
 
-    Page<Product> findByApprovalStatus(String status, Pageable pageable);
+    // Find bestsellers
+    @Query("SELECT p FROM Product p WHERE p.isBestseller = true AND p.approvalStatus = 'APPROVED'")
+    Page<Product> findBestsellers(Pageable pageable);
 
+    // Find by price range
+    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND p.price BETWEEN :minPrice AND :maxPrice")
+    Page<Product> findByPriceRange(@Param("minPrice") BigDecimal minPrice, @Param("maxPrice") BigDecimal maxPrice, Pageable pageable);
+
+    // Find by minimum rating
+    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND p.rating >= :minRating")
+    Page<Product> findByMinRating(@Param("minRating") BigDecimal minRating, Pageable pageable);
+
+    // Low stock products
+    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND p.stockQuantity <= :threshold")
+    Page<Product> findLowStockProducts(@Param("threshold") int threshold, Pageable pageable);
+
+    // Top rated products
+    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' ORDER BY p.rating DESC")
+    Page<Product> findTopRated(Pageable pageable);
+
+    // Most reviewed products
+    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' ORDER BY p.reviewsCount DESC")
+    Page<Product> findMostReviewed(Pageable pageable);
+
+    // Search in category
+    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND p.category = :category AND " +
+            "(LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Product> searchInCategory(@Param("category") Category category, @Param("keyword") String keyword, Pageable pageable);
+
+    // Find by category and approved
+    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND p.category = :category")
+    Page<Product> findByCategoryAndApproved(@Param("category") Category category, Pageable pageable);
+
+    // Advanced search with multiple filters
+    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' " +
+            "AND (:keyword IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:minPrice IS NULL OR p.price >= :minPrice) " +
+            "AND (:maxPrice IS NULL OR p.price <= :maxPrice) " +
+            "AND (:minRating IS NULL OR p.rating >= :minRating)")
+    Page<Product> advancedSearch(
+            @Param("keyword") String keyword,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
+            @Param("minRating") BigDecimal minRating,
+            Pageable pageable
+    );
 }
