@@ -3,12 +3,14 @@ import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import SmartSearchBar from '../components/SmartSearch/SmartSearchBar';
 import SearchResults from '../components/SmartSearch/SearchResults';
+import SearchHistoryPanel from '../components/SmartSearch/SearchHistoryPanel';
 
 const SearchResultsPage: React.FC = () => {
     const location = useLocation();
     const [searchData, setSearchData] = useState<any>(location.state || null);
     const [loading, setLoading] = useState(false);
     const [currentQuery, setCurrentQuery] = useState('');
+    const [showHistory, setShowHistory] = useState(false);
 
     // Update search data when location state changes
     useEffect(() => {
@@ -32,6 +34,25 @@ const SearchResultsPage: React.FC = () => {
             setCurrentQuery(query);
             return;
         }
+
+        {/* Bouton toggle historique */}
+        <div className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl shadow p-4">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Résultats de Recherche</h1>
+            <button
+                onClick={() => setShowHistory(!showHistory)}
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
+            >
+                {showHistory ? '📋 Masquer l\'historique' : '📜 Afficher l\'historique'}
+            </button>
+        </div>
+
+        {/* Panel d'historique */}
+        {showHistory && (
+            <SearchHistoryPanel
+                onSelectQuery={handleSuggestionClick}
+                className="mb-6"
+            />
+        )}
 
         // Otherwise fetch new results
         setLoading(true);

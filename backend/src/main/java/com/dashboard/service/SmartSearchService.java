@@ -67,6 +67,42 @@ public class SmartSearchService {
 
         try {
             String originalQuery = request.getQuery().trim();
+            String queryUpper = originalQuery.toUpperCase();
+
+            // PRIORITY 1: ASIN Search
+            if (isAsinSearch(queryUpper)) {
+                log.info("🏷️ ASIN search detected: {}", queryUpper);
+                Optional<Product> product = productRepository.findByAsin(queryUpper);
+
+                if (product.isPresent()) {
+                    List<SmartSearchResponse.ProductSearchResult> results =
+                            List.of(mapProductToResult(product.get()));
+
+                    double searchTime = System.currentTimeMillis() - startTime;
+
+                    return SmartSearchResponse.builder()
+                            .success(true)
+                            .query(SmartSearchResponse.ParsedQuery.builder()
+                                    .originalQuery(originalQuery)
+                                    .normalizedQuery(queryUpper)
+                                    .intent("product_search")
+                                    .confidence(1.0)
+                                    .entities(SmartSearchResponse.ExtractedEntities.builder()
+                                            .keywords(List.of(queryUpper))
+                                            .build())
+                                    .build())
+                            .results(results)
+                            .totalResults(1)
+                            .searchTimeMs(searchTime)
+                            .suggestions(List.of())
+                            .filtersApplied(Map.of("asin", queryUpper))
+                            .build();
+                } else {
+                    log.warn("ASIN not found: {}", queryUpper);
+                }
+            }
+
+            // PRIORITY 2: Regular search (existing code continues here)
             String query = originalQuery.toLowerCase();
 
             // Extract filters
@@ -137,6 +173,10 @@ public class SmartSearchService {
                     .totalResults(0)
                     .build();
         }
+    }
+
+    private boolean isAsinSearch(String query) {
+        return query.matches("^B0[A-Z0-9]{8}$");
     }
 
     private Specification<Product> buildSpecification(String searchTerm, String category,

@@ -15,6 +15,20 @@ class EntityExtractor:
         entities = ExtractedEntities()
         query_lower = query.lower().strip()
         
+        # Extract ASIN (format: B0XXXXXXXX)
+        asin = self._extract_asin(query)
+        if asin:
+            entities.keywords = [asin]
+            logger.info(f"Detected ASIN search: {asin}")
+            return entities
+        
+        # Extract product name (if searching by name)
+        product_name = self._extract_product_name(query_lower)
+        if product_name:
+            entities.keywords = [product_name]
+            logger.info(f"Detected product name search: {product_name}")
+        
+        # Extract filters
         min_price, max_price = self.patterns.extract_price(query_lower)
         entities.min_price = min_price
         entities.max_price = max_price
@@ -29,10 +43,52 @@ class EntityExtractor:
         if any(word in query_lower for word in ["bestseller", "best-seller", "best seller", "meilleure vente"]):
             entities.is_bestseller = True
         
-        entities.keywords = self._extract_keywords(query)
+        # If no specific keywords extracted, use general keywords
+        if not entities.keywords:
+            entities.keywords = self._extract_keywords(query)
+        
         return entities
     
+    def _extract_asin(self, query: str) -> str | None:
+        """Extract ASIN from query (format: B0XXXXXXXX)"""
+        # ASIN pattern: starts with B0, followed by 8 alphanumeric characters
+        asin_pattern = r'\b(B0[A-Z0-9]{8})\b'
+        match = re.search(asin_pattern, query.upper())
+        if match:
+            return match.group(1)
+        return None
+    
+    def _extract_product_name(self, query: str) -> str | None:
+        """Extract specific product name if present"""
+        # Remove filter words but keep product-related terms
+        filter_patterns = [
+            r'sous\s*\$?\d+', r'moins\s*de\s*\$?\d+', r'under\s*\$?\d+',
+            r'\d+\s*[eé]toiles?', r'\d+\s*stars?', r'bien\s*not[eé]',
+            r'meilleur', r'best', r'pas\s*cher', r'cheap', r'nouveau', r'new'
+        ]
+        
+        cleaned = query
+        for pattern in filter_patterns:
+            cleaned = re.sub(pattern, ' ', cleaned, flags=re.IGNORECASE)
+        
+        # Remove category keywords
+        category_words = ['electronique', 'électronique', 'electronics', 'livre', 'livres', 
+                         'books', 'vetement', 'vêtement', 'clothing', 'maison', 'home']
+        for word in category_words:
+            cleaned = re.sub(r'\b' + word + r's?\b', ' ', cleaned, flags=re.IGNORECASE)
+        
+        # Clean and extract
+        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        
+        # If remaining text is meaningful (not just stop words)
+        if len(cleaned) > 2 and not all(word in ['le', 'la', 'les', 'un', 'une', 'des'] 
+                                         for word in cleaned.split()):
+            return cleaned
+        
+        return None
+    
     def _extract_keywords(self, query: str) -> List[str]:
+        """Extract general keywords from query"""
         stopwords = {
             "le", "la", "les", "un", "une", "des", "du", "de", "à", "au", "aux",
             "et", "ou", "mais", "pour", "par", "sur", "sous", "dans", "avec",

@@ -27,7 +27,7 @@ function debounce<T extends (...args: any[]) => any>(
 
 const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
                                                            onSearch,
-                                                           placeholder = "Recherche intelligente... (ex: 'produits électroniques sous $50')",
+                                                           placeholder = "Recherche intelligente... (ex: 'laptop', 'B0XXXXXX', 'iPhone 13')",
                                                            className = "",
                                                            initialQuery = ""
                                                        }) => {
@@ -56,6 +56,50 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
         return '/shop/search';
     };
 
+    // Fonction pour détecter le type de recherche
+    const detectSearchType = (searchQuery: string): string => {
+        // ASIN pattern: B0 + 8 alphanumeric
+        if (/^B0[A-Z0-9]{8}$/i.test(searchQuery.trim())) {
+            return 'ASIN';
+        }
+        // Product name: contains letters
+        if (/[a-zA-Z]{3,}/.test(searchQuery)) {
+            return 'Product Name';
+        }
+        return 'Keyword';
+    };
+
+    // Fonction pour afficher l'indicateur de type
+    const getSearchTypeIndicator = () => {
+        if (!query) return null;
+        const type = detectSearchType(query);
+
+        const indicators = {
+            'ASIN': {
+                icon: '🏷️',
+                text: 'ASIN',
+                color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+            },
+            'Product Name': {
+                icon: '📦',
+                text: 'Nom',
+                color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+            },
+            'Keyword': {
+                icon: '🔍',
+                text: 'Mot-clé',
+                color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+            }
+        };
+
+        const indicator = indicators[type as keyof typeof indicators];
+        return (
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${indicator.color}`}>
+                {indicator.icon} {indicator.text}
+            </span>
+        );
+    };
+
     const fetchSuggestionsDebounced = useCallback(
         debounce(async (searchQuery: string) => {
             if (searchQuery.length < 2) {
@@ -81,7 +125,7 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
 
                 if (data?.trending && allSuggestions.length < 8) {
                     data.trending.slice(0, 3).forEach((s: string) => {
-                        if (! allSuggestions.find(x => x.text === s)) {
+                        if (!allSuggestions.find(x => x.text === s)) {
                             allSuggestions.push({ text: s, type: 'trending' });
                         }
                     });
@@ -115,7 +159,7 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
         const handleClickOutside = (event: MouseEvent) => {
             if (
                 suggestionsRef.current &&
-                ! suggestionsRef.current.contains(event.target as Node) &&
+                !suggestionsRef.current.contains(event.target as Node) &&
                 !inputRef.current?.contains(event.target as Node)
             ) {
                 setShowSuggestions(false);
@@ -128,7 +172,7 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
 
     const handleSearch = async (searchQuery: string) => {
         const trimmedQuery = searchQuery.trim();
-        if (! trimmedQuery) return;
+        if (!trimmedQuery) return;
 
         setLoading(true);
         setShowSuggestions(false);
@@ -223,7 +267,7 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
         <div className={`relative ${className}`}>
             <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    {loading ?  (
+                    {loading ? (
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
                     ) : (
                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,10 +284,11 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
                     onFocus={() => setShowSuggestions(true)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
-                    className="w-full pl-12 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full pl-12 pr-32 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 />
 
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center gap-2">
+                    {query && getSearchTypeIndicator()}
                     <span className="px-2 py-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs font-bold rounded-full">
                         AI
                     </span>
@@ -280,7 +325,7 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
 
                     <div className="px-4 py-3 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border-t border-gray-200 dark:border-gray-700">
                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                            💡 <strong>Astuce:</strong> Essayez "iphone", "laptop sous $500", ou "headphones"
+                            💡 <strong>Astuce:</strong> Tapez un ASIN (ex: B0XXXXXXXX), nom de produit ou mot-clé
                         </p>
                     </div>
                 </div>
@@ -299,9 +344,9 @@ const SmartSearchBar: React.FC<SmartSearchBarProps> = ({
                             {[
                                 "iphone",
                                 "laptop",
-                                "headphones",
-                                "electronics sous $100",
-                                "books"
+                                "B0ABCD1234",
+                                "laptop sous $500",
+                                "téléphone bien noté"
                             ].map((example, index) => (
                                 <button
                                     key={index}
