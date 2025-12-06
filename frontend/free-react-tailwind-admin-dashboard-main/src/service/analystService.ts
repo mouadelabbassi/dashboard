@@ -1,4 +1,5 @@
 import axios from 'axios';
+import api from './api';
 
 const API_URL = import.meta.env. VITE_API_URL || 'http://localhost:8080/api';
 
@@ -177,11 +178,9 @@ export const analystService = {
         return response.data.data;
     },
 
-    getBestsellerTrends: async () => {
-        const response = await axios.get(`${API_URL}/analyst/products/bestseller-trends`, {
-            headers: getAuthHeader(),
-        });
-        return response.data.data;
+    getBestsellerTrends: async (): Promise<any[]> => {
+        const response = await api.get('/analyst/products/bestseller-trends');
+        return response. data. data || [];
     },
 
     // ==================== SELLER ANALYTICS ====================

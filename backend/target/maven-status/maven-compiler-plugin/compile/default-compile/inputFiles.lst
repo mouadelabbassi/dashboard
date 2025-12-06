@@ -56,6 +56,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\reque
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\SellerRegisterRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\OpenApiConfig.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\DashboardApplication.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AdminDashboardController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\OrderItem.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\SellerRevenueRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\CorsConfig.java

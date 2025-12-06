@@ -14,6 +14,8 @@ import {
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
 import { analystService, SalesTrendPoint, CategorySales } from '../../service/analystService';
+import ExportPDFButton from '../../components/ExportPDFButton';
+
 
 ChartJS.register(
     CategoryScale,
@@ -174,6 +176,7 @@ const AnalystDashboard: React.FC = () => {
                     <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                     Live Data
                 </div>
+                <ExportPDFButton type="admin" />
             </div>
 
             {/* KPI Cards */}

@@ -1,224 +1,286 @@
+"""
+🔍 Smart Search Service - Direct Database Access (MySQL)
+"""
 import logging
 import time
-import httpx
-from typing import List, Dict, Any
-from urllib.parse import urlencode
-from app.config import settings
-from app.models. search_models import (
-    SmartSearchRequest, SmartSearchResponse, ParsedQuery,
-    ProductResult, ExtractedEntities, SearchIntent
+from typing import List, Dict, Any, Optional
+from sqlalchemy import text
+from app.database import get_db
+from app.services.nlp_engine import get_nlp_engine, ParsedQuery, SearchIntent
+from app.models.search_models import (
+    SmartSearchRequest, SmartSearchResponse, ProductResult,
+    ParsedQueryResponse, ExtractedEntities
 )
-from app.services.embedding_service import get_embedding_service
-from app.services. intent_classifier import get_intent_classifier
-from app.services. entity_extractor import get_entity_extractor
 
 logger = logging.getLogger(__name__)
 
 
 class SearchService:
+    """
+    🎯 Intelligent Search Service with Direct MySQL Access
+    """
+
     def __init__(self):
-        self.spring_boot_url = settings. SPRING_BOOT_URL
-        self.embedding_service = get_embedding_service()
-        self.intent_classifier = get_intent_classifier()
-        self.entity_extractor = get_entity_extractor()
-    
+        self.nlp = get_nlp_engine()
+        logger.info("🔍 Search Service initialized with direct DB access")
+
     async def smart_search(self, request: SmartSearchRequest) -> SmartSearchResponse:
-        start_time = time. time()
-        
+        """
+        🚀 Main search method
+        """
+        start_time = time.time()
+
         try:
-            parsed_query = self._parse_query(request.query)
-            search_params = self._build_search_params(parsed_query, request)
-            products = await self._fetch_products(search_params)
-            
-            if parsed_query.embedding and products and self.embedding_service. is_available():
-                products = self._rank_by_similarity(products, parsed_query.embedding)
-            
-            suggestions = self._generate_suggestions(request.query, parsed_query)
-            search_time_ms = (time. time() - start_time) * 1000
-            
+            # 1. Parse query with NLP
+            parsed = self.nlp.parse(request.query)
+
+            # 2. Search database directly
+            products = self._search_database(parsed, request.page, request.size)
+
+            # 3. Build response
+            search_time_ms = (time.time() - start_time) * 1000
+
             return SmartSearchResponse(
                 success=True,
-                query=parsed_query,
+                query=ParsedQueryResponse(
+                    original_query=parsed.original,
+                    normalized_query=parsed.normalized,
+                    intent=parsed.intent.value,
+                    confidence=parsed.confidence,
+                    entities=ExtractedEntities(
+                        keywords=parsed.keywords,
+                        search_terms=parsed.search_terms,
+                        category=parsed.category,
+                        min_price=parsed.min_price,
+                        max_price=parsed.max_price,
+                        min_rating=parsed.min_rating,
+                        min_reviews=parsed.min_reviews,
+                        brand=parsed.brand,
+                        sort_by=parsed.sort_by,
+                        sort_order=parsed.sort_order,
+                        is_bestseller=parsed.is_bestseller,
+                    )
+                ),
                 results=products,
                 total_results=len(products),
                 search_time_ms=search_time_ms,
-                suggestions=suggestions,
-                filters_applied=search_params
+                suggestions=self._generate_suggestions(parsed),
+                filters_applied={
+                    "search_terms": parsed.search_terms,
+                    "category": parsed.category,
+                    "max_price": parsed.max_price,
+                    "min_rating": parsed.min_rating,
+                    "min_reviews": parsed.min_reviews,
+                }
             )
+
         except Exception as e:
-            logger.error(f"Search failed: {e}")
-            import traceback
-            traceback.print_exc()
-            
+            logger.error(f"❌ Search failed: {e}", exc_info=True)
             return SmartSearchResponse(
                 success=False,
-                query=ParsedQuery(
-                    original_query=request. query,
-                    normalized_query=request.query. lower(),
-                    intent=SearchIntent. PRODUCT_SEARCH,
+                query=ParsedQueryResponse(
+                    original_query=request.query,
+                    normalized_query=request.query.lower(),
+                    intent="product_search",
                     confidence=0.0,
                     entities=ExtractedEntities()
                 ),
                 results=[],
                 total_results=0,
-                search_time_ms=(time.time() - start_time) * 1000,
-                suggestions=[]
+                search_time_ms=0,
+                suggestions=[],
+                filters_applied={}
             )
-    
-    def _parse_query(self, query: str) -> ParsedQuery:
-        normalized = query.lower(). strip()
-        intent, confidence = self.intent_classifier.classify(query)
-        entities = self.entity_extractor.extract(query)
-        
-        embedding = None
-        if self. embedding_service.is_available():
-            try:
-                embedding = self.embedding_service.get_embedding(query)
-            except Exception as e:
-                logger.warning(f"Could not generate embedding: {e}")
-        
-        return ParsedQuery(
-            original_query=query,
-            normalized_query=normalized,
-            intent=intent,
-            confidence=confidence,
-            entities=entities,
-            embedding=embedding
-        )
-    
-    def _build_search_params(self, parsed: ParsedQuery, request: SmartSearchRequest) -> Dict[str, Any]:
-        params = {"page": request.page, "size": request.size}
-        entities = parsed.entities
-        
-        if entities.keywords:
-            params["keyword"] = " ".join(entities.keywords)
-        if entities.min_price is not None:
-            params["minPrice"] = entities. min_price
-        if entities.max_price is not None:
-            params["maxPrice"] = entities. max_price
-        if entities.min_rating is not None:
-            params["minRating"] = entities. min_rating
-        if entities.min_reviews is not None:
-            params["minReviews"] = entities.min_reviews
-        if entities.category:
-            params["category"] = entities. category
-        if entities.is_bestseller:
-            params["isBestseller"] = "true"
-        
-        if entities.sort_by:
-            params["sortBy"] = entities. sort_by
-            params["sortOrder"] = entities.sort_order or "desc"
-        elif parsed.intent == SearchIntent.TOP_RATED:
-            params["sortBy"] = "rating"
-            params["sortOrder"] = "desc"
-        elif parsed.intent == SearchIntent.BESTSELLERS:
-            params["sortBy"] = "salesCount"
-            params["sortOrder"] = "desc"
-        
-        return params
-    
-    async def _fetch_products(self, params: Dict[str, Any]) -> List[ProductResult]:
+
+    def _search_database(self, parsed: ParsedQuery, page: int, size: int) -> List[ProductResult]:
+        """
+        🗄️ Search MySQL database directly
+        """
         try:
-            # Clean params - remove None values
-            clean_params = {k: v for k, v in params.items() if v is not None}
-            
-            # Build URL properly
-            base_url = f"{self.spring_boot_url}/api/search/products/search/smart"
-            
-            logger.info(f"Fetching products from: {base_url}")
-            logger.info(f"With params: {clean_params}")
-            
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                response = await client.get(base_url, params=clean_params)
-                
-                logger.info(f"Response status: {response.status_code}")
-                
-                if response.status_code == 200:
-                    data = response. json()
-                    products_data = []
-                    
-                    if isinstance(data, dict):
-                        if "data" in data:
-                            inner = data["data"]
-                            if isinstance(inner, dict) and "content" in inner:
-                                products_data = inner["content"]
-                            elif isinstance(inner, list):
-                                products_data = inner
-                        elif "content" in data:
-                            products_data = data["content"]
-                    elif isinstance(data, list):
-                        products_data = data
-                    
-                    logger.info(f"Found {len(products_data)} products")
-                    
-                    return [
-                        ProductResult(
-                            asin=str(p. get("asin", "")),
-                            product_name=str(p.get("productName", "")),
-                            price=float(p.get("price", 0) or 0),
-                            rating=float(p.get("rating")) if p.get("rating") else None,
-                            reviews_count=int(p.get("reviewsCount")) if p.get("reviewsCount") else None,
-                            category_name=str(p. get("categoryName", "")) if p.get("categoryName") else None,
-                            image_url=str(p.get("imageUrl", "")) if p.get("imageUrl") else None,
-                            seller_name=str(p.get("sellerName", "")) if p.get("sellerName") else None,
-                            is_bestseller=bool(p.get("isBestseller", False)),
-                            stock_quantity=int(p.get("stockQuantity")) if p.get("stockQuantity") else None,
-                            relevance_score=1.0
-                        )
-                        for p in products_data
-                    ]
-                elif response.status_code == 401:
-                    logger.error("Unauthorized - Spring Boot requires authentication")
-                    return []
-                elif response.status_code == 404:
-                    logger.error("Endpoint not found on Spring Boot")
-                    return []
-                else:
-                    logger.error(f"Spring Boot returned {response.status_code}: {response.text[:200]}")
-                    return []
-                    
-        except httpx.ConnectError as e:
-            logger.error(f"Cannot connect to Spring Boot at {self.spring_boot_url}: {e}")
-            return []
+            with get_db() as db:
+                # Build dynamic SQL
+                conditions = ["p.approval_status = 'APPROVED'"]
+                params = {}
+
+                # Search terms - search in product name
+                if parsed.search_terms:
+                    search_conditions = []
+                    for i, term in enumerate(parsed.search_terms):
+                        param_name = f"term_{i}"
+                        search_conditions.append(f"LOWER(p.product_name) LIKE :{param_name}")
+                        params[param_name] = f"%{term.lower()}%"
+
+                    if search_conditions:
+                        conditions.append(f"({' OR '.join(search_conditions)})")
+
+                # Category filter
+                if parsed.category:
+                    conditions.append("LOWER(c.name) LIKE :category")
+                    params["category"] = f"%{parsed.category.lower()}%"
+
+                # Price filters
+                if parsed.min_price is not None:
+                    conditions.append("p.price >= :min_price")
+                    params["min_price"] = parsed.min_price
+
+                if parsed.max_price is not None:
+                    conditions.append("p.price <= :max_price")
+                    params["max_price"] = parsed.max_price
+
+                # Rating filter
+                if parsed.min_rating is not None:
+                    conditions.append("p.rating >= :min_rating")
+                    params["min_rating"] = parsed.min_rating
+
+                # Reviews filter 🆕
+                if parsed.min_reviews is not None:
+                    conditions.append("p.reviews_count >= :min_reviews")
+                    params["min_reviews"] = parsed.min_reviews
+
+                # Brand filter
+                if parsed.brand:
+                    conditions.append("LOWER(p.product_name) LIKE :brand")
+                    params["brand"] = f"%{parsed.brand.lower()}%"
+
+                # Bestseller filter
+                if parsed.is_bestseller:
+                    conditions.append("p.is_bestseller = 1")
+
+                # Build ORDER BY (MySQL compatible)
+                order_by = self._build_order_by(parsed)
+
+                # Build WHERE clause
+                where_clause = " AND ".join(conditions)
+
+                # MySQL compatible query
+                query = f"""
+                    SELECT 
+                        p.asin,
+                        p.product_name,
+                        p.price,
+                        p.rating,
+                        p.reviews_count,
+                        p.image_url,
+                        p.stock_quantity,
+                        p.is_bestseller,
+                        p.sales_count,
+                        p.ranking,
+                        c.name as category_name,
+                        COALESCE(u.store_name, 'MouadVision') as seller_name
+                    FROM products p
+                    LEFT JOIN categories c ON p.category_id = c.id
+                    LEFT JOIN users u ON p.seller_id = u.id
+                    WHERE {where_clause}
+                    ORDER BY {order_by}
+                    LIMIT :limit OFFSET :offset
+                """
+
+                params["limit"] = size
+                params["offset"] = page * size
+
+                logger.info(f"🔍 Executing search query...")
+                logger.debug(f"   SQL: {query}")
+                logger.debug(f"   Params: {params}")
+
+                result = db.execute(text(query), params)
+                rows = result.fetchall()
+
+                logger.info(f"✅ Found {len(rows)} products")
+
+                # Convert to ProductResult
+                products = []
+                for row in rows:
+                    products.append(ProductResult(
+                        asin=row.asin,
+                        product_name=row.product_name,
+                        price=float(row.price) if row.price else 0.0,
+                        rating=float(row.rating) if row.rating else None,
+                        reviews_count=row.reviews_count,
+                        category_name=row.category_name,
+                        image_url=row.image_url,
+                        seller_name=row.seller_name,
+                        is_bestseller=bool(row.is_bestseller) if row.is_bestseller else False,
+                        stock_quantity=row.stock_quantity,
+                        relevance_score=1.0
+                    ))
+
+                return products
+
         except Exception as e:
-            logger.error(f"Failed to fetch products: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"❌ Database search failed: {e}", exc_info=True)
             return []
-    
-    def _rank_by_similarity(self, products: List[ProductResult], query_embedding: List[float]) -> List[ProductResult]:
-        if not products:
-            return products
-        try:
-            product_names = [p.product_name for p in products]
-            product_embeddings = self.embedding_service. get_embeddings(product_names)
-            for i, product in enumerate(products):
-                similarity = self. embedding_service.compute_similarity(query_embedding, product_embeddings[i])
-                product.relevance_score = (product.relevance_score + similarity) / 2
-            products.sort(key=lambda p: p. relevance_score, reverse=True)
-        except Exception as e:
-            logger. warning(f"Could not rank by similarity: {e}")
-        return products
-    
-    def _generate_suggestions(self, query: str, parsed: ParsedQuery) -> List[str]:
+
+    def _build_order_by(self, parsed: ParsedQuery) -> str:
+        """
+        Build ORDER BY clause - MySQL compatible
+        MySQL does NOT support NULLS LAST, use ISNULL() instead
+        """
+        sort_map = {
+            "price": "p.price",
+            "rating": "p.rating",
+            "sales_count": "p.sales_count",
+            "ranking": "p.ranking",
+            "reviews_count": "p.reviews_count",
+            "created_at": "p.asin",
+        }
+
+        field = sort_map.get(parsed.sort_by, "p.ranking")
+
+        # MySQL compatible NULL handling (ISNULL puts NULLs last)
+        if parsed.sort_order == "desc":
+            return f"ISNULL({field}), {field} DESC"
+        else:
+            return f"ISNULL({field}), {field} ASC"
+
+    def _generate_suggestions(self, parsed: ParsedQuery) -> List[str]:
+        """Generate search suggestions"""
         suggestions = []
-        if not parsed.entities.max_price:
-            suggestions.append(f"{query} pas cher")
-        if not parsed.entities. min_rating:
-            suggestions. append(f"{query} bien noté")
-        suggestions.append(f"{query} meilleur prix")
+        base = " ".join(parsed.search_terms) if parsed.search_terms else ""
+        
+        if not base and parsed.original:
+            words = parsed.original.split()
+            if words:
+                base = words[0]
+
+        if base and len(base) > 2:
+            if not parsed.max_price:
+                suggestions.append(f"{base} pas cher")
+            if not parsed.min_rating:
+                suggestions.append(f"{base} bien noté")
+            if not parsed.min_reviews:
+                suggestions.append(f"{base} +1000 avis")
+            suggestions.append(f"{base} meilleur prix")
+            suggestions.append(f"meilleur {base}")
+
         return suggestions[:5]
-    
-    async def get_suggestions(self, partial_query: str, limit: int = 10) -> List[str]:
-        if len(partial_query) >= 2:
-            return [
-                f"{partial_query} pas cher",
-                f"{partial_query} meilleur prix",
-                f"{partial_query} bien noté",
-                f"meilleur {partial_query}",
-            ][:limit]
-        return []
+
+    async def get_suggestions(self, partial: str, limit: int = 10) -> List[str]:
+        """Get autocomplete suggestions from database"""
+        try:
+            with get_db() as db:
+                query = """
+                    SELECT DISTINCT product_name
+                    FROM products
+                    WHERE LOWER(product_name) LIKE :search
+                    AND approval_status = 'APPROVED'
+                    LIMIT :limit
+                """
+                result = db.execute(text(query), {
+                    "search": f"%{partial.lower()}%",
+                    "limit": limit
+                })
+                return [row[0] for row in result.fetchall()]
+        except Exception as e:
+            logger.error(f"Suggestions error: {e}")
+            return []
 
 
-def get_search_service():
-    return SearchService()
+# Singleton instance
+_search_service = None
+
+
+def get_search_service() -> SearchService:
+    global _search_service
+    if _search_service is None:
+        _search_service = SearchService()
+    return _search_service

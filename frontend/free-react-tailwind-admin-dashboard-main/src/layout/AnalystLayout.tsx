@@ -110,7 +110,7 @@ const AnalystLayout: React.FC = () => {
             {/* Sidebar */}
             <aside
                 className={`fixed lg:static inset-y-0 left-0 z-50 ${
-                    sidebarOpen ? 'w-64' : 'w-20'
+                    sidebarOpen ?  'w-64' : 'w-20'
                 } bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 flex flex-col`}
             >
                 {/* Logo */}
@@ -141,11 +141,12 @@ const AnalystLayout: React.FC = () => {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                                className={`flex items-center ${sidebarOpen ? 'gap-3' : 'justify-center'} px-3 py-2.5 rounded-lg transition-all ${
                                     isActive(item.path, item.exact)
                                         ?  'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25'
                                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                                 }`}
+                                title={! sidebarOpen ?  item.label : undefined}
                             >
                                 {item.icon}
                                 {sidebarOpen && <span className="font-medium">{item.label}</span>}
@@ -161,11 +162,12 @@ const AnalystLayout: React.FC = () => {
                         )}
                         <Link
                             to="/analyst/profile"
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                            className={`flex items-center ${sidebarOpen ? 'gap-3' : 'justify-center'} px-3 py-2.5 rounded-lg transition-all ${
                                 isActive('/analyst/profile')
-                                    ?  'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white'
                                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                             }`}
+                            title={!sidebarOpen ? 'Profile' : undefined}
                         >
                             <ProfileIcon />
                             {sidebarOpen && <span className="font-medium">Profile</span>}
@@ -173,29 +175,40 @@ const AnalystLayout: React.FC = () => {
                     </div>
                 </nav>
 
-                {/* User Info */}
-                {sidebarOpen && (
-                    <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold">
-                                {user?.fullName?.charAt(0) || 'A'}
+                {/* User Info & Logout - FIXED: Always visible */}
+                <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+                    {sidebarOpen ?  (
+                        <>
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold">
+                                    {user?.fullName?.charAt(0) || 'A'}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                        {user?.fullName || 'Analyst'}
+                                    </p>
+                                    <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                                </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                    {user?.fullName || 'Analyst'}
-                                </p>
-                                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                            </div>
-                        </div>
+                            <button
+                                onClick={handleLogout}
+                                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            >
+                                <LogoutIcon />
+                                <span>Logout</span>
+                            </button>
+                        </>
+                    ) : (
+                        /* Compact logout button when sidebar is collapsed */
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            className="w-full flex items-center justify-center p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            title="Logout"
                         >
                             <LogoutIcon />
-                            <span>Logout</span>
                         </button>
-                    </div>
-                )}
+                    )}
+                </div>
             </aside>
 
             {/* Main Content */}
@@ -272,7 +285,7 @@ const AnalystLayout: React.FC = () => {
                 {/* Footer */}
                 <footer className="h-12 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex items-center justify-center">
                     <p className="text-sm text-gray-500">
-                        © 2025 MouadVision Analytics.All rights reserved.
+                        © 2025 MouadVision Analytics. All rights reserved.
                     </p>
                 </footer>
             </div>

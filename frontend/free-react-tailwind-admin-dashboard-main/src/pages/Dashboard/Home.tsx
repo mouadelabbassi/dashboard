@@ -9,7 +9,8 @@ import PriceDistributionChart from '../../components/ecommerce/PriceDistribution
 import RatingDistributionChart from '../../components/ecommerce/RatingDistributionChart';
 import TopCategoriesRevenueChart from '../../components/ecommerce/TopCategoriesRevenueChart';
 import ReviewsCorrelationChart from '../../components/ecommerce/ReviewsCorrelationChart';
-import TopSellersChart from '../../components/ecommerce/TopSellersChart';  // NEW IMPORT
+import TopSellersChart from '../../components/ecommerce/TopSellersChart';
+import ExportPDFButton from '../../components/ExportPDFButton';
 import { useAuth } from '../../context/AuthContext';
 import { getAdminDashboard, AdminDashboard } from '../../service/api';
 
@@ -42,13 +43,17 @@ const Home: React.FC = () => {
             />
 
             <div className="p-4 sm:p-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
-                <div className="mb-6">
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                        Welcome back, {user?.fullName?.split(' ')[0] || 'Admin'}!  👋
-                    </h1>
-                    <p className="text-gray-600 dark:text-gray-400">
-                        Here's what's happening with your platform today
-                    </p>
+                {/* ✅ HEADER CORRIGÉ - Bouton à droite */}
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                            Welcome back, {user?.fullName?.split(' ')[0] || 'Admin'}!  👋
+                        </h1>
+                        <p className="text-gray-600 dark:text-gray-400">
+                            Here's what's happening with your platform today
+                        </p>
+                    </div>
+                    <ExportPDFButton type="admin" />
                 </div>
 
                 {/* Admin Quick Stats - Pending Approvals & Revenue */}
@@ -120,17 +125,17 @@ const Home: React.FC = () => {
                                     </svg>
                                 </div>
                             </div>
-                            <p className="text-purple-200 text-xs mt-2">Registered </p>
+                            <p className="text-purple-200 text-xs mt-2">Registered</p>
                         </div>
                     </div>
                 )}
 
-                {/* Existing Metrics Cards (without duplicate Platform Revenue) */}
+                {/* Existing Metrics Cards */}
                 <div className="mb-6">
                     <EcommerceMetrics />
                 </div>
 
-                {/* NEW: Top Sellers Performance Chart */}
+                {/* Top Sellers Performance Chart */}
                 <div className="mb-6">
                     <TopSellersChart />
                 </div>
@@ -150,7 +155,7 @@ const Home: React.FC = () => {
                     <RatingDistributionChart />
                 </div>
 
-                {/* Reviews vs Ranking Correlation - Full Width */}
+                {/* Reviews vs Ranking Correlation */}
                 <div className="mb-6">
                     <ReviewsCorrelationChart />
                 </div>

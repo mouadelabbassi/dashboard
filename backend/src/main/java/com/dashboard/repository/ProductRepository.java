@@ -40,6 +40,10 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
 
     List<Product> findBySeller(User seller);
 
+    List<Product> findTop10ByApprovalStatusOrderBySalesCountDesc(Product.ApprovalStatus status);
+
+    List<Product> findTop10ByApprovalStatusOrderByRankingAsc(Product.ApprovalStatus status);
+
     Page<Product> findByStockQuantityEquals(Integer quantity, Pageable pageable);
 
     List<Product> findByStockQuantityLessThanOrderByStockQuantityAsc(Integer threshold);
@@ -49,6 +53,17 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     Page<Product> findByStockQuantityLessThan(Integer threshold, Pageable pageable);
 
     Page<Product> findByStockQuantityGreaterThanEqual(Integer threshold, Pageable pageable);
+
+    long countByApprovalStatus(Product.ApprovalStatus status);
+
+    List<Product> findByApprovalStatusOrderBySalesCountDesc(Product.ApprovalStatus status, Pageable pageable);
+
+    long countBySellerId(Long sellerId);
+
+
+    List<Product> findBySellerId(Long sellerId);
+
+
 
     @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND " +
             "(LOWER(p.productName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
@@ -99,7 +114,6 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
             Pageable pageable
     );
 
-    Long countByApprovalStatus(Product.ApprovalStatus status);
 
     // Products for buyers (only approved ones)
     @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' ORDER BY p.createdAt DESC")

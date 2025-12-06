@@ -452,27 +452,28 @@ public class AnalystService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getBestsellerTrends() {
-        List<Product> products = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED);
+        List<Product> bestsellers = productRepository.findTop10ByApprovalStatusOrderBySalesCountDesc(
+                Product.ApprovalStatus.APPROVED
+        );
 
-        return products.stream()
-                .filter(p -> p.getIsBestseller() != null && p.getIsBestseller())
-                .sorted((a, b) -> {
-                    int rankA = a.getRanking() != null ? a.getRanking() : Integer.MAX_VALUE;
-                    int rankB = b.getRanking() != null ?  b.getRanking() : Integer.MAX_VALUE;
-                    return Integer.compare(rankA, rankB);
-                })
-                .limit(10)
-                .map(p -> {
-                    Map<String, Object> data = new HashMap<>();
-                    data.put("asin", p.getAsin());
-                    data.put("productName", p.getProductName());
-                    data.put("ranking", p.getRanking());
-                    data.put("salesCount", p.getSalesCount());
-                    data.put("rating", p.getRating());
-                    data.put("category", p.getCategory() != null ? p.getCategory().getName() : "Unknown");
-                    return data;
-                })
-                .collect(Collectors.toList());
+        // If no products with salesCount, fallback to products with best ranking
+        if (bestsellers.isEmpty()) {
+            bestsellers = productRepository.findTop10ByApprovalStatusOrderByRankingAsc(
+                    Product.ApprovalStatus.APPROVED
+            );
+        }
+
+        return bestsellers.stream(). map(product -> {
+            Map<String, Object> map = new HashMap<>();
+            map. put("asin", product.getAsin());
+            map.put("productName", product.getProductName());
+            map.put("category", product.getCategory() != null ? product.getCategory(). getName() : "Uncategorized");
+            map. put("salesCount", product.getSalesCount() != null ? product.getSalesCount() : 0);
+            map.put("rating", product.getRating() != null ? product.getRating() : 0);
+            map.put("price", product.getPrice());
+            map.put("imageUrl", product.getImageUrl());
+            return map;
+        }). collect(Collectors.toList());
     }
 
     // ==================== SELLER ANALYTICS ====================

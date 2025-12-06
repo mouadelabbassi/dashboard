@@ -22,6 +22,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByRole(User.Role role, Pageable pageable);
 
+    List<User> findByRoleOrderByCreatedAtDesc(User. Role role, Pageable pageable);
+
     List<User> findByRoleAndIsActiveTrue(User.Role role);
 
     List<User> findAllByRole(User.Role role);
@@ -30,6 +32,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
     Long countByRoleAndIsActiveTrue(User.Role role);
+
+    List<User> findByRole(User.Role role);
 
     // ADD THIS METHOD - for filtering by verification status
     Page<User> findByRoleAndIsVerifiedSeller(User.Role role, Boolean isVerifiedSeller, Pageable pageable);

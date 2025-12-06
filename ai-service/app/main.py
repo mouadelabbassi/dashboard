@@ -3,11 +3,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.config import settings
-from app.routers. search import router as search_router
+from app.routers.search import router as search_router
 
 # Configure logging
 logging.basicConfig(
-    level=logging. INFO,
+    level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
@@ -25,12 +25,12 @@ def get_embedding_service():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
-    logger. info("Starting AI Search Service...")
+    logger.info("Starting AI Search Service...")
     logger.info("Loading AI models...")
     
     try:
         service = get_embedding_service()
-        if service. is_available():
+        if service.is_available():
             service.get_embedding("test query warmup")
             logger.info("AI embedding model loaded successfully")
         else:
@@ -53,7 +53,7 @@ app = FastAPI(
 )
 
 # CORS middleware
-app. add_middleware(
+app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
