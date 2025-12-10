@@ -15,18 +15,20 @@ import SignUp from './pages/AuthPages/SignUp';
 import ForgotPassword from './pages/AuthPages/ForgotPassword';
 import AdminOrdersPage from './pages/Admin/AdminOrdersPage';
 
+// 🆕 Public Pages
+import LandingPage from './pages/Public/LandingPage';
+import PublicShopPage from './pages/Public/PublicShopPage';
+import AboutPage from './pages/Public/AboutPage';
+
 import AnalystLayout from './layout/AnalystLayout';
 import AnalystDashboard from './pages/Analyst/AnalystDashboard';
 import SalesAnalytics from './pages/Analyst/SalesAnalytics';
 import ProductAnalytics from './pages/Analyst/ProductAnalytics';
 import SellerAnalytics from './pages/Analyst/SellerAnalytics';
 import CategoryAnalysis from './pages/Analyst/CategoryAnalysis';
-import Reports from './pages/Analyst/Reports'
+import Reports from './pages/Analyst/Reports';
 import SellerStockManagement from './pages/Seller/SellerStockManagement';
 import AdminStockManagement from './pages/Admin/AdminStockManagement';
-
-
-
 
 // Admin Pages
 import Home from './pages/Dashboard/Home';
@@ -67,12 +69,12 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, allowedRoles }) =
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
 
-    if (! token || !user) {
+    if (!token || !user) {
         return <Navigate to="/signin" replace />;
     }
 
     const userData = JSON.parse(user);
-    if (! allowedRoles.includes(userData.role)) {
+    if (!allowedRoles.includes(userData.role)) {
         switch (userData.role) {
             case 'ADMIN':
                 return <Navigate to="/admin" replace />;
@@ -94,11 +96,17 @@ function App() {
             <CartProvider>
                 <Router>
                     <Routes>
-                        {/* Public Auth Routes */}
+                        {/* 🆕 PUBLIC ROUTES - No Login Required */}
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/explore" element={<PublicShopPage />} />
+                        <Route path="/about" element={<AboutPage />} />
+
+                        {/* Auth Routes */}
                         <Route path="/signin" element={<SignIn />} />
                         <Route path="/signup" element={<SignUp />} />
                         <Route path="/forgot-password" element={<ForgotPassword />} />
 
+                        {/* Analyst Routes */}
                         <Route
                             path="/analyst"
                             element={
@@ -135,7 +143,7 @@ function App() {
                             <Route path="sellers" element={<SellerManagement />} />
                         </Route>
 
-                        {/* Seller Routes - Including Shop Access */}
+                        {/* Seller Routes */}
                         <Route
                             path="/seller"
                             element={
@@ -154,8 +162,6 @@ function App() {
                             <Route path="reviews" element={<SellerReviews />} />
                             <Route path="profile" element={<SellerProfile />} />
                             <Route path="notifications" element={<NotificationsPage />} />
-
-                            {/* ✅ NEW: Seller can shop as buyer */}
                             <Route path="shop" element={<ShopPage />} />
                             <Route path="shop/product/:asin" element={<ProductDetailPage />} />
                             <Route path="shop/cart" element={<CartPage />} />
@@ -182,9 +188,6 @@ function App() {
                             <Route path="my-reviews" element={<MyReviewsPage />} />
                             <Route path="notifications" element={<NotificationsPage />} />
                         </Route>
-
-                        {/* Root redirect */}
-                        <Route path="/" element={<Navigate to="/signin" replace />} />
 
                         {/* 404 */}
                         <Route path="*" element={<NotFound />} />

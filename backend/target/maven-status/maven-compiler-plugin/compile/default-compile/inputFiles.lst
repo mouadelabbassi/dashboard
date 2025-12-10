@@ -12,6 +12,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controlle
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\SellerProductSubmissionRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\SellerStockController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ListFromStockRequest.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\PublicController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ReviewRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ApiResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\SellerStock.java

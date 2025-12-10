@@ -17,6 +17,7 @@ com\dashboard\service\StockManagementService.class
 com\dashboard\service\UserService.class
 com\dashboard\dto\response\DashboardResponse.class
 com\dashboard\security\JwtTokenProvider.class
+com\dashboard\controller\PublicController.class
 com\dashboard\service\NotificationService.class
 com\dashboard\dto\response\CategoryResponse$CategoryResponseBuilder.class
 com\dashboard\dto\request\CreateOrderRequest$OrderItemRequest.class

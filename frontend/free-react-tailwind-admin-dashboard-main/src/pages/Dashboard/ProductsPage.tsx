@@ -13,6 +13,23 @@ const ProductsPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
+    // 🆕 Calculate dynamic product score (Rating × 1000 + Sales × 100)
+    const calculateProductScore = (product: Product): number => {
+        const ratingScore = (product.rating || 0) * 1000;
+        const salesScore = (product.salesCount || 0) * 100;
+        return ratingScore + salesScore;
+    };
+
+    // 🆕 Sort products by score and assign dynamic rank
+    const getProductsWithDynamicRank = (productsList: Product[]): (Product & { dynamicRank: number })[] => {
+        return [...productsList]
+            .sort((a, b) => calculateProductScore(b) - calculateProductScore(a))
+            .map((product, index) => ({
+                ...product,
+                dynamicRank:  index + 1
+            }));
+    };
+
     // Fetch products and categories on mount
     useEffect(() => {
         fetchProducts();
@@ -82,7 +99,7 @@ const ProductsPage: React.FC = () => {
                 fetchProducts();
             } catch (error) {
                 console.error("Error deleting product:", error);
-                alert("Failed to delete product. Please try again.");
+                alert("Failed to delete product.Please try again.");
             }
         }
     };
@@ -110,10 +127,13 @@ const ProductsPage: React.FC = () => {
             'Clothing, Shoes & Jewelry': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
             'Camera & Photo': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
             'Gift Cards': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
-            'Books': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+            'Books':  'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
         };
         return colors[categoryName] || 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     };
+
+    // 🆕 Get ranked products
+    const rankedProducts = getProductsWithDynamicRank(products);
 
     return (
         <div className="p-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
@@ -140,7 +160,7 @@ const ProductsPage: React.FC = () => {
 
             {/* Filters */}
             <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm p-6 mb-6 border border-gray-200 dark:border-gray-800">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md: grid-cols-5 gap-4">
                     {/* Search */}
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
@@ -152,7 +172,7 @@ const ProductsPage: React.FC = () => {
                             </svg>
                             <input
                                 type="text"
-                                className="w-full pl-10 pr-4 py-2.5 border rounded-lg bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="w-full pl-10 pr-4 py-2.5 border rounded-lg bg-white dark: bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 placeholder="Search by name, ASIN..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -166,7 +186,7 @@ const ProductsPage: React.FC = () => {
                             Category
                         </label>
                         <select
-                            className="w-full px-3 py-2.5 border rounded-lg bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2.5 border rounded-lg bg-white dark:bg-gray-800 border-gray-300 dark: border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                             value={filters.category || ""}
                             onChange={(e) => setFilters({ ...filters, category: e.target.value || undefined })}
                         >
@@ -198,7 +218,7 @@ const ProductsPage: React.FC = () => {
                         </label>
                         <input
                             type="number"
-                            className="w-full px-3 py-2.5 border rounded-lg bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2.5 border rounded-lg bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-900 dark: text-white focus:ring-2 focus:ring-blue-500"
                             placeholder="Max"
                             value={filters.maxPrice || ""}
                             onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value ? Number(e.target.value) : undefined })}
@@ -210,7 +230,7 @@ const ProductsPage: React.FC = () => {
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button
                         onClick={handleReset}
-                        className="inline-flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+                        className="inline-flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover: bg-gray-700"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -219,6 +239,7 @@ const ProductsPage: React.FC = () => {
                     </button>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Showing <span className="font-semibold text-gray-900 dark:text-white">{products.length}</span> products
+                        <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">(Ranked by Rating & Sales)</span>
                     </p>
                 </div>
             </div>
@@ -234,7 +255,7 @@ const ProductsPage: React.FC = () => {
                         <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                         </svg>
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">No products found</h3>
+                        <h3 className="text-lg font-medium text-gray-900 dark: text-white mb-1">No products found</h3>
                         <p className="text-gray-500 dark:text-gray-400">Try adjusting your search or filters</p>
                     </div>
                 ) : (
@@ -257,47 +278,47 @@ const ProductsPage: React.FC = () => {
                                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                                     Rating
                                 </th>
-                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                                    Reviews
+                                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark: text-gray-400 uppercase tracking-wider">
+                                    Sales
                                 </th>
-                                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark: text-gray-400 uppercase tracking-wider">
                                     Actions
                                 </th>
                             </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {products.map((product) => (
+                            {rankedProducts.map((product) => (
                                 <tr
                                     key={product.asin}
                                     className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                                 >
-                                    {/* Rank */}
+                                    {/* 🆕 Dynamic Rank */}
                                     <td className="px-4 py-4">
-                                            <span className={`inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold ${
-                                                (product.ranking || 0) <= 3
-                                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                                    : (product.ranking || 0) <= 10
-                                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                                            }`}>
-                                                #{product.ranking || 'N/A'}
-                                            </span>
+                                        <span className={`inline-flex items-center justify-center w-10 h-10 rounded-full text-sm font-bold ${
+                                            product.dynamicRank <= 3
+                                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                                : product.dynamicRank <= 10
+                                                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark: text-blue-400'
+                                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                                        }`}>
+                                            #{product.dynamicRank}
+                                        </span>
                                     </td>
 
                                     {/* Product */}
                                     <td className="px-4 py-4">
                                         <div className="flex items-center gap-3">
-                                            {product.imageUrl ? (
+                                            {product.imageUrl ?  (
                                                 <img
                                                     src={product.imageUrl}
                                                     alt={product.productName}
-                                                    className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-gray-700"
+                                                    className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark: border-gray-700"
                                                     onError={(e) => {
                                                         e.currentTarget.src = 'https://via.placeholder.com/48?text=No+Image';
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                                                <div className="w-12 h-12 rounded-lg bg-gray-100 dark: bg-gray-800 flex items-center justify-center">
                                                     <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
@@ -316,33 +337,37 @@ const ProductsPage: React.FC = () => {
 
                                     {/* Category */}
                                     <td className="px-4 py-4">
-                                            <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${getCategoryColor(product.categoryName || '')}`}>
-                                                {product.categoryName || 'Uncategorized'}
-                                            </span>
+                                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium ${getCategoryColor(product.categoryName || '')}`}>
+                                            {product.categoryName || 'Uncategorized'}
+                                        </span>
                                     </td>
 
                                     {/* Price */}
                                     <td className="px-4 py-4">
-                                            <span className="font-semibold text-green-600 dark:text-green-400">
-                                                ${product.price?.toFixed(2) || '0.00'}
-                                            </span>
+                                        <span className="font-semibold text-green-600 dark:text-green-400">
+                                            ${product.price?.toFixed(2) || '0.00'}
+                                        </span>
                                     </td>
 
                                     {/* Rating */}
                                     <td className="px-4 py-4">
                                         <div className="flex items-center gap-1">
                                             <span className="text-yellow-500">⭐</span>
-                                            <span className="font-medium text-gray-900 dark:text-white">
-                                                    {product.rating?.toFixed(1) || 'N/A'}
-                                                </span>
+                                            <span className="font-medium text-gray-900 dark: text-white">
+                                                {product.rating?.toFixed(1) || '0.0'}
+                                            </span>
                                         </div>
                                     </td>
 
-                                    {/* Reviews */}
+                                    {/* 🆕 Sales (replaced Reviews) */}
                                     <td className="px-4 py-4">
-                                            <span className="text-gray-700 dark:text-gray-300">
-                                                {(product.reviewsCount || 0).toLocaleString()}
-                                            </span>
+                                        <span className={`font-medium ${
+                                            (product.salesCount || 0) > 0
+                                                ? 'text-green-600 dark:text-green-400'
+                                                : 'text-gray-500 dark:text-gray-400'
+                                        }`}>
+                                            {(product.salesCount || 0).toLocaleString()}
+                                        </span>
                                     </td>
 
                                     {/* Actions */}

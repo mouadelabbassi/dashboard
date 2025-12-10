@@ -73,11 +73,9 @@ public class DashboardService {
                 .mapToLong(Product::getReviewsCount)
                 .sum();
 
-        // CHANGE TO:
         BigDecimal totalRevenue = sellerRevenueRepository.calculateTotalPlatformRevenue();
         Long totalSales = orderRepository.countConfirmedOrders();
 
-        // Calculate inventory value
         BigDecimal totalInventoryValue = allProducts.stream()
                 .filter(p -> p.getPrice() != null)
                 .map(Product::getPrice)
@@ -121,7 +119,6 @@ public class DashboardService {
                 .sum();
 
 
-        // Get top product by calculated score
         List<Product> rankedProducts = getProductsRankedByScore(allProducts);
         Product topProduct = rankedProducts.isEmpty() ? null : rankedProducts.get(0);
         ProductResponse topProductResponse = topProduct != null ?  convertToProductResponse(topProduct) : null;
@@ -140,7 +137,6 @@ public class DashboardService {
     public Map<String, Long> getCategoryDistribution() {
         log.debug("Fetching category distribution");
 
-        // Count products directly from products table for accuracy
         List<Product> allProducts = getAllProducts();
         Map<String, Long> distribution = new LinkedHashMap<>();
 
@@ -254,34 +250,23 @@ public class DashboardService {
 
             result.add(categoryData);
         }
-
-        // Sort by estimated revenue descending
         result.sort((a, b) -> ((BigDecimal) b.get("estimatedRevenue")).compareTo((BigDecimal) a.get("estimatedRevenue")));
 
         return result;
     }
-
-    /**
-     * Calculate a dynamic ranking score for products
-     * Formula: (sales_count * 10) + (reviews_count * 0.5) + (rating * 20) - penalty for no data
-     */
     private double calculateProductScore(Product p) {
-        double salesScore = (p.getSalesCount() != null ?  p.getSalesCount() : 0) * 10.0;
-        double reviewsScore = (p.getReviewsCount() != null ? p.getReviewsCount() : 0) * 0.5;
-        double ratingScore = (p.getRating() != null ? p.getRating().doubleValue() : 0) * 20.0;
+        double ratingScore = (p.getRating() != null ? p.getRating().doubleValue() : 0) * 1000.0;
 
-        // Bonus for having an original ranking (from CSV data)
+        double salesScore = (p.getSalesCount() != null ? p.getSalesCount() : 0) * 100.0;
+
         double rankingBonus = 0;
-        if (p.getRanking() != null && p.getRanking() > 0) {
-            rankingBonus = Math.max(0, 100 - p.getRanking()); // Higher bonus for lower ranking number
+        if (p.getRanking() != null && p.getRanking() > 0 && p.getRanking() <= 100) {
+            rankingBonus = Math.max(0, 100 - p.getRanking());
         }
 
-        return salesScore + reviewsScore + ratingScore + rankingBonus;
+        return ratingScore + salesScore + rankingBonus;
     }
 
-    /**
-     * Get products sorted by calculated score (best first)
-     */
     private List<Product> getProductsRankedByScore(List<Product> products) {
         return products.stream()
                 .sorted((a, b) -> Double.compare(calculateProductScore(b), calculateProductScore(a)))
