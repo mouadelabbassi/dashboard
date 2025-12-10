@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import SmartSearchBar from '../components/SmartSearch/SmartSearchBar';
 
 // Icons
 const DashboardIcon = () => (
@@ -234,11 +233,6 @@ const AnalystLayout: React.FC = () => {
                         </div>
 
                         {/* Smart Search Bar - Desktop */}
-                        <div className="hidden md:block flex-1 max-w-xl mx-4">
-                            <SmartSearchBar
-                                placeholder="Recherche intelligente... (ex: 'ventes du mois')"
-                            />
-                        </div>
 
                         <div className="flex items-center gap-3">
                             {/* Mobile Search Toggle */}
@@ -270,9 +264,6 @@ const AnalystLayout: React.FC = () => {
                     {/* Mobile Search Bar */}
                     {showMobileSearch && (
                         <div className="md:hidden px-6 pb-3">
-                            <SmartSearchBar
-                                placeholder="Recherche intelligente..."
-                            />
                         </div>
                     )}
                 </header>

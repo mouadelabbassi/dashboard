@@ -3,7 +3,6 @@ package com.dashboard.service;
 import com.dashboard.entity.Product;
 import com.dashboard.entity.Sale;
 import com.dashboard.repository.ProductRepository;
-import com.dashboard.repository.SaleRepository;
 import com.opencsv.CSVWriter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,6 @@ import java.util.List;
 public class ExportService {
 
     private final ProductRepository productRepository;
-    private final SaleRepository saleRepository;
 
     @Transactional(readOnly = true)
     public byte[] exportProductsToCsv() throws IOException {
@@ -126,7 +124,6 @@ public class ExportService {
     public byte[] exportSalesToCsv() throws IOException {
         log.info("Exporting sales to CSV");
 
-        List<Sale> sales = saleRepository.findAll();
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              OutputStreamWriter osw = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
@@ -137,24 +134,9 @@ public class ExportService {
                     "Quantity", "Unit Price", "Total Amount", "Sale Date", "Status"};
             writer.writeNext(header);
 
-            // Write data
-            for (Sale sale : sales) {
-                String[] data = {
-                        sale.getId().toString(),
-                        sale.getProduct().getAsin(),
-                        sale.getProduct().getProductName(),
-                        sale.getUser() != null ? sale.getUser().getEmail() : "N/A",
-                        sale.getQuantity().toString(),
-                        sale.getUnitPrice().toString(),
-                        sale.getTotalAmount().toString(),
-                        sale.getSaleDate().toString(),
-                        sale.getStatus().toString()
-                };
-                writer.writeNext(data);
-            }
+
 
             writer.flush();
-            log.info("Exported {} sales to CSV", sales.size());
             return baos.toByteArray();
         }
     }

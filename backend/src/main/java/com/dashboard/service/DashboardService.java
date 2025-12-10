@@ -26,7 +26,6 @@ public class DashboardService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
-    private final SaleRepository saleRepository;
     private final SellerRevenueRepository sellerRevenueRepository;
     private final OrderRepository orderRepository;
 
@@ -121,8 +120,6 @@ public class DashboardService {
                 .mapToLong(Product::getReviewsCount)
                 .sum();
 
-        BigDecimal totalRevenue = saleRepository.calculateTotalRevenue();
-        Long totalSales = saleRepository.countCompletedSales();
 
         // Get top product by calculated score
         List<Product> rankedProducts = getProductsRankedByScore(allProducts);
@@ -136,8 +133,6 @@ public class DashboardService {
                 .avgRating(avgRating)
                 .totalReviews(totalReviews)
                 .topProduct(topProductResponse)
-                .totalRevenue(totalRevenue != null ? totalRevenue : BigDecimal.ZERO)
-                .totalSales(totalSales != null ? totalSales : 0L)
                 .build();
     }
 

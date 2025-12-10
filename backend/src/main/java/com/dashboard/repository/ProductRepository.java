@@ -143,10 +143,6 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     @Query("SELECT p FROM Product p WHERE p.stockQuantity = :quantity")
     Page<Product> findByStockQuantityEqualsPageable(@Param("quantity") Integer quantity, Pageable pageable);
 
-    // =====================================================
-    // SMART SEARCH METHODS - Added for AI Search feature
-    // =====================================================
-
     // Find by approval status string (for SmartSearchService)
     @Query("SELECT p FROM Product p WHERE p.approvalStatus = :status")
     Page<Product> findByApprovalStatusString(@Param("status") String status, Pageable pageable);

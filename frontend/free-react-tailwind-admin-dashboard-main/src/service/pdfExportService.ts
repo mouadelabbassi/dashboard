@@ -141,7 +141,7 @@ export const generateAdminPDF = async (data: {
     doc.setTextColor(...darkColor);
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
-    doc.text('📊 Key Performance Indicators', 14, yPos);
+    doc.text('[KPI] Key Performance Indicators', 14, yPos);
     yPos += 10;
 
     // KPI Cards (2x2 grid)
@@ -195,7 +195,7 @@ export const generateAdminPDF = async (data: {
     // Orders by Status
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('📦 Orders by Status', 14, yPos);
+    doc.text('[ORDERS] Orders by Status', 14, yPos);
     yPos += 8;
 
     const statusData = Object.entries(data.ordersByStatus).map(([status, count]) => [
@@ -216,7 +216,6 @@ export const generateAdminPDF = async (data: {
 
     addFooter(1);
 
-    // ===== PAGE 2: Top Products =====
     doc.addPage();
     yPos = 20;
 
@@ -226,13 +225,17 @@ export const generateAdminPDF = async (data: {
     doc.text('🏆 Top 10 Best-Selling Products', 14, yPos);
     yPos += 10;
 
-    const productData = data.topProducts.slice(0, 10).map((product, index) => [
+// Debug log
+    console.log('📦 Top Products for PDF:', data.topProducts);
+
+    const productData = data.topProducts.slice(0, 10).map((product: any, index: number) => [
         `#${index + 1}`,
-        product.productName.substring(0, 40) + (product.productName.length > 40 ? '...' : ''),
-        product.category || 'N/A',
-        formatCurrency(product.price),
-        formatNumber(product.salesCount),
-        product.rating?.toFixed(1) || 'N/A',
+        (product.productName || product.product_name || 'Unknown').substring(0, 40) +
+        ((product.productName || product.product_name || '').length > 40 ? '...' : ''),
+        product.category || product.categoryName || product.category_name || 'N/A',
+        formatCurrency(product.price || 0),
+        formatNumber(product.salesCount || product.sales_count || 0),
+        product.rating ?  product.rating.toFixed(1) : 'N/A',
     ]);
 
     autoTable(doc, {
@@ -255,18 +258,21 @@ export const generateAdminPDF = async (data: {
 
     yPos = (doc as any).lastAutoTable.finalY + 15;
 
-    // Top Sellers
+// Top Sellers
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.text('👥 Top Sellers', 14, yPos);
     yPos += 8;
 
-    const sellerData = data.topSellers.slice(0, 5).map((seller, index) => [
+// Debug log
+    console.log('👥 Top Sellers for PDF:', data.topSellers);
+
+    const sellerData = data.topSellers.slice(0, 5).map((seller: any, index: number) => [
         `#${index + 1}`,
-        seller.storeName || seller.email,
-        formatNumber(seller.productCount),
-        formatNumber(seller.totalSales),
-        formatCurrency(seller.totalRevenue),
+        seller.storeName || seller.store_name || seller.fullName || seller.email || 'Unknown',
+        formatNumber(seller.productCount || seller.product_count || 0),
+        formatNumber(seller.totalSales || seller.total_sales || seller.salesCount || 0),
+        formatCurrency(seller.totalRevenue || seller.total_revenue || seller.revenue || 0),
     ]);
 
     autoTable(doc, {
@@ -289,7 +295,7 @@ export const generateAdminPDF = async (data: {
         doc.setTextColor(...darkColor);
         doc.setFontSize(16);
         doc.setFont('helvetica', 'bold');
-        doc.text('📈 Revenue Trends (Last 12 Months)', 14, yPos);
+        doc.text('[REVENUE] Revenue Trends (Last 12 Months)', 14, yPos);
         yPos += 10;
 
         const revenueData = data.revenueByMonth.map(item => [
@@ -458,7 +464,7 @@ export const generateAnalystPDF = async (data: {
     doc.setTextColor(...darkColor);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('📊 Key Business Metrics', 14, yPos);
+    doc.text('[METRICS] Key Business Metrics', 14, yPos);
     yPos += 10;
 
     const metricsGrid = [
@@ -509,7 +515,7 @@ export const generateAnalystPDF = async (data: {
     doc.setTextColor(...darkColor);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('💡 Key Insights', 14, yPos);
+    doc.text('[INSIGHTS] Key Insights', 14, yPos);
     yPos += 10;
 
     const insights = [
@@ -534,7 +540,7 @@ export const generateAnalystPDF = async (data: {
     doc.setTextColor(...primaryColor);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('🎯 Recommendations', 14, yPos);
+    doc.text('[ACTIONS] Recommendations', 14, yPos);
     yPos += 10;
 
     const recommendations = [
@@ -569,7 +575,7 @@ export const generateAnalystPDF = async (data: {
     doc.setTextColor(...darkColor);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('📈 Monthly Revenue Breakdown', 14, yPos);
+    doc.text('[TREND] Monthly Revenue Breakdown', 14, yPos);
     yPos += 10;
 
     if (data.revenueByMonth && data.revenueByMonth.length > 0) {
@@ -599,7 +605,7 @@ export const generateAnalystPDF = async (data: {
                     fontStyle: 'bold',
                 }
             },
-            didParseCell: function(data) {
+            didParseCell: function (data) {
                 if (data.column.index === 4 && data.section === 'body') {
                     const value = data.cell.raw as string;
                     if (value && value.startsWith('+')) {
@@ -649,7 +655,7 @@ export const generateAnalystPDF = async (data: {
     doc.setTextColor(...darkColor);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('🏆 Top 20 Products by Sales', 14, yPos);
+    doc.text('[TOP] Top 20 Products by Sales', 14, yPos);
     yPos += 10;
 
     const productTableData = data.topProducts.slice(0, 20).map((product, index) => [
@@ -659,7 +665,7 @@ export const generateAnalystPDF = async (data: {
         formatCurrency(product.price),
         formatNumber(product.salesCount),
         formatCurrency(product.revenue || product.price * product.salesCount),
-        product.rating ?  `⭐ ${product.rating.toFixed(1)}` : 'N/A',
+        product.rating ? `${product.rating.toFixed(1)}/5` : 'N/A',
     ]);
 
     autoTable(doc, {
@@ -695,7 +701,7 @@ export const generateAnalystPDF = async (data: {
     doc.setTextColor(...darkColor);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('📦 Performance by Category', 14, yPos);
+    doc.text('[CATEGORY] Performance by Category', 14, yPos);
     yPos += 10;
 
     if (data.categoryPerformance && data.categoryPerformance.length > 0) {
@@ -705,7 +711,7 @@ export const generateAnalystPDF = async (data: {
             formatNumber(cat.productCount),
             formatCurrency(cat.totalRevenue),
             formatCurrency(cat.avgPrice),
-            cat.avgRating ? `⭐ ${cat.avgRating.toFixed(1)}` : 'N/A',
+            cat.avgRating ? `${cat.avgRating.toFixed(1)}/5` : 'N/A',
         ]);
 
         autoTable(doc, {
@@ -724,7 +730,7 @@ export const generateAnalystPDF = async (data: {
     // Price Distribution
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('💰 Price Distribution', 14, yPos);
+    doc.text('[PRICE] Price Distribution', 14, yPos);
     yPos += 10;
 
     if (data.priceDistribution && Object.keys(data.priceDistribution).length > 0) {
@@ -748,7 +754,7 @@ export const generateAnalystPDF = async (data: {
     // Rating Distribution (side by side)
     if (data.ratingDistribution && Object.keys(data.ratingDistribution).length > 0) {
         const ratingData = Object.entries(data.ratingDistribution).map(([rating, count]) => [
-            `⭐ ${rating}`,
+            `${rating} stars`,
             formatNumber(count),
             formatPercent((count / data.kpis.totalProducts) * 100),
         ]);
@@ -778,7 +784,7 @@ export const generateAnalystPDF = async (data: {
     doc.setTextColor(...darkColor);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('👥 Top Performing Sellers', 14, yPos);
+    doc.text('[SELLERS] Top Performing Sellers', 14, yPos);
     yPos += 10;
 
     const sellerTableData = data.topSellers.map((seller, index) => [
@@ -788,7 +794,7 @@ export const generateAnalystPDF = async (data: {
         formatNumber(seller.productCount),
         formatNumber(seller.totalSales),
         formatCurrency(seller.totalRevenue),
-        seller.rating ? `⭐ ${seller.rating.toFixed(1)}` : 'N/A',
+        seller.rating ? `${seller.rating.toFixed(1)}/5` : 'N/A',
     ]);
 
     autoTable(doc, {
@@ -819,7 +825,7 @@ export const generateAnalystPDF = async (data: {
     doc.setTextColor(...darkColor);
     doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text('📊 Seller Insights', 20, yPos + 12);
+    doc.text('[STATS] Seller Insights', 20, yPos + 12);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
@@ -843,7 +849,7 @@ export const generateAnalystPDF = async (data: {
     doc.setTextColor(...darkColor);
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('⚠️ Low Stock Products', 14, yPos);
+    doc.text('[ALERT] Low Stock Products', 14, yPos);
     yPos += 10;
 
     if (data.lowStockProducts && data.lowStockProducts.length > 0) {
@@ -853,7 +859,7 @@ export const generateAnalystPDF = async (data: {
             product.asin,
             formatCurrency(product.price),
             product.stockQuantity === 0 ? 'OUT OF STOCK' : `${product.stockQuantity} units`,
-            product.stockQuantity === 0 ? '🔴 Critical' : product.stockQuantity <= 5 ? '🟡 Low' : '🟢 OK',
+            product.stockQuantity === 0 ? 'CRITICAL' : product.stockQuantity <= 5 ? 'LOW' : 'OK',
         ]);
 
         autoTable(doc, {
@@ -864,7 +870,7 @@ export const generateAnalystPDF = async (data: {
             headStyles: { fillColor: dangerColor, textColor: [255, 255, 255], fontStyle: 'bold' },
             margin: { left: 14, right: 14 },
             styles: { fontSize: 8, cellPadding: 2 },
-            didParseCell: function(data) {
+            didParseCell: function (data) {
                 if (data.column.index === 4 && data.section === 'body') {
                     const value = data.cell.raw as string;
                     if (value === 'OUT OF STOCK') {
@@ -887,7 +893,7 @@ export const generateAnalystPDF = async (data: {
         doc.setTextColor(...dangerColor);
         doc.setFontSize(11);
         doc.setFont('helvetica', 'bold');
-        doc.text('⚡ Action Required', 20, yPos + 12);
+        doc.text('[!] Action Required', 20, yPos + 12);
 
         doc.setTextColor(...darkColor);
         doc.setFont('helvetica', 'normal');
@@ -896,7 +902,7 @@ export const generateAnalystPDF = async (data: {
         doc.text(`• ${lowStock} products have LOW STOCK (≤5 units) - Consider restocking`, 25, yPos + 30);
     } else {
         doc.setFontSize(12);
-        doc.text('✅ All products have adequate stock levels! ', 14, yPos + 10);
+        doc.text('OK - All products have adequate stock levels!', 14, yPos + 10);
     }
 
     // ===== FINAL PAGE: CONCLUSION =====
@@ -931,7 +937,7 @@ export const generateAnalystPDF = async (data: {
     doc.text('analytics@mouadvision.com', pageWidth / 2, 235, { align: 'center' });
 
     doc.setFontSize(8);
-    doc.text('© 2025 MouadVision. All Rights Reserved. | Confidential Document', pageWidth / 2, pageHeight - 20, { align: 'center' });
+    doc.text('© 2025 MouadVision.All Rights Reserved.| Confidential Document', pageWidth / 2, pageHeight - 20, { align: 'center' });
 
     addFooter();
 

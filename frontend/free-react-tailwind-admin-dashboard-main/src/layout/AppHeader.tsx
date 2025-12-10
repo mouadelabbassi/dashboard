@@ -4,7 +4,6 @@ import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import UserDropdown from "../components/header/UserDropdown";
 import NotificationDropdown from "../components/header/NotificationDropdown";
-import SmartSearchBar from "../components/SmartSearch/SmartSearchBar";
 
 const AppHeader: React.FC = () => {
     const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -57,14 +56,6 @@ const AppHeader: React.FC = () => {
                             <path fillRule="evenodd" clipRule="evenodd" d="M18.001 10.4951C18.8294 10.4951 19.501 11.1667 19.501 11.9951V12.0051C19.501 12.8335 18.8294 13.5051 18.001 13.5051C17.1726 13.5051 16.501 12.8335 16.501 12.0051V11.9951C16.501 11.1667 17.1726 10.4951 18.001 10.4951Z" fill="currentColor"/>
                         </svg>
                     </button>
-
-                    {/* Smart Search Bar - Desktop */}
-                    <div className="hidden lg:block flex-1 max-w-xl">
-                        <SmartSearchBar
-                            placeholder="Recherche intelligente... (ex: 'produits sous $50')"
-                            className="w-full"
-                        />
-                    </div>
                 </div>
                 <div
                     className={`${

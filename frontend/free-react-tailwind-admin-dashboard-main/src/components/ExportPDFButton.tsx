@@ -18,14 +18,18 @@ const ExportPDFButton: React.FC<ExportPDFButtonProps> = ({ type, className = '' 
         try {
             if (type === 'admin') {
                 const data = await reportService.getAdminReportData();
+                console.log('📊 Admin Report Data:', data);  // DEBUG
+                console.log('📦 Products:', data.topProducts);  // DEBUG
+                console.log('👥 Sellers:', data.topSellers);  // DEBUG
                 await generateAdminPDF(data);
             } else {
                 const data = await reportService.getAnalystReportData();
+                console.log('📊 Analyst Report Data:', data);  // DEBUG
                 await generateAnalystPDF(data);
             }
         } catch (err: any) {
             console.error('Export error:', err);
-            setError('Failed to generate PDF.Please try again.');
+            setError('Failed to generate PDF.  Please try again.');
         } finally {
             setLoading(false);
         }

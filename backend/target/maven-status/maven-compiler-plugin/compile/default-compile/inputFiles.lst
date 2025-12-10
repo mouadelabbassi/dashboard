@@ -1,6 +1,5 @@
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\CategoryResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\UserRepository.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\SmartSearchService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AdminSellerController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\ProductService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AnalystController.java
@@ -13,7 +12,6 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controlle
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\SellerProductSubmissionRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\SellerStockController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ListFromStockRequest.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\SmartSearchRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ReviewRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ApiResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\SellerStock.java
@@ -25,17 +23,14 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\respo
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\OrderResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\StockManagementService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\ImportController.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\SearchHistoryRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\security\JwtTokenProvider.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ProductApprovalRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\ProductReview.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\exception\GlobalExceptionHandler.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\RegisterRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\AdminDashboardResponse.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\SaleRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\NotificationResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\NotificationRepository.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\SaleService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\Notification.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\exception\BadRequestException.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\OrderItemRepository.java
@@ -51,7 +46,6 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\A
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\NotificationController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\SellerService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\UserController.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\SmartSearchResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\SellerProfileUpdateRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\SellerRegisterRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\OpenApiConfig.java
@@ -62,11 +56,8 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repositor
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\CorsConfig.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\Sale.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\StockUpdateRequestRepository.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\SearchHistory.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\SellerRevenue.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\OrderService.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\SmartSearchController.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\SaleRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\security\JwtAuthenticationFilter.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\SellerReviewSummary.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\AuthService.java
@@ -80,12 +71,10 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\reque
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\util\CsvHelper.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\SellerDashboardResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\CategoryService.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\SaleResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\NotificationService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\ExportController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\AnalystService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\OrderRequest.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\SaleController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ProductRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\security\UserDetailsServiceImpl.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\StockUpdateRequest.java

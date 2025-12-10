@@ -81,10 +81,6 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Sale> sales = new ArrayList<>();
 
     public enum Role {
         BUYER("Regular Buyer"),

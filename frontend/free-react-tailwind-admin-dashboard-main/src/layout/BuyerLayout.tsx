@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import SmartSearchBar from '../components/SmartSearch/SmartSearchBar';
 
 const BuyerLayout: React.FC = () => {
     const { logout } = useAuth();
@@ -51,15 +50,6 @@ const BuyerLayout: React.FC = () => {
                                 MouadVision
                             </span>
                         </Link>
-
-                        {/* Smart Search Bar - Desktop */}
-                        <div className="hidden md:block flex-1 max-w-xl mx-4">
-                            <SmartSearchBar
-                                placeholder="Recherche intelligente... (ex: 'électronique pas cher')"
-                            />
-                        </div>
-
-                        {/* Navigation - Desktop */}
                         <nav className="hidden lg:flex items-center gap-1">
                             {navLinks.map(link => (
                                 <Link
@@ -142,15 +132,6 @@ const BuyerLayout: React.FC = () => {
                             </button>
                         </div>
                     </div>
-
-                    {/* Mobile Search Bar */}
-                    {showMobileSearch && (
-                        <div className="md:hidden pb-4">
-                            <SmartSearchBar
-                                placeholder="Recherche intelligente..."
-                            />
-                        </div>
-                    )}
                 </div>
 
                 {/* Mobile Navigation */}

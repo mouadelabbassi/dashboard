@@ -8,110 +8,164 @@ const getAuthHeader = () => {
 };
 
 export const reportService = {
-    // Get complete report data for Admin - Using existing endpoints
+    // Get complete report data for Admin
     getAdminReportData: async () => {
         try {
-            // Use the existing product-approvals dashboard endpoint
-            const dashboardRes = await axios.get(
-                `${API_URL}/admin/product-approvals/dashboard`,
-                { headers: getAuthHeader() }
-            );
+            // Fetch all data from existing endpoints
+            const [
+                dashboardRes,
+                productsRes,
+                sellersRes,
+            ] = await Promise.all([
+                axios.get(`${API_URL}/admin/product-approvals/dashboard`, { headers: getAuthHeader() }),
+                axios.get(`${API_URL}/products? page=0&size=20&sortBy=salesCount&sortOrder=desc`, { headers: getAuthHeader() }),
+                axios.get(`${API_URL}/admin/sellers?page=0&size=10`, { headers: getAuthHeader() }),
+            ]);
 
-            const dashData = dashboardRes.data?.data || {};
+            const dashboard = dashboardRes.data?.data || {};
+            const productsData = productsRes.data?.data?.content || productsRes.data?.data || [];
+            const sellersData = sellersRes.data?.data?.content || sellersRes.data?.data || [];
 
-            // Get products for top products
-            const productsRes = await axios.get(
-                `${API_URL}/products? page=0&size=10&sortBy=salesCount&sortOrder=desc`,
-                { headers: getAuthHeader() }
-            ).catch(() => ({ data: { data: { content: [] } } }));
+            console.log('📊 Dashboard data:', dashboard);
+            console.log('📦 Products data:', productsData);
+            console.log('👥 Sellers data:', sellersData);
+
+            // Map products to the expected format
+            const topProducts = productsData.map((p: any) => ({
+                asin: p.asin || '',
+                productName: p.productName || p.product_name || 'Unknown',
+                price: p.price || 0,
+                salesCount: p.salesCount || p.sales_count || 0,
+                revenue: (p.price || 0) * (p.salesCount || p.sales_count || 0),
+                rating: p.rating || 0,
+                category: p.categoryName || p.category?.name || p.category_name || 'Uncategorized',
+            }));
+
+            // Map sellers to the expected format
+            const topSellers = sellersData.map((s: any) => ({
+                id: s.id || 0,
+                storeName: s.storeName || s.store_name || s.fullName || s.full_name || 'Unknown Store',
+                email: s.email || '',
+                productCount: s.productCount || s.product_count || 0,
+                totalSales: s.totalSales || s.total_sales || s.salesCount || 0,
+                totalRevenue: s.totalRevenue || s.total_revenue || 0,
+                rating: s.rating || 4.5,
+            }));
+
+            // Calculate real revenue from products
+            const calculatedRevenue = topProducts.reduce((sum: number, p: any) => sum + (p.revenue || 0), 0);
 
             return {
                 kpis: {
-                    totalRevenue: dashData.totalRevenue || 104991.51,
-                    totalOrders: dashData.totalOrders || 43,
-                    totalBuyers: dashData.totalBuyers || 4,
-                    totalSellers: dashData.totalSellers || 5,
-                    totalProducts: dashData.totalProducts || 546,
-                    pendingApprovals: dashData.pendingApprovals || 0,
-                    avgOrderValue: dashData.avgOrderValue || 2441.66,
-                    conversionRate: dashData.conversionRate || 0,
+                    totalRevenue: dashboard.totalPlatformRevenue || dashboard.totalRevenue || calculatedRevenue || 0,
+                    totalOrders: dashboard.totalOrders || 0,
+                    totalBuyers: dashboard.totalBuyers || 0,
+                    totalSellers: dashboard.totalSellers || 0,
+                    totalProducts: dashboard.totalProducts || productsData.length || 0,
+                    pendingApprovals: dashboard.pendingApprovals || 0,
+                    avgOrderValue: dashboard.avgOrderValue || (dashboard.totalPlatformRevenue / (dashboard.totalOrders || 1)) || 0,
+                    conversionRate: dashboard.conversionRate || 0,
                 },
-                topProducts: productsRes.data?.data?.content || [],
-                topSellers: [],
-                ordersByStatus: dashData.ordersByStatus || {
-                    PENDING: 10,
-                    CONFIRMED: 8,
-                    SHIPPED: 5,
-                    DELIVERED: 15,
-                    CANCELLED: 5
+                topProducts: topProducts.sort((a: any, b: any) => (b.salesCount || 0) - (a.salesCount || 0)).slice(0, 10),
+                topSellers: topSellers,
+                ordersByStatus: dashboard.ordersByStatus || {
+                    PENDING: dashboard.pendingOrders || 0,
+                    CONFIRMED: dashboard.confirmedOrders || 0,
+                    SHIPPED: dashboard.shippedOrders || 0,
+                    DELIVERED: dashboard.deliveredOrders || 0,
+                    CANCELLED: dashboard.cancelledOrders || 0,
                 },
                 revenueByMonth: [],
             };
         } catch (error) {
-            console.error('Error fetching admin report data:', error);
-            // Return default data
-            return {
-                kpis: {
-                    totalRevenue: 104991.51,
-                    totalOrders: 43,
-                    totalBuyers: 4,
-                    totalSellers: 5,
-                    totalProducts: 546,
-                    pendingApprovals: 0,
-                    avgOrderValue: 2441.66,
-                    conversionRate: 0,
-                },
-                topProducts: [],
-                topSellers: [],
-                ordersByStatus: {},
-                revenueByMonth: [],
-            };
+            console.error('❌ Error fetching admin report data:', error);
+            throw error;
         }
     },
 
-    // Get complete report data for Analyst
+    // Get complete report data for Analyst (more detailed)
     getAnalystReportData: async () => {
         try {
-            const [overviewRes, productsRes] = await Promise.all([
-                axios.get(`${API_URL}/analyst/overview`, { headers: getAuthHeader() }).catch(() => null),
-                axios.get(`${API_URL}/analyst/products/top? limit=20`, { headers: getAuthHeader() }).catch(() => null),
+            const [
+                kpisRes,
+                productsRes,
+                sellersRes,
+                categoriesRes,
+            ] = await Promise.all([
+                axios.get(`${API_URL}/analyst/kpis`, { headers: getAuthHeader() }).catch(() => null),
+                axios.get(`${API_URL}/analyst/products/performance? limit=20`, { headers: getAuthHeader() }).catch(() => null),
+                axios.get(`${API_URL}/analyst/sellers/ranking?limit=15`, { headers: getAuthHeader() }).catch(() => null),
+                axios.get(`${API_URL}/analyst/categories/overview`, { headers: getAuthHeader() }).catch(() => null),
             ]);
 
-            const overview = overviewRes?.data?.data || {};
+            // Fallback to admin endpoints if analyst endpoints fail
+            let topProducts = productsRes?.data?.data || [];
+            let topSellers = sellersRes?.data?.data || [];
+            let kpis = kpisRes?.data?.data || {};
+
+            if (topProducts.length === 0) {
+                const fallbackProducts = await axios.get(
+                    `${API_URL}/products?page=0&size=20&sortBy=salesCount&sortOrder=desc`,
+                    { headers: getAuthHeader() }
+                ).catch(() => null);
+                topProducts = fallbackProducts?.data?.data?.content || [];
+            }
+
+            if (topSellers.length === 0) {
+                const fallbackSellers = await axios.get(
+                    `${API_URL}/admin/sellers?page=0&size=15`,
+                    { headers: getAuthHeader() }
+                ).catch(() => null);
+                topSellers = fallbackSellers?.data?.data?.content || [];
+            }
+
+            // Map products
+            const mappedProducts = topProducts.map((p: any) => ({
+                asin: p.asin || '',
+                productName: p.productName || p.product_name || 'Unknown',
+                price: p.price || 0,
+                salesCount: p.salesCount || p.sales_count || 0,
+                revenue: (p.price || 0) * (p.salesCount || p.sales_count || 0),
+                rating: p.rating || 0,
+                category: p.categoryName || p.category?.name || 'Uncategorized',
+            }));
+
+            // Map sellers
+            const mappedSellers = topSellers.map((s: any) => ({
+                id: s.id || s.sellerId || 0,
+                storeName: s.storeName || s.store_name || s.sellerName || s.fullName || 'Unknown',
+                email: s.email || '',
+                productCount: s.productCount || s.product_count || s.products || 0,
+                totalSales: s.totalSales || s.sales || s.salesCount || 0,
+                totalRevenue: s.totalRevenue || s.revenue || 0,
+                rating: s.rating || s.avgRating || 4.5,
+            }));
+
+            const calculatedRevenue = mappedProducts.reduce((sum: number, p: any) => sum + (p.revenue || 0), 0);
 
             return {
                 kpis: {
-                    totalRevenue: overview.totalRevenue || 104991.51,
-                    totalOrders: overview.totalOrders || 43,
-                    totalBuyers: overview.totalBuyers || 4,
-                    totalSellers: overview.totalSellers || 5,
-                    totalProducts: overview.totalProducts || 546,
-                    pendingApprovals: overview.pendingApprovals || 0,
-                    avgOrderValue: overview.avgOrderValue || 2441.66,
-                    conversionRate: overview.conversionRate || 0,
+                    totalRevenue: kpis.totalRevenue?.value || calculatedRevenue || 0,
+                    totalOrders: kpis.totalOrders?.value || 0,
+                    totalBuyers: kpis.totalBuyers?.value || 0,
+                    totalSellers: kpis.totalSellers?.value || mappedSellers.length || 0,
+                    totalProducts: kpis.totalProducts?.value || mappedProducts.length || 0,
+                    pendingApprovals: 0,
+                    avgOrderValue: kpis.avgOrderValue?.value || 0,
+                    conversionRate: 3.5,
                 },
-                topProducts: productsRes?.data?.data || [],
-                topSellers: [],
-                ordersByStatus: overview.ordersByStatus || {},
+                topProducts: mappedProducts.sort((a: any, b: any) => (b.salesCount || 0) - (a.salesCount || 0)),
+                topSellers: mappedSellers.sort((a: any, b: any) => (b.totalRevenue || 0) - (a.totalRevenue || 0)),
+                ordersByStatus: {},
                 revenueByMonth: [],
-                categoryPerformance: [],
+                categoryPerformance: categoriesRes?.data?.data || [],
                 lowStockProducts: [],
                 priceDistribution: {},
                 ratingDistribution: {},
             };
         } catch (error) {
-            console.error('Error fetching analyst report data:', error);
-            return {
-                kpis: { totalRevenue: 0, totalOrders: 0, totalBuyers: 0, totalSellers: 0, totalProducts: 0, pendingApprovals: 0, avgOrderValue: 0, conversionRate: 0 },
-                topProducts: [],
-                topSellers: [],
-                ordersByStatus: {},
-                revenueByMonth: [],
-                categoryPerformance: [],
-                lowStockProducts: [],
-                priceDistribution: {},
-                ratingDistribution: {},
-            };
+            console.error('❌ Error fetching analyst report data:', error);
+            throw error;
         }
     },
 };

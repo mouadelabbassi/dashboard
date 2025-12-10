@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import SmartSearchBar from '../components/SmartSearch/SmartSearchBar';
 
 const SellerLayout: React.FC = () => {
     const { user, logout } = useAuth();
@@ -151,12 +150,6 @@ const SellerLayout: React.FC = () => {
                             </svg>
                         </button>
 
-                        {/* Smart Search Bar - Desktop */}
-                        <div className="hidden md:block flex-1 max-w-xl">
-                            <SmartSearchBar
-                                placeholder="Recherche intelligente... (ex: 'produits populaires')"
-                            />
-                        </div>
 
                         {/* Right Actions */}
                         <div className="flex items-center gap-3">
@@ -195,14 +188,6 @@ const SellerLayout: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Mobile Search Bar */}
-                    {showMobileSearch && (
-                        <div className="md:hidden px-4 pb-4">
-                            <SmartSearchBar
-                                placeholder="Recherche intelligente..."
-                            />
-                        </div>
-                    )}
                 </header>
 
                 {/* Page Content */}
