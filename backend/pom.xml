@@ -15,7 +15,7 @@
     <groupId>com.dashboard</groupId>
     <artifactId>amazon-dashboard</artifactId>
     <version>1.0.0</version>
-    <name>Amazon Dashboard Backend</name>
+    <name>Backend</name>
     <description>Spring Boot backend for Amazon Sales Analytics Dashboard</description>
 
     <properties>

@@ -38,6 +38,7 @@ com\dashboard\entity\Order.class
 com\dashboard\dto\request\SellerProductSubmissionRequest$SellerProductSubmissionRequestBuilder.class
 com\dashboard\dto\response\ProductDetailResponse.class
 com\dashboard\dto\response\ReviewResponse.class
+com\dashboard\config\MLServiceConfig.class
 com\dashboard\entity\StockUpdateRequest.class
 com\dashboard\dto\response\NotificationResponse.class
 com\dashboard\entity\PlatformRevenue.class
@@ -56,6 +57,7 @@ com\dashboard\controller\AnalystController.class
 com\dashboard\dto\response\CategoryStatsResponse$CategoryStatsResponseBuilder.class
 com\dashboard\dto\response\ProductDetailResponse$ProductDetailResponseBuilder.class
 com\dashboard\entity\ProductReview.class
+com\dashboard\service\MLServiceClient.class
 com\dashboard\dto\request\UpdateProfileRequest$UpdateProfileRequestBuilder.class
 com\dashboard\dto\response\OrderResponse$OrderItemResponse.class
 com\dashboard\dto\response\OrderResponse$OrderResponseBuilder.class
@@ -78,7 +80,6 @@ com\dashboard\dto\request\SellerRegisterRequest.class
 com\dashboard\repository\StockUpdateRequestRepository.class
 com\dashboard\dto\response\SellerProductRequestResponse$SellerProductRequestResponseBuilder.class
 com\dashboard\entity\StockUpdateRequest$RequestStatus.class
-com\dashboard\config\RestTemplateConfig.class
 com\dashboard\dto\request\LoginRequest$LoginRequestBuilder.class
 com\dashboard\repository\ProductRepository.class
 com\dashboard\service\AnalystService.class

@@ -14,6 +14,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controlle
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ListFromStockRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\PublicController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ReviewRequest.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\MLServiceConfig.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ApiResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\SellerStock.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\SellerController.java
@@ -39,6 +40,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controlle
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\PlatformRevenue.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ForgotPasswordRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\SellerRevenueService.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\MLServiceClient.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\SellerStockService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ProductDetailResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\PlatformRevenueRepository.java
@@ -92,7 +94,6 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\Se
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AdminProductApprovalController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\ReviewService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\exception\DuplicateResourceException.java
-C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\RestTemplateConfig.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\LoginRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\ProductRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\Category.java

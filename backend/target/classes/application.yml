@@ -44,13 +44,7 @@ jwt:
   expiration: 86400000
   refresh-expiration: 604800000
 
-# AI Service Configuration
-ai:
-  service:
-    url: http://localhost:8000
-    enabled: true
 
-# CORS Configuration
 cors:
   allowed-origins: http://localhost:5173,http://localhost:3000,http://localhost:8000
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
@@ -58,6 +52,28 @@ cors:
   exposed-headers: Authorization
   allow-credentials: true
   max-age: 3600
+
+
+ml:
+  service:
+    enabled: true
+    url: http://localhost:8000
+    connect-timeout: 5000
+    read-timeout: 30000
+    retry:
+      max-attempts: 3
+      delay: 1000
+    endpoints:
+      health:  /health
+      predictions: /api/predictions
+      training: /api/training
+      dashboard: /api/predictions/dashboard
+      ranking: /api/predictions/ranking
+      bestsellers: /api/predictions/bestsellers/potential
+      price-optimal: /api/predictions/price/optimal
+      price-bulk: /api/predictions/price/bulk-analysis
+      train-all: /api/training/train-all
+      capture-stats: /api/training/data/capture
 
 # CSV Import Configuration
 csv:
@@ -73,6 +89,7 @@ logging:
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.dashboard.service.MLServiceClient: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
@@ -91,3 +108,10 @@ springdoc:
 pagination:
   default-page-size: 20
   max-page-size: 100
+
+scheduling:
+  enabled:  true
+  daily-stats:
+    cron: "0 0 1 * * ?"
+  weekly-cleanup:
+    cron: "0 0 3 ?  * SUN"
