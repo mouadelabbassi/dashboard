@@ -114,10 +114,6 @@ public class Product {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    @Builder.Default
-    private List<Sale> sales = new ArrayList<>();
-
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ProductReview> reviews = new ArrayList<>();

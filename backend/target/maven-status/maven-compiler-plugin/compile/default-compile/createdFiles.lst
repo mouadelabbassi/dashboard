@@ -9,7 +9,6 @@ com\dashboard\dto\response\CategoryStatsResponse.class
 com\dashboard\repository\ProductReviewRepository.class
 com\dashboard\dto\response\CategoryResponse.class
 com\dashboard\dto\request\ProductApprovalRequest$ProductApprovalRequestBuilder.class
-com\dashboard\entity\Sale.class
 com\dashboard\dto\request\SellerProfileUpdateRequest.class
 com\dashboard\dto\response\ProductResponse$ProductResponseBuilder.class
 com\dashboard\dto\response\ProductResponse.class
@@ -38,7 +37,6 @@ com\dashboard\entity\Order.class
 com\dashboard\dto\request\SellerProductSubmissionRequest$SellerProductSubmissionRequestBuilder.class
 com\dashboard\dto\response\ProductDetailResponse.class
 com\dashboard\dto\response\ReviewResponse.class
-com\dashboard\config\MLServiceConfig.class
 com\dashboard\entity\StockUpdateRequest.class
 com\dashboard\dto\response\NotificationResponse.class
 com\dashboard\entity\PlatformRevenue.class
@@ -57,7 +55,6 @@ com\dashboard\controller\AnalystController.class
 com\dashboard\dto\response\CategoryStatsResponse$CategoryStatsResponseBuilder.class
 com\dashboard\dto\response\ProductDetailResponse$ProductDetailResponseBuilder.class
 com\dashboard\entity\ProductReview.class
-com\dashboard\service\MLServiceClient.class
 com\dashboard\dto\request\UpdateProfileRequest$UpdateProfileRequestBuilder.class
 com\dashboard\dto\response\OrderResponse$OrderItemResponse.class
 com\dashboard\dto\response\OrderResponse$OrderResponseBuilder.class
@@ -95,7 +92,6 @@ com\dashboard\service\ProductService.class
 com\dashboard\dto\request\StockUpdateRequest$StockUpdateRequestBuilder.class
 com\dashboard\controller\AuthController.class
 com\dashboard\controller\AdminProductApprovalController.class
-com\dashboard\entity\Sale$SaleBuilder.class
 com\dashboard\controller\AdminStockController.class
 com\dashboard\dto\request\OrderRequest$OrderRequestBuilder.class
 com\dashboard\dto\response\OrderResponse$OrderItemResponse$OrderItemResponseBuilder.class
@@ -169,7 +165,6 @@ com\dashboard\config\OpenApiConfig.class
 com\dashboard\dto\response\DashboardStatsResponse$DashboardStatsResponseBuilder.class
 com\dashboard\controller\SellerController.class
 com\dashboard\dto\request\ProductRequest.class
-com\dashboard\entity\Sale$SaleStatus.class
 com\dashboard\dto\request\OrderRequest.class
 com\dashboard\dto\response\NotificationResponse$NotificationResponseBuilder.class
 com\dashboard\dto\response\ReviewResponse$ReviewResponseBuilder.class

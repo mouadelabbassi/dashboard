@@ -55,7 +55,7 @@ public class AnalystService {
         kpis.put("totalRevenue", Map.of(
                 "value", totalRevenue,
                 "growth", revenueGrowth,
-                "trend", revenueGrowth >= 0 ? "up" : "down"
+                "trend", revenueGrowth >= 0 ? "up" :  "down"
         ));
 
         // Total Orders
@@ -107,6 +107,433 @@ public class AnalystService {
         return kpis;
     }
 
+    // ==================== ADVANCED REPORT DATA ====================
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getAdvancedReportData() {
+        Map<String, Object> reportData = new HashMap<>();
+
+        // Platform Revenue Overview
+        reportData.put("platformRevenue", getPlatformRevenueOverview());
+
+        // Top 3 Best Sellers
+        reportData.put("top3Sellers", getTop3BestSellers());
+
+        // Top 3 Categories by Revenue
+        reportData.put("top3Categories", getTop3CategoriesByRevenue());
+
+        // Top 10 Most Sold Products
+        reportData.put("mostSoldProducts", getMostSoldProducts(10));
+
+        // Monthly Revenue Trend (last 12 months)
+        reportData.put("monthlyRevenueTrend", getMonthlyRevenueTrend());
+
+        // Category Revenue Distribution
+        reportData.put("categoryRevenueDistribution", getCategoryRevenueDistribution());
+
+        // Sales Performance Metrics
+        reportData.put("salesPerformance", getSalesPerformanceMetrics());
+
+        // Order Status Distribution
+        reportData.put("orderStatusDistribution", getOrderStatusDistribution());
+
+        // Weekly Sales Trend
+        reportData.put("weeklySalesTrend", getWeeklySalesTrend());
+
+        // KPIs
+        reportData.put("kpis", getKPIs());
+
+        return reportData;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getPlatformRevenueOverview() {
+        Map<String, Object> overview = new HashMap<>();
+
+        // Total Platform Revenue
+        BigDecimal totalRevenue = calculateTotalRevenue();
+        overview.put("totalRevenue", totalRevenue);
+
+        // Platform Direct Sales Revenue
+        BigDecimal platformDirectRevenue = platformRevenueRepository.findAll().stream()
+                .filter(pr -> pr.getRevenueType() == PlatformRevenue.RevenueType.DIRECT_SALE)
+                .map(pr -> pr.getGrossAmount() != null ? pr.getGrossAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        overview.put("directSalesRevenue", platformDirectRevenue);
+
+        // Commission Revenue from Sellers
+        BigDecimal commissionRevenue = sellerRevenueRepository.findAll().stream()
+                .map(sr -> sr.getPlatformFee() != null ? sr.getPlatformFee() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        overview.put("commissionRevenue", commissionRevenue);
+
+        // Seller Generated Revenue
+        BigDecimal sellerRevenue = sellerRevenueRepository.findAll().stream()
+                .map(sr -> sr.getGrossAmount() != null ? sr.getGrossAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        overview.put("sellerRevenue", sellerRevenue);
+
+        // Total Orders
+        long totalOrders = orderRepository.count();
+        overview.put("totalOrders", totalOrders);
+
+        // Completed Orders
+        long completedOrders = orderRepository.findAll().stream()
+                .filter(o -> o.getStatus() == Order.OrderStatus.DELIVERED)
+                .count();
+        overview.put("completedOrders", completedOrders);
+
+        // Average Order Value
+        overview.put("avgOrderValue", calculateAverageOrderValue());
+
+        // Growth Metrics
+        BigDecimal previousMonthRevenue = calculatePreviousPeriodRevenue(30);
+        double revenueGrowth = calculateGrowthPercentage(previousMonthRevenue, totalRevenue);
+        overview.put("revenueGrowth", revenueGrowth);
+
+        // This Month Revenue
+        BigDecimal thisMonthRevenue = getRevenueForPeriod(LocalDate.now().withDayOfMonth(1), LocalDate.now());
+        overview.put("thisMonthRevenue", thisMonthRevenue);
+
+        // Last Month Revenue
+        LocalDate lastMonthStart = LocalDate.now().minusMonths(1).withDayOfMonth(1);
+        LocalDate lastMonthEnd = LocalDate.now().withDayOfMonth(1).minusDays(1);
+        BigDecimal lastMonthRevenue = getRevenueForPeriod(lastMonthStart, lastMonthEnd);
+        overview.put("lastMonthRevenue", lastMonthRevenue);
+
+        return overview;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getTop3BestSellers() {
+        List<Object[]> topSellers = sellerRevenueRepository.getTopSellersByRevenue(Pageable.ofSize(3));
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        int rank = 1;
+
+        for (Object[] row : topSellers) {
+            Map<String, Object> seller = new HashMap<>();
+            seller.put("rank", rank++);
+            seller.put("sellerId", row[0]);
+            seller.put("sellerName", row[1] != null ? row[1].toString() : "Unknown");
+            seller.put("storeName", row[2] != null ? row[2].toString() : "No Store Name");
+            seller.put("totalRevenue", row[3] != null ? ((BigDecimal) row[3]).doubleValue() : 0.0);
+            seller.put("productsSold", row[4] != null ? ((Long) row[4]).intValue() : 0);
+            seller.put("totalOrders", row[5] != null ? ((Long) row[5]).intValue() : 0);
+
+            // Calculate average order value for this seller
+            double avgOrderValue = seller.get("totalOrders") != null && (int) seller.get("totalOrders") > 0
+                    ? (double) seller.get("totalRevenue") / (int) seller.get("totalOrders")
+                    : 0.0;
+            seller.put("avgOrderValue", avgOrderValue);
+
+            // Get seller's product count
+            Long sellerId = row[0] != null ? ((Number) row[0]).longValue() : null;
+            if (sellerId != null) {
+                User sellerUser = userRepository.findById(sellerId).orElse(null);
+                if (sellerUser != null) {
+                    long productCount = productRepository.findBySeller(sellerUser).stream()
+                            .filter(p -> p.getApprovalStatus() == Product.ApprovalStatus.APPROVED)
+                            .count();
+                    seller.put("productCount", productCount);
+                }
+            }
+
+            result.add(seller);
+        }
+
+        // If we don't have enough sellers from revenue, supplement with sellers who have products
+        if (result.size() < 3) {
+            List<User> allSellers = userRepository.findAllByRole(User.Role.SELLER);
+            for (User s : allSellers) {
+                if (result.size() >= 3) break;
+                boolean alreadyIncluded = result.stream()
+                        .anyMatch(r -> r.get("sellerId") != null && r.get("sellerId").equals(s.getId()));
+                if (!alreadyIncluded) {
+                    List<Product> sellerProducts = productRepository.findBySeller(s);
+                    int totalSales = sellerProducts.stream()
+                            .filter(p -> p.getSalesCount() != null)
+                            .mapToInt(Product::getSalesCount)
+                            .sum();
+                    BigDecimal revenue = sellerProducts.stream()
+                            .filter(p -> p.getPrice() != null && p.getSalesCount() != null)
+                            .map(p -> p.getPrice().multiply(BigDecimal.valueOf(p.getSalesCount())))
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    Map<String, Object> seller = new HashMap<>();
+                    seller.put("rank", result.size() + 1);
+                    seller.put("sellerId", s.getId());
+                    seller.put("sellerName", s.getFullName());
+                    seller.put("storeName", s.getStoreName() != null ? s.getStoreName() : "No Store Name");
+                    seller.put("totalRevenue", revenue.doubleValue());
+                    seller.put("productsSold", totalSales);
+                    seller.put("totalOrders", 0);
+                    seller.put("productCount", sellerProducts.size());
+                    seller.put("avgOrderValue", 0.0);
+
+                    result.add(seller);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getTop3CategoriesByRevenue() {
+        List<Category> categories = categoryRepository.findAll();
+
+        List<Map<String, Object>> categoryRevenues = new ArrayList<>();
+
+        for (Category category : categories) {
+            List<Product> products = productRepository.findByCategory(category);
+
+            BigDecimal totalRevenue = BigDecimal.ZERO;
+            int totalSold = 0;
+            int productCount = products.size();
+
+            for (Product product : products) {
+                int salesCount = product.getSalesCount() != null ? product.getSalesCount() : 0;
+                BigDecimal price = product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
+
+                totalRevenue = totalRevenue.add(price.multiply(BigDecimal.valueOf(salesCount)));
+                totalSold += salesCount;
+            }
+
+            // Calculate average price
+            BigDecimal avgPrice = productCount > 0
+                    ? products.stream()
+                    .filter(p -> p.getPrice() != null)
+                    .map(Product::getPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .divide(BigDecimal.valueOf(productCount), 2, RoundingMode.HALF_UP)
+                    :  BigDecimal.ZERO;
+
+            // Calculate average rating
+            double avgRating = products.stream()
+                    .filter(p -> p.getRating() != null)
+                    .mapToDouble(p -> p.getRating().doubleValue())
+                    .average()
+                    .orElse(0.0);
+
+            Map<String, Object> categoryData = new HashMap<>();
+            categoryData.put("categoryId", category.getId());
+            categoryData.put("categoryName", category.getName());
+            categoryData.put("productCount", productCount);
+            categoryData.put("revenue", totalRevenue);
+            categoryData.put("unitsSold", totalSold);
+            categoryData.put("avgPrice", avgPrice);
+            categoryData.put("avgRating", Math.round(avgRating * 10.0) / 10.0);
+
+            categoryRevenues.add(categoryData);
+        }
+
+        // Sort by revenue descending and return top 3
+        return categoryRevenues.stream()
+                .sorted((a, b) -> ((BigDecimal) b.get("revenue")).compareTo((BigDecimal) a.get("revenue")))
+                .limit(3)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getMostSoldProducts(int limit) {
+        List<Product> products = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED);
+
+        return products.stream()
+                .filter(p -> p.getSalesCount() != null && p.getSalesCount() > 0)
+                .sorted((a, b) -> b.getSalesCount().compareTo(a.getSalesCount()))
+                .limit(limit)
+                .map(p -> {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("rank", 0); // Will be set later
+                    data.put("asin", p.getAsin());
+                    data.put("productName", p.getProductName());
+                    data.put("price", p.getPrice());
+                    data.put("salesCount", p.getSalesCount());
+                    data.put("revenue", p.getPrice() != null ? p.getPrice().multiply(BigDecimal.valueOf(p.getSalesCount())) : BigDecimal.ZERO);
+                    data.put("rating", p.getRating());
+                    data.put("categoryName", p.getCategory() != null ? p.getCategory().getName() : "Uncategorized");
+                    data.put("imageUrl", p.getImageUrl());
+                    data.put("stockQuantity", p.getStockQuantity());
+                    data.put("seller", p.getSeller() != null ? p.getSeller().getStoreName() : "MouadVision");
+                    return data;
+                })
+                .peek(data -> {
+                    // Set rank
+                    int index = products.stream()
+                            .filter(p -> p.getSalesCount() != null && p.getSalesCount() > 0)
+                            .sorted((a, b) -> b.getSalesCount().compareTo(a.getSalesCount()))
+                            .collect(Collectors.toList())
+                            .indexOf(productRepository.findByAsin((String) data.get("asin")).orElse(null));
+                    data.put("rank", index + 1);
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getMonthlyRevenueTrend() {
+        List<Map<String, Object>> trend = new ArrayList<>();
+
+        for (int i = 11; i >= 0; i--) {
+            LocalDate monthStart = LocalDate.now().minusMonths(i).withDayOfMonth(1);
+            LocalDate monthEnd = monthStart.plusMonths(1).minusDays(1);
+
+            BigDecimal revenue = getRevenueForPeriod(monthStart, monthEnd);
+
+            List<Order> monthOrders = orderRepository.findByCreatedAtBetween(
+                    monthStart.atStartOfDay(),
+                    monthEnd.plusDays(1).atStartOfDay()
+            );
+
+            long orderCount = monthOrders.stream()
+                    .filter(o -> o.getStatus() == Order.OrderStatus.CONFIRMED ||
+                            o.getStatus() == Order.OrderStatus.DELIVERED)
+                    .count();
+
+            Map<String, Object> monthData = new HashMap<>();
+            monthData.put("month", monthStart.getMonth().toString().substring(0, 3));
+            monthData.put("year", monthStart.getYear());
+            monthData.put("monthYear", monthStart.getMonth().toString().substring(0, 3) + " " + monthStart.getYear());
+            monthData.put("revenue", revenue);
+            monthData.put("orders", orderCount);
+
+            trend.add(monthData);
+        }
+
+        return trend;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getCategoryRevenueDistribution() {
+        List<Map<String, Object>> categories = getCategoriesOverview();
+
+        BigDecimal totalRevenue = categories.stream()
+                .map(c -> (BigDecimal) c.get("revenue"))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return categories.stream()
+                .map(c -> {
+                    BigDecimal revenue = (BigDecimal) c.get("revenue");
+                    double percentage = totalRevenue.compareTo(BigDecimal.ZERO) > 0
+                            ? revenue.divide(totalRevenue, 4, RoundingMode.HALF_UP)
+                            .multiply(new BigDecimal("100")).doubleValue()
+                            :  0;
+
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("categoryName", c.get("name"));
+                    data.put("revenue", revenue);
+                    data.put("percentage", Math.round(percentage * 10.0) / 10.0);
+                    data.put("productCount", c.get("productCount"));
+                    data.put("color", generateColorForCategory((String) c.get("name")));
+
+                    return data;
+                })
+                .sorted((a, b) -> Double.compare((double) b.get("percentage"), (double) a.get("percentage")))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getSalesPerformanceMetrics() {
+        Map<String, Object> metrics = new HashMap<>();
+
+        // Today's stats
+        LocalDate today = LocalDate.now();
+        BigDecimal todayRevenue = getRevenueForPeriod(today, today);
+        metrics.put("todayRevenue", todayRevenue);
+
+        // This week stats
+        LocalDate weekStart = today.minusDays(today.getDayOfWeek().getValue() - 1);
+        BigDecimal weekRevenue = getRevenueForPeriod(weekStart, today);
+        metrics.put("weekRevenue", weekRevenue);
+
+        // This month stats
+        LocalDate monthStart = today.withDayOfMonth(1);
+        BigDecimal monthRevenue = getRevenueForPeriod(monthStart, today);
+        metrics.put("monthRevenue", monthRevenue);
+
+        // Year to date
+        LocalDate yearStart = today.withDayOfYear(1);
+        BigDecimal yearRevenue = getRevenueForPeriod(yearStart, today);
+        metrics.put("yearRevenue", yearRevenue);
+
+        // Best selling day this month
+        Map<LocalDate, BigDecimal> dailyRevenue = new HashMap<>();
+        for (LocalDate date = monthStart; ! date.isAfter(today); date = date.plusDays(1)) {
+            dailyRevenue.put(date, getRevenueForPeriod(date, date));
+        }
+        Map.Entry<LocalDate, BigDecimal> bestDay = dailyRevenue.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .orElse(null);
+        if (bestDay != null) {
+            metrics.put("bestSellingDay", bestDay.getKey().toString());
+            metrics.put("bestSellingDayRevenue", bestDay.getValue());
+        }
+
+        // Conversion rate (orders / total users * 100)
+        long totalBuyers = userRepository.countByRole(User.Role.BUYER);
+        long totalOrders = orderRepository.count();
+        double conversionRate = totalBuyers > 0 ?  (double) totalOrders / totalBuyers * 100 :  0;
+        metrics.put("conversionRate", Math.round(conversionRate * 10.0) / 10.0);
+
+        return metrics;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getOrderStatusDistribution() {
+        Map<String, Object> distribution = new LinkedHashMap<>();
+
+        List<Order> allOrders = orderRepository.findAll();
+
+        distribution.put("PENDING", allOrders.stream().filter(o -> o.getStatus() == Order.OrderStatus.PENDING).count());
+        distribution.put("CONFIRMED", allOrders.stream().filter(o -> o.getStatus() == Order.OrderStatus.CONFIRMED).count());
+        distribution.put("SHIPPED", allOrders.stream().filter(o -> o.getStatus() == Order.OrderStatus.SHIPPED).count());
+        distribution.put("DELIVERED", allOrders.stream().filter(o -> o.getStatus() == Order.OrderStatus.DELIVERED).count());
+        distribution.put("CANCELLED", allOrders.stream().filter(o -> o.getStatus() == Order.OrderStatus.CANCELLED).count());
+
+        return distribution;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getWeeklySalesTrend() {
+        List<Map<String, Object>> trend = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+
+        for (int i = 6; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
+            BigDecimal revenue = getRevenueForPeriod(date, date);
+
+            List<Order> dayOrders = orderRepository.findByCreatedAtBetween(
+                    date.atStartOfDay(),
+                    date.plusDays(1).atStartOfDay()
+            );
+
+            long orderCount = dayOrders.stream()
+                    .filter(o -> o.getStatus() == Order.OrderStatus.CONFIRMED ||
+                            o.getStatus() == Order.OrderStatus.DELIVERED)
+                    .count();
+
+            Map<String, Object> dayData = new HashMap<>();
+            dayData.put("date", date.toString());
+            dayData.put("dayName", date.getDayOfWeek().toString().substring(0, 3));
+            dayData.put("revenue", revenue);
+            dayData.put("orders", orderCount);
+
+            trend.add(dayData);
+        }
+
+        return trend;
+    }
+
+    private String generateColorForCategory(String categoryName) {
+        // Generate consistent colors based on category name
+        String[] colors = {
+                "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6",
+                "#EC4899", "#06B6D4", "#84CC16", "#F97316", "#6366F1"
+        };
+        int hash = Math.abs(categoryName.hashCode());
+        return colors[hash % colors.length];
+    }
+
     // ==================== SALES ANALYTICS ====================
 
     @Transactional(readOnly = true)
@@ -119,7 +546,6 @@ public class AnalystService {
         LocalDateTime start = startDate.atStartOfDay();
         LocalDateTime end = endDate.plusDays(1).atStartOfDay();
 
-        // Get orders in period
         List<Order> orders = orderRepository.findByCreatedAtBetween(start, end);
         List<Order> confirmedOrders = orders.stream()
                 .filter(o -> o.getStatus() == Order.OrderStatus.CONFIRMED ||
@@ -150,29 +576,25 @@ public class AnalystService {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(days);
 
-        // Get all orders in the period
         List<Order> orders = orderRepository.findByCreatedAtBetween(
                 startDate.atStartOfDay(),
                 endDate.plusDays(1).atStartOfDay()
         );
 
-        // Filter confirmed orders
         List<Order> confirmedOrders = orders.stream()
                 .filter(o -> o.getStatus() == Order.OrderStatus.CONFIRMED ||
                         o.getStatus() == Order.OrderStatus.DELIVERED)
                 .collect(Collectors.toList());
 
-        // Group by date
         Map<LocalDate, List<Order>> ordersByDate = confirmedOrders.stream()
                 .collect(Collectors.groupingBy(o -> o.getCreatedAt().toLocalDate()));
 
-        // Fill in all dates
         for (LocalDate date = startDate; ! date.isAfter(endDate); date = date.plusDays(1)) {
             List<Order> dayOrders = ordersByDate.getOrDefault(date, Collections.emptyList());
 
             BigDecimal revenue = dayOrders.stream()
                     .map(Order::getTotalAmount)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    .reduce(BigDecimal.ZERO, BigDecimal:: add);
 
             Map<String, Object> point = new HashMap<>();
             point.put("date", date.toString());
@@ -192,14 +614,14 @@ public class AnalystService {
 
         List<Category> categories = categoryRepository.findAll();
 
-        for (Category category : categories) {
+        for (Category category :  categories) {
             List<Product> products = productRepository.findByCategory(category);
 
             BigDecimal totalRevenue = BigDecimal.ZERO;
             int totalSold = 0;
 
             for (Product product : products) {
-                int salesCount = product.getSalesCount() != null ?  product.getSalesCount() : 0;
+                int salesCount = product.getSalesCount() != null ? product.getSalesCount() : 0;
                 BigDecimal price = product.getPrice() != null ? product.getPrice() : BigDecimal.ZERO;
 
                 totalRevenue = totalRevenue.add(price.multiply(BigDecimal.valueOf(salesCount)));
@@ -218,7 +640,6 @@ public class AnalystService {
             }
         }
 
-        // Sort by revenue descending
         result.sort((a, b) -> ((BigDecimal) b.get("revenue")).compareTo((BigDecimal) a.get("revenue")));
 
         return result;
@@ -253,12 +674,10 @@ public class AnalystService {
 
         LocalDate today = LocalDate.now();
 
-        // This week vs last week
         BigDecimal thisWeekRevenue = getRevenueForPeriod(today.minusDays(7), today);
         BigDecimal lastWeekRevenue = getRevenueForPeriod(today.minusDays(14), today.minusDays(7));
         double weeklyGrowth = calculateGrowthPercentage(lastWeekRevenue, thisWeekRevenue);
 
-        // This month vs last month
         BigDecimal thisMonthRevenue = getRevenueForPeriod(today.minusDays(30), today);
         BigDecimal lastMonthRevenue = getRevenueForPeriod(today.minusDays(60), today.minusDays(30));
         double monthlyGrowth = calculateGrowthPercentage(lastMonthRevenue, thisMonthRevenue);
@@ -282,13 +701,11 @@ public class AnalystService {
     public List<Map<String, Object>> getPeakSalesTimes() {
         List<Map<String, Object>> peakTimes = new ArrayList<>();
 
-        // Get all confirmed orders
         List<Order> orders = orderRepository.findAll().stream()
                 .filter(o -> o.getStatus() == Order.OrderStatus.CONFIRMED ||
                         o.getStatus() == Order.OrderStatus.DELIVERED)
                 .collect(Collectors.toList());
 
-        // Group by day of week
         String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
         Map<Integer, Integer> ordersByDay = new HashMap<>();
 
@@ -318,7 +735,6 @@ public class AnalystService {
 
         overview.put("totalProducts", products.size());
 
-        // Average price
         BigDecimal avgPrice = products.stream()
                 .filter(p -> p.getPrice() != null)
                 .map(Product::getPrice)
@@ -326,7 +742,6 @@ public class AnalystService {
                 .divide(BigDecimal.valueOf(Math.max(products.size(), 1)), 2, RoundingMode.HALF_UP);
         overview.put("avgPrice", avgPrice);
 
-        // Average rating
         double avgRating = products.stream()
                 .filter(p -> p.getRating() != null)
                 .mapToDouble(p -> p.getRating().doubleValue())
@@ -334,27 +749,23 @@ public class AnalystService {
                 .orElse(0.0);
         overview.put("avgRating", Math.round(avgRating * 10.0) / 10.0);
 
-        // Total reviews
         long totalReviews = products.stream()
                 .filter(p -> p.getReviewsCount() != null)
                 .mapToLong(Product::getReviewsCount)
                 .sum();
         overview.put("totalReviews", totalReviews);
 
-        // Total inventory value
         BigDecimal inventoryValue = products.stream()
                 .filter(p -> p.getPrice() != null && p.getStockQuantity() != null)
                 .map(p -> p.getPrice().multiply(BigDecimal.valueOf(p.getStockQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         overview.put("inventoryValue", inventoryValue);
 
-        // Low stock count
         long lowStockCount = products.stream()
                 .filter(p -> p.getStockQuantity() != null && p.getStockQuantity() < 10)
                 .count();
         overview.put("lowStockCount", lowStockCount);
 
-        // Out of stock count
         long outOfStockCount = products.stream()
                 .filter(p -> p.getStockQuantity() != null && p.getStockQuantity() == 0)
                 .count();
@@ -456,24 +867,23 @@ public class AnalystService {
                 Product.ApprovalStatus.APPROVED
         );
 
-        // If no products with salesCount, fallback to products with best ranking
         if (bestsellers.isEmpty()) {
             bestsellers = productRepository.findTop10ByApprovalStatusOrderByRankingAsc(
                     Product.ApprovalStatus.APPROVED
             );
         }
 
-        return bestsellers.stream(). map(product -> {
+        return bestsellers.stream().map(product -> {
             Map<String, Object> map = new HashMap<>();
-            map. put("asin", product.getAsin());
+            map.put("asin", product.getAsin());
             map.put("productName", product.getProductName());
-            map.put("category", product.getCategory() != null ? product.getCategory(). getName() : "Uncategorized");
-            map. put("salesCount", product.getSalesCount() != null ? product.getSalesCount() : 0);
+            map.put("category", product.getCategory() != null ? product.getCategory().getName() : "Uncategorized");
+            map.put("salesCount", product.getSalesCount() != null ? product.getSalesCount() : 0);
             map.put("rating", product.getRating() != null ? product.getRating() : 0);
             map.put("price", product.getPrice());
             map.put("imageUrl", product.getImageUrl());
             return map;
-        }). collect(Collectors.toList());
+        }).collect(Collectors.toList());
     }
 
     // ==================== SELLER ANALYTICS ====================
@@ -492,19 +902,16 @@ public class AnalystService {
                 .filter(s -> Boolean.TRUE.equals(s.getIsActive()))
                 .count());
 
-        // Total seller revenue
         BigDecimal totalSellerRevenue = sellerRevenueRepository.findAll().stream()
                 .map(sr -> sr.getGrossAmount() != null ? sr.getGrossAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         overview.put("totalSellerRevenue", totalSellerRevenue);
 
-        // Platform commission
         BigDecimal platformCommission = sellerRevenueRepository.findAll().stream()
                 .map(sr -> sr.getPlatformFee() != null ? sr.getPlatformFee() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         overview.put("platformCommission", platformCommission);
 
-        // Seller products count
         long sellerProducts = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED)
                 .stream()
                 .filter(p -> p.getSeller() != null)
@@ -527,7 +934,7 @@ public class AnalystService {
             seller.put("sellerId", row[0]);
             seller.put("sellerName", row[1] != null ? row[1].toString() : "Unknown");
             seller.put("storeName", row[2] != null ? row[2].toString() : "No Store Name");
-            seller.put("totalRevenue", row[3] != null ?  ((BigDecimal) row[3]).doubleValue() : 0.0);
+            seller.put("totalRevenue", row[3] != null ? ((BigDecimal) row[3]).doubleValue() : 0.0);
             seller.put("productsSold", row[4] != null ? ((Long) row[4]).intValue() : 0);
             seller.put("totalOrders", row[5] != null ? ((Long) row[5]).intValue() : 0);
             ranking.add(seller);
@@ -540,9 +947,8 @@ public class AnalystService {
     public List<Map<String, Object>> getSellerGrowth() {
         List<Map<String, Object>> growth = new ArrayList<>();
 
-        List<User> sellers = userRepository.findAllByRole(User. Role.SELLER);
+        List<User> sellers = userRepository.findAllByRole(User.Role.SELLER);
 
-        // Group by creation month (last 6 months)
         LocalDate sixMonthsAgo = LocalDate.now().minusMonths(6);
 
         for (int i = 0; i < 6; i++) {
@@ -569,7 +975,6 @@ public class AnalystService {
     public Map<String, Object> getPlatformVsSellersComparison() {
         Map<String, Object> comparison = new HashMap<>();
 
-        // Platform (MouadVision) stats
         BigDecimal platformRevenue = platformRevenueRepository.findAll().stream()
                 .filter(pr -> pr.getRevenueType() == PlatformRevenue.RevenueType.DIRECT_SALE)
                 .map(PlatformRevenue::getGrossAmount)
@@ -593,7 +998,6 @@ public class AnalystService {
                 "sales", platformSales
         ));
 
-        // Sellers stats
         BigDecimal sellersRevenue = sellerRevenueRepository.findAll().stream()
                 .map(sr -> sr.getGrossAmount() != null ? sr.getGrossAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -616,7 +1020,6 @@ public class AnalystService {
                 "sales", sellersSales
         ));
 
-        // Percentages
         BigDecimal totalRevenue = platformRevenue.add(sellersRevenue);
         if (totalRevenue.compareTo(BigDecimal.ZERO) > 0) {
             comparison.put("platformShare", platformRevenue.divide(totalRevenue, 4, RoundingMode.HALF_UP)
@@ -641,18 +1044,15 @@ public class AnalystService {
         details.put("isVerified", seller.getIsVerifiedSeller());
         details.put("joinedAt", seller.getCreatedAt());
 
-        // Products
         List<Product> products = productRepository.findBySeller(seller);
         details.put("totalProducts", products.size());
         details.put("approvedProducts", products.stream()
                 .filter(p -> p.getApprovalStatus() == Product.ApprovalStatus.APPROVED)
                 .count());
 
-        // Revenue
         BigDecimal totalRevenue = sellerRevenueRepository.calculateTotalRevenueBySeller(seller);
-        details.put("totalRevenue", totalRevenue != null ? totalRevenue : BigDecimal.ZERO);
+        details.put("totalRevenue", totalRevenue != null ? totalRevenue :  BigDecimal.ZERO);
 
-        // Top products
         details.put("topProducts", products.stream()
                 .filter(p -> p.getSalesCount() != null && p.getSalesCount() > 0)
                 .sorted((a, b) -> b.getSalesCount().compareTo(a.getSalesCount()))
@@ -682,7 +1082,6 @@ public class AnalystService {
                     data.put("name", c.getName());
                     data.put("productCount", products.size());
 
-                    // Average price
                     BigDecimal avgPrice = products.stream()
                             .filter(p -> p.getPrice() != null)
                             .map(Product::getPrice)
@@ -690,7 +1089,6 @@ public class AnalystService {
                             .divide(BigDecimal.valueOf(Math.max(products.size(), 1)), 2, RoundingMode.HALF_UP);
                     data.put("avgPrice", avgPrice);
 
-                    // Average rating
                     double avgRating = products.stream()
                             .filter(p -> p.getRating() != null)
                             .mapToDouble(p -> p.getRating().doubleValue())
@@ -698,18 +1096,16 @@ public class AnalystService {
                             .orElse(0.0);
                     data.put("avgRating", Math.round(avgRating * 10.0) / 10.0);
 
-                    // Total sales
                     int totalSales = products.stream()
                             .filter(p -> p.getSalesCount() != null)
                             .mapToInt(Product::getSalesCount)
                             .sum();
                     data.put("totalSales", totalSales);
 
-                    // Revenue
                     BigDecimal revenue = products.stream()
                             .filter(p -> p.getPrice() != null && p.getSalesCount() != null)
                             .map(p -> p.getPrice().multiply(BigDecimal.valueOf(p.getSalesCount())))
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                            .reduce(BigDecimal.ZERO, BigDecimal:: add);
                     data.put("revenue", revenue);
 
                     return data;
@@ -730,7 +1126,6 @@ public class AnalystService {
         metrics.put("name", category.getName());
         metrics.put("productCount", products.size());
 
-        // Price statistics
         if (! products.isEmpty()) {
             List<BigDecimal> prices = products.stream()
                     .filter(p -> p.getPrice() != null)
@@ -747,7 +1142,6 @@ public class AnalystService {
             }
         }
 
-        // Best rated product
         products.stream()
                 .filter(p -> p.getRating() != null)
                 .max(Comparator.comparing(Product::getRating))
@@ -757,7 +1151,6 @@ public class AnalystService {
                         "rating", p.getRating()
                 )));
 
-        // Best selling product
         products.stream()
                 .filter(p -> p.getSalesCount() != null && p.getSalesCount() > 0)
                 .max(Comparator.comparing(Product::getSalesCount))
@@ -767,7 +1160,6 @@ public class AnalystService {
                         "sales", p.getSalesCount()
                 )));
 
-        // Rating distribution
         Map<String, Long> ratingDist = new LinkedHashMap<>();
         ratingDist.put("5 stars", products.stream()
                 .filter(p -> p.getRating() != null && p.getRating().compareTo(new BigDecimal("4.5")) >= 0)
@@ -875,7 +1267,7 @@ public class AnalystService {
                     data.put("reviewsCount", p.getReviewsCount());
                     data.put("salesCount", p.getSalesCount());
                     data.put("stockQuantity", p.getStockQuantity());
-                    data.put("seller", p.getSeller() != null ?  p.getSeller().getFullName() : "MouadVision");
+                    data.put("seller", p.getSeller() != null ? p.getSeller().getFullName() : "MouadVision");
                     return data;
                 })
                 .collect(Collectors.toList());

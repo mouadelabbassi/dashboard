@@ -7,11 +7,119 @@ const getAuthHeader = () => {
     return { Authorization: `Bearer ${token}` };
 };
 
+// Types for advanced report
+export interface PlatformRevenue {
+    totalRevenue: number;
+    directSalesRevenue: number;
+    commissionRevenue: number;
+    sellerRevenue: number;
+    totalOrders: number;
+    completedOrders: number;
+    avgOrderValue: number;
+    revenueGrowth: number;
+    thisMonthRevenue: number;
+    lastMonthRevenue: number;
+}
+
+export interface TopSeller {
+    rank: number;
+    sellerId: number;
+    sellerName: string;
+    storeName: string;
+    totalRevenue: number;
+    productsSold: number;
+    totalOrders: number;
+    avgOrderValue: number;
+    productCount: number;
+}
+
+export interface TopCategory {
+    categoryId: number;
+    categoryName: string;
+    productCount: number;
+    revenue: number;
+    unitsSold: number;
+    avgPrice: number;
+    avgRating: number;
+}
+
+export interface MostSoldProduct {
+    rank: number;
+    asin: string;
+    productName: string;
+    price: number;
+    salesCount: number;
+    revenue: number;
+    rating: number;
+    categoryName: string;
+    imageUrl: string;
+    stockQuantity: number;
+    seller: string;
+}
+
+export interface MonthlyTrend {
+    month: string;
+    year: number;
+    monthYear: string;
+    revenue: number;
+    orders: number;
+}
+
+export interface CategoryDistribution {
+    categoryName: string;
+    revenue: number;
+    percentage: number;
+    productCount: number;
+    color: string;
+}
+
+export interface SalesPerformance {
+    todayRevenue: number;
+    weekRevenue: number;
+    monthRevenue: number;
+    yearRevenue: number;
+    bestSellingDay: string;
+    bestSellingDayRevenue: number;
+    conversionRate: number;
+}
+
+export interface WeeklyTrend {
+    date: string;
+    dayName: string;
+    revenue: number;
+    orders: number;
+}
+
+export interface AdvancedReportData {
+    platformRevenue: PlatformRevenue;
+    top3Sellers: TopSeller[];
+    top3Categories: TopCategory[];
+    mostSoldProducts: MostSoldProduct[];
+    monthlyRevenueTrend: MonthlyTrend[];
+    categoryRevenueDistribution: CategoryDistribution[];
+    salesPerformance:  SalesPerformance;
+    orderStatusDistribution: { [key: string]: number };
+    weeklySalesTrend: WeeklyTrend[];
+    kpis: any;
+}
+
 export const reportService = {
+    // Get advanced report data for professional PDF export
+    getAdvancedReportData: async (): Promise<AdvancedReportData> => {
+        try {
+            const response = await axios.get(`${API_URL}/analyst/reports/advanced`, {
+                headers: getAuthHeader(),
+            });
+            return response.data.data;
+        } catch (error) {
+            console.error('Error fetching advanced report data:', error);
+            throw error;
+        }
+    },
+
     // Get complete report data for Admin
     getAdminReportData: async () => {
         try {
-            // Fetch all data from existing endpoints
             const [
                 dashboardRes,
                 productsRes,
@@ -26,11 +134,6 @@ export const reportService = {
             const productsData = productsRes.data?.data?.content || productsRes.data?.data || [];
             const sellersData = sellersRes.data?.data?.content || sellersRes.data?.data || [];
 
-            console.log('📊 Dashboard data:', dashboard);
-            console.log('📦 Products data:', productsData);
-            console.log('👥 Sellers data:', sellersData);
-
-            // Map products to the expected format
             const topProducts = productsData.map((p: any) => ({
                 asin: p.asin || '',
                 productName: p.productName || p.product_name || 'Unknown',
@@ -41,7 +144,6 @@ export const reportService = {
                 category: p.categoryName || p.category?.name || p.category_name || 'Uncategorized',
             }));
 
-            // Map sellers to the expected format
             const topSellers = sellersData.map((s: any) => ({
                 id: s.id || 0,
                 storeName: s.storeName || s.store_name || s.fullName || s.full_name || 'Unknown Store',
@@ -52,7 +154,6 @@ export const reportService = {
                 rating: s.rating || 4.5,
             }));
 
-            // Calculate real revenue from products
             const calculatedRevenue = topProducts.reduce((sum: number, p: any) => sum + (p.revenue || 0), 0);
 
             return {
@@ -66,7 +167,7 @@ export const reportService = {
                     avgOrderValue: dashboard.avgOrderValue || (dashboard.totalPlatformRevenue / (dashboard.totalOrders || 1)) || 0,
                     conversionRate: dashboard.conversionRate || 0,
                 },
-                topProducts: topProducts.sort((a: any, b: any) => (b.salesCount || 0) - (a.salesCount || 0)).slice(0, 10),
+                topProducts:  topProducts.sort((a:  any, b: any) => (b.salesCount || 0) - (a.salesCount || 0)).slice(0, 10),
                 topSellers: topSellers,
                 ordersByStatus: dashboard.ordersByStatus || {
                     PENDING: dashboard.pendingOrders || 0,
@@ -78,12 +179,12 @@ export const reportService = {
                 revenueByMonth: [],
             };
         } catch (error) {
-            console.error('❌ Error fetching admin report data:', error);
+            console.error('Error fetching admin report data:', error);
             throw error;
         }
     },
 
-    // Get complete report data for Analyst (more detailed)
+    // Get complete report data for Analyst
     getAnalystReportData: async () => {
         try {
             const [
@@ -98,7 +199,6 @@ export const reportService = {
                 axios.get(`${API_URL}/analyst/categories/overview`, { headers: getAuthHeader() }).catch(() => null),
             ]);
 
-            // Fallback to admin endpoints if analyst endpoints fail
             let topProducts = productsRes?.data?.data || [];
             let topSellers = sellersRes?.data?.data || [];
             let kpis = kpisRes?.data?.data || {};
@@ -119,7 +219,6 @@ export const reportService = {
                 topSellers = fallbackSellers?.data?.data?.content || [];
             }
 
-            // Map products
             const mappedProducts = topProducts.map((p: any) => ({
                 asin: p.asin || '',
                 productName: p.productName || p.product_name || 'Unknown',
@@ -130,7 +229,6 @@ export const reportService = {
                 category: p.categoryName || p.category?.name || 'Uncategorized',
             }));
 
-            // Map sellers
             const mappedSellers = topSellers.map((s: any) => ({
                 id: s.id || s.sellerId || 0,
                 storeName: s.storeName || s.store_name || s.sellerName || s.fullName || 'Unknown',
@@ -141,30 +239,30 @@ export const reportService = {
                 rating: s.rating || s.avgRating || 4.5,
             }));
 
-            const calculatedRevenue = mappedProducts.reduce((sum: number, p: any) => sum + (p.revenue || 0), 0);
+            const calculatedRevenue = mappedProducts.reduce((sum: number, p:  any) => sum + (p.revenue || 0), 0);
 
             return {
                 kpis: {
                     totalRevenue: kpis.totalRevenue?.value || calculatedRevenue || 0,
                     totalOrders: kpis.totalOrders?.value || 0,
                     totalBuyers: kpis.totalBuyers?.value || 0,
-                    totalSellers: kpis.totalSellers?.value || mappedSellers.length || 0,
+                    totalSellers:  kpis.totalSellers?.value || mappedSellers.length || 0,
                     totalProducts: kpis.totalProducts?.value || mappedProducts.length || 0,
                     pendingApprovals: 0,
                     avgOrderValue: kpis.avgOrderValue?.value || 0,
                     conversionRate: 3.5,
                 },
-                topProducts: mappedProducts.sort((a: any, b: any) => (b.salesCount || 0) - (a.salesCount || 0)),
-                topSellers: mappedSellers.sort((a: any, b: any) => (b.totalRevenue || 0) - (a.totalRevenue || 0)),
+                topProducts:  mappedProducts.sort((a: any, b: any) => (b.salesCount || 0) - (a.salesCount || 0)),
+                topSellers: mappedSellers.sort((a: any, b:  any) => (b.totalRevenue || 0) - (a.totalRevenue || 0)),
                 ordersByStatus: {},
-                revenueByMonth: [],
+                revenueByMonth:  [],
                 categoryPerformance: categoriesRes?.data?.data || [],
                 lowStockProducts: [],
                 priceDistribution: {},
                 ratingDistribution: {},
             };
         } catch (error) {
-            console.error('❌ Error fetching analyst report data:', error);
+            console.error('Error fetching analyst report data:', error);
             throw error;
         }
     },

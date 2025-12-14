@@ -18,18 +18,16 @@ const ExportPDFButton: React.FC<ExportPDFButtonProps> = ({ type, className = '' 
         try {
             if (type === 'admin') {
                 const data = await reportService.getAdminReportData();
-                console.log('📊 Admin Report Data:', data);  // DEBUG
-                console.log('📦 Products:', data.topProducts);  // DEBUG
-                console.log('👥 Sellers:', data.topSellers);  // DEBUG
+                console.log('📊 Admin Report Data:', data);
                 await generateAdminPDF(data);
             } else {
                 const data = await reportService.getAnalystReportData();
-                console.log('📊 Analyst Report Data:', data);  // DEBUG
+                console.log('📊 Analyst Report Data:', data);
                 await generateAnalystPDF(data);
             }
-        } catch (err: any) {
+        } catch (err:  any) {
             console.error('Export error:', err);
-            setError('Failed to generate PDF.  Please try again.');
+            setError('Failed to generate PDF.Please try again.');
         } finally {
             setLoading(false);
         }
@@ -42,7 +40,7 @@ const ExportPDFButton: React.FC<ExportPDFButtonProps> = ({ type, className = '' 
                 disabled={loading}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
                     loading
-                        ? 'bg-gray-400 cursor-not-allowed'
+                        ?  'bg-gray-400 cursor-not-allowed'
                         : type === 'admin'
                             ? 'bg-blue-600 hover:bg-blue-700 text-white'
                             : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white'
@@ -86,7 +84,7 @@ const ExportPDFButton: React.FC<ExportPDFButtonProps> = ({ type, className = '' 
             </button>
 
             {error && (
-                <div className="absolute top-full mt-2 left-0 right-0 bg-red-100 text-red-700 px-3 py-2 rounded-lg text-sm">
+                <div className="absolute top-full mt-2 left-0 right-0 bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm">
                     {error}
                 </div>
             )}

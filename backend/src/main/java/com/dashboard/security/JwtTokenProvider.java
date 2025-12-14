@@ -1,11 +1,11 @@
-package com.dashboard. security;
+package com.dashboard.security;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io. Decoders;
-import io.jsonwebtoken.security. Keys;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans. factory.annotation.Value;
-import org. springframework.security.core.Authentication;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -33,14 +33,13 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
         return Jwts.builder()
-                .subject(userPrincipal. getUsername())
+                .subject(userPrincipal.getUsername())
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
                 .compact();
     }
-
-    // NEW: Add this method for AuthService
+    
     public String generateToken(String email, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
@@ -51,7 +50,7 @@ public class JwtTokenProvider {
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
-                . compact();
+                .compact();
     }
 
     public String generateTokenFromUsername(String username) {
@@ -62,7 +61,7 @@ public class JwtTokenProvider {
                 .subject(username)
                 .issuedAt(now)
                 .expiration(expiryDate)
-                . signWith(getSigningKey())
+                .signWith(getSigningKey())
                 .compact();
     }
 
@@ -80,13 +79,13 @@ public class JwtTokenProvider {
         try {
             Jwts.parser()
                     .verifyWith(getSigningKey())
-                    . build()
+                    .build()
                     .parseSignedClaims(authToken);
             return true;
         } catch (SecurityException ex) {
-            log. error("Invalid JWT signature");
+            log.error("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
-            log. error("Invalid JWT token");
+            log.error("Invalid JWT token");
         } catch (ExpiredJwtException ex) {
             log.error("Expired JWT token");
         } catch (UnsupportedJwtException ex) {

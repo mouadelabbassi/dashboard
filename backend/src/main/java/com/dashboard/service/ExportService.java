@@ -1,7 +1,6 @@
 package com.dashboard.service;
 
 import com.dashboard.entity.Product;
-import com.dashboard.entity.Sale;
 import com.dashboard.repository.ProductRepository;
 import com.opencsv.CSVWriter;
 import lombok.RequiredArgsConstructor;

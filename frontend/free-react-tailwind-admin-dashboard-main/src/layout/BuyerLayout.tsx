@@ -8,9 +8,7 @@ const BuyerLayout: React.FC = () => {
     const { getItemCount } = useCart();
     const location = useLocation();
     const navigate = useNavigate();
-    const [isDark, setIsDark] = useState(true);
-    const [showMobileSearch, setShowMobileSearch] = useState(false);
-
+    const [isDark, setIsDark] = useState(false); // Default to light for shopping
     const itemCount = getItemCount();
 
     useEffect(() => {
@@ -27,38 +25,35 @@ const BuyerLayout: React.FC = () => {
     };
 
     const navLinks = [
-        { path: '/shop', label: 'Shop' },
-        { path: '/shop/orders', label: 'My Orders' },
-        { path: '/shop/my-reviews', label: 'My Reviews' },
-        { path: '/shop/profile', label: 'Profile' },
+        { path: '/shop', label: 'Shop', icon: '🛍️' },
+        { path: '/shop/orders', label: 'Orders', icon: '📦' },
+        { path: '/shop/my-reviews', label: 'Reviews', icon: '⭐' },
+        { path: '/shop/profile', label: 'Profile', icon: '👤' },
     ];
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex flex-col">
-            {/* Header */}
-            <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
+        <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-shop-50 dark:from-neutral-900 dark:to-neutral-800 flex flex-col">
+            <header className="sticky top-0 z-50 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16 gap-4">
-                        {/* Logo */}
-                        <Link to="/shop" className="flex items-center gap-3 flex-shrink-0">
-                            <img
-                                src="/images/logo/logo.png"
-                                alt="MouadVision"
-                                className="h-10 w-auto"
-                            />
-                            <span className="text-xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent hidden sm:block">
-                                MouadVision
-                            </span>
+                    <div className="flex items-center justify-between h-20 gap-4">
+                        <Link to="/shop" className="flex items-center gap-3 flex-shrink-0 group">
+                            <div className="w-12 h-12 bg-gradient-to-br from-shop-500 to-shop-600 rounded-xl flex items-center justify-center shadow-shop transform group-hover:scale-105 transition-transform">
+                                <img src="/images/logo/logo.png" alt="Logo" className="h-8 w-auto" />
+                                <span className="font-bold text-lg bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                                    MouadVision
+                                </span>
+                            </div>
                         </Link>
+
                         <nav className="hidden lg:flex items-center gap-1">
                             {navLinks.map(link => (
                                 <Link
                                     key={link.path}
                                     to={link.path}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                                         location.pathname === link.path
-                                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25'
-                                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                                            ? 'bg-gradient-to-r from-shop-500 to-shop-600 text-white shadow-shop'
+                                            : 'text-neutral-700 dark:text-neutral-300 hover:bg-shop-50 dark:hover:bg-neutral-800 hover:text-shop-600 dark:hover:text-shop-400'
                                     }`}
                                 >
                                     <span>{link.label}</span>
@@ -66,48 +61,26 @@ const BuyerLayout: React.FC = () => {
                             ))}
                         </nav>
 
-                        {/* Right Actions */}
                         <div className="flex items-center gap-2">
-                            {/* Mobile Search Toggle */}
-                            <button
-                                onClick={() => setShowMobileSearch(!showMobileSearch)}
-                                className="md:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </button>
-
-                            {/* Cart */}
                             <Link
                                 to="/shop/cart"
-                                className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 text-white hover:shadow-accent transform hover:scale-105 transition-all"
                                 title="Shopping Cart"
                             >
-                                <svg
-                                    className="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                                    />
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                                 {itemCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                                    <span className="absolute -top-2 -right-2 w-6 h-6 bg-shop-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-bounce-subtle">
                                         {itemCount > 99 ? '99+' : itemCount}
                                     </span>
                                 )}
                             </Link>
 
-                            {/* Theme Toggle */}
+
                             <button
                                 onClick={() => setIsDark(!isDark)}
-                                className="flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                                className="hidden sm:flex items-center justify-center w-11 h-11 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
                             >
                                 {isDark ? (
                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -123,68 +96,59 @@ const BuyerLayout: React.FC = () => {
                             {/* Logout */}
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-red-500/25"
+                                className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-semibold rounded-xl transition-all"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                 </svg>
-                                <span className="hidden sm:inline">Logout</span>
+                                <span>Logout</span>
+                            </button>
+
+                            {/* Mobile Menu */}
+                            <button className="lg:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Mobile Navigation */}
-                <nav className="md:hidden border-t border-gray-200 dark:border-gray-800 px-2 py-2 flex justify-around bg-white dark:bg-gray-900">
+                <nav className="lg:hidden border-t border-neutral-200 dark:border-neutral-800 px-2 py-2 flex justify-around bg-white dark:bg-neutral-900">
                     {navLinks.map(link => (
                         <Link
                             key={link.path}
                             to={link.path}
-                            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                                 location.pathname === link.path
-                                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                                    : 'text-gray-600 dark:text-gray-400'
+                                    ? 'text-shop-600 dark:text-shop-400 bg-shop-50 dark:bg-shop-900/20'
+                                    : 'text-neutral-600 dark:text-neutral-400 hover:text-shop-600 dark:hover:text-shop-400'
                             }`}
                         >
+                            <span className="text-xl">{link.icon}</span>
                             <span>{link.label}</span>
                         </Link>
                     ))}
-                    <Link
-                        to="/shop/cart"
-                        className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-colors relative ${
-                            location.pathname === '/shop/cart'
-                                ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                                : 'text-gray-600 dark:text-gray-400'
-                        }`}
-                    >
-                        <span className="text-lg">🛒</span>
-                        <span>Cart</span>
-                        {itemCount > 0 && (
-                            <span className="absolute top-0 right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                                {itemCount > 9 ? '9+' : itemCount}
-                            </span>
-                        )}
-                    </Link>
                 </nav>
             </header>
-
-            {/* Main Content */}
-            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Outlet />
             </main>
+            <footer className="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800 mt-auto">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-            {/* Footer */}
-            <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-auto">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-neutral-200 dark:border-neutral-800">
                         <div className="flex items-center gap-3">
-                            <img src="/images/logo/logo.png" alt="MouadVision" className="h-8 w-auto" />
-                            <span className="font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                                MouadVision
-                            </span>
+                            <div className="w-12 h-12 bg-gradient-to-br from-shop-500 to-shop-600 rounded-xl flex items-center justify-center shadow-shop transform group-hover:scale-105 transition-transform">
+                                <img src="/images/logo/logo.png" alt="Logo" className="h-8 w-auto" />
+                                <span className="font-bold text-lg bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                                    MouadVision
+                                </span>
+                            </div>
                         </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                            © 2025 MouadVision.All rights reserved.
+                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                            © 2025 MouadVision. All rights reserved.
                         </p>
                     </div>
                 </div>
