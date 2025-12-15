@@ -166,7 +166,7 @@ const CategoryAnalysis: React.FC = () => {
             {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    🏷️ Category Analysis
+                    Category Analysis
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 mt-1">
                     Deep dive into category performance and metrics
@@ -200,49 +200,49 @@ const CategoryAnalysis: React.FC = () => {
 
             {/* Selected Category Details */}
             {selectedCategory && (
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">
+                <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark: border-gray-700">
                     {detailsLoading ? (
                         <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 dark:border-gray-400"></div>
                         </div>
                     ) : (
                         <>
-                            <h3 className="text-xl font-bold mb-4">{selectedCategory.name} - Detailed Metrics</h3>
+                            <h3 className="text-xl font-bold mb-4 text-gray-900 dark: text-white">{selectedCategory.name} - Detailed Metrics</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="bg-white/10 rounded-xl p-4">
-                                    <p className="text-blue-200 text-sm">Products</p>
-                                    <p className="text-2xl font-bold mt-1">{selectedCategory.productCount}</p>
+                                <div className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark: border-gray-600">
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Products</p>
+                                    <p className="text-2xl font-bold mt-1 text-gray-900 dark: text-white">{selectedCategory. productCount}</p>
                                 </div>
-                                <div className="bg-white/10 rounded-xl p-4">
-                                    <p className="text-blue-200 text-sm">Avg Price</p>
-                                    <p className="text-2xl font-bold mt-1">{formatCurrency(selectedCategory.avgPrice || 0)}</p>
+                                <div className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Avg Price</p>
+                                    <p className="text-2xl font-bold mt-1 text-gray-900 dark:text-white">{formatCurrency(selectedCategory. avgPrice || 0)}</p>
                                 </div>
-                                <div className="bg-white/10 rounded-xl p-4">
-                                    <p className="text-blue-200 text-sm">Price Range</p>
-                                    <p className="text-lg font-bold mt-1">
+                                <div className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Price Range</p>
+                                    <p className="text-lg font-bold mt-1 text-gray-900 dark:text-white">
                                         {formatCurrency(selectedCategory.minPrice || 0)} - {formatCurrency(selectedCategory.maxPrice || 0)}
                                     </p>
                                 </div>
-                                <div className="bg-white/10 rounded-xl p-4">
-                                    <p className="text-blue-200 text-sm">Avg Rating</p>
-                                    <p className="text-2xl font-bold mt-1">⭐ {selectedCategory.avgRating || 'N/A'}</p>
+                                <div className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark: border-gray-600">
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">Avg Rating</p>
+                                    <p className="text-2xl font-bold mt-1 text-gray-900 dark:text-white">⭐ {selectedCategory. avgRating || 'N/A'}</p>
                                 </div>
                             </div>
 
                             {/* Best Products */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 {selectedCategory.bestRated && (
-                                    <div className="bg-white/10 rounded-xl p-4">
-                                        <p className="text-blue-200 text-sm mb-2">🌟 Best Rated</p>
-                                        <p className="font-medium truncate">{selectedCategory.bestRated.name}</p>
-                                        <p className="text-sm text-blue-200">⭐ {selectedCategory.bestRated.rating}</p>
+                                    <div className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">🌟 Best Rated</p>
+                                        <p className="font-medium truncate text-gray-900 dark:text-white">{selectedCategory.bestRated.name}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">⭐ {selectedCategory.bestRated.rating}</p>
                                     </div>
                                 )}
-                                {selectedCategory.bestSelling && (
-                                    <div className="bg-white/10 rounded-xl p-4">
-                                        <p className="text-blue-200 text-sm mb-2">🔥 Best Selling</p>
-                                        <p className="font-medium truncate">{selectedCategory.bestSelling.name}</p>
-                                        <p className="text-sm text-blue-200">{selectedCategory.bestSelling.sales} sold</p>
+                                {selectedCategory. bestSelling && (
+                                    <div className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">🔥 Best Selling</p>
+                                        <p className="font-medium truncate text-gray-900 dark:text-white">{selectedCategory.bestSelling.name}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">{selectedCategory.bestSelling. sales} sold</p>
                                     </div>
                                 )}
                             </div>
@@ -250,12 +250,12 @@ const CategoryAnalysis: React.FC = () => {
                             {/* Rating Distribution */}
                             {selectedCategory.ratingDistribution && (
                                 <div className="mt-4">
-                                    <p className="text-blue-200 text-sm mb-2">Rating Distribution</p>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">Rating Distribution</p>
                                     <div className="grid grid-cols-5 gap-2">
-                                        {Object.entries(selectedCategory.ratingDistribution).map(([rating, count]) => (
-                                            <div key={rating} className="bg-white/10 rounded-lg p-2 text-center">
-                                                <p className="text-xs">{rating}</p>
-                                                <p className="font-bold">{count as number}</p>
+                                        {Object.entries(selectedCategory. ratingDistribution).map(([rating, count]) => (
+                                            <div key={rating} className="bg-white dark:bg-gray-700 rounded-lg p-2 text-center border border-gray-200 dark: border-gray-600">
+                                                <p className="text-xs text-gray-500 dark: text-gray-400">{rating}</p>
+                                                <p className="font-bold text-gray-900 dark:text-white">{count as number}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -371,7 +371,6 @@ const CategoryAnalysis: React.FC = () => {
                             <th className="pb-4 font-medium text-right">Avg Rating</th>
                             <th className="pb-4 font-medium text-right">Total Sales</th>
                             <th className="pb-4 font-medium text-right">Revenue</th>
-                            <th className="pb-4 font-medium text-right">Share</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -379,18 +378,12 @@ const CategoryAnalysis: React.FC = () => {
                             <tr key={category.id} className="border-t border-gray-100 dark:border-gray-700">
                                 <td className="py-4">
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold ${
-                                            index === 0 ?  'bg-blue-500' :
-                                                index === 1 ?  'bg-green-500' :
-                                                    index === 2 ? 'bg-yellow-500' :
-                                                        index === 3 ? 'bg-red-500' :
-                                                            'bg-purple-500'
-                                        }`}>
+                                        <span className="text-gray-500 dark:text-gray-400 font-medium w-6 text-center">
                                             {index + 1}
-                                        </div>
+                                        </span>
                                         <span className="font-medium text-gray-900 dark:text-white">
-                                                {category.name}
-                                            </span>
+            {                               category.name}
+                                        </span>
                                     </div>
                                 </td>
                                 <td className="py-4 text-right text-gray-600 dark:text-gray-400">
@@ -409,19 +402,6 @@ const CategoryAnalysis: React.FC = () => {
                                 </td>
                                 <td className="py-4 text-right font-bold text-green-600">
                                     {formatCurrency(category.revenue)}
-                                </td>
-                                <td className="py-4 text-right">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                            <div
-                                                className="h-full bg-blue-500 rounded-full"
-                                                style={{ width: `${category.percentage || 0}%` }}
-                                            ></div>
-                                        </div>
-                                        <span className="text-sm text-gray-500 w-12 text-right">
-                                                {(category.percentage || 0).toFixed(1)}%
-                                            </span>
-                                    </div>
                                 </td>
                             </tr>
                         ))}

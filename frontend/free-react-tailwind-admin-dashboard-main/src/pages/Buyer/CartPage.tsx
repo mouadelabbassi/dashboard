@@ -188,7 +188,7 @@ const CartPage: React.FC = () => {
 
                         <Link
                             to={checkoutPath}
-                            className="w-full block text-center py-3 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
+                            className="w-full block text-center py-3 bg-gray-700 dark:bg-gray-700 text-white rounded-lg font-semibold hover:bg-gray-600 dark:hover:bg-gray-600 transition-colors"
                         >
                             → Proceed to Checkout
                         </Link>

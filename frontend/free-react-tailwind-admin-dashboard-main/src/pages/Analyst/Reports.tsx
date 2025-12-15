@@ -112,45 +112,10 @@ const Reports: React.FC = () => {
                     </p>
                 </div>
 
-                {/* Advanced PDF Export Button */}
                 <ExportAdvancedPDFButton variant="gradient" />
             </div>
 
-            {/* Executive Report Banner */}
-            <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-2xl p-6 text-white shadow-xl">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                        <h2 className="text-xl font-bold flex items-center gap-2">
-                            <span>📊</span> Executive Business Report
-                        </h2>
-                        <p className="text-purple-100 mt-1">
-                            Generate a comprehensive PDF report with charts, top sellers, revenue analytics, and business insights
-                        </p>
-                        <div className="flex flex-wrap gap-2 mt-3">
-                            <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
-                                🏆 Top 3 Sellers
-                            </span>
-                            <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
-                                📂 Top Categories
-                            </span>
-                            <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
-                                📈 Revenue Charts
-                            </span>
-                            <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
-                                🛒 Best Products
-                            </span>
-                            <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
-                                💡 Business Insights
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex-shrink-0">
-                        <ExportAdvancedPDFButton variant="outline" className="! border-white ! text-white hover:!bg-white hover:!text-purple-600" />
-                    </div>
-                </div>
-            </div>
 
-            {/* Date Range Selector */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark: border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     📅 Select Date Range
@@ -440,48 +405,6 @@ const Reports: React.FC = () => {
                     )}
                 </div>
             )}
-
-            {/* Tips Section */}
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark: text-white mb-4">
-                    💡 Export Tips
-                </h3>
-                <div className="grid grid-cols-1 md: grid-cols-3 gap-4">
-                    <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-100 dark: bg-blue-900/30 flex items-center justify-center flex-shrink-0">
-                            <span>📄</span>
-                        </div>
-                        <div>
-                            <p className="font-medium text-gray-900 dark:text-white text-sm">Executive PDF</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                                Use the Executive Report button for comprehensive PDF with charts and insights.
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                            <span>📈</span>
-                        </div>
-                        <div>
-                            <p className="font-medium text-gray-900 dark:text-white text-sm">Excel Analysis</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                                Export CSV files and open in Excel for pivot tables and advanced charts.
-                            </p>
-                        </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                            <span>🔄</span>
-                        </div>
-                        <div>
-                            <p className="font-medium text-gray-900 dark:text-white text-sm">Regular Exports</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                                Schedule weekly exports to track performance over time.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     );
 };

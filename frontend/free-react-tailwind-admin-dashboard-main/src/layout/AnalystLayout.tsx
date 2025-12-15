@@ -122,7 +122,7 @@ const AnalystLayout: React.FC = () => {
                         />
                         {sidebarOpen && (
                             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                Analyst
+                                MouadVision
                             </span>
                         )}
                     </Link>
@@ -138,17 +138,15 @@ const AnalystLayout: React.FC = () => {
                         )}
                         {navItems.map((item) => (
                             <Link
-                                key={item.path}
-                                to={item.path}
-                                className={`flex items-center ${sidebarOpen ? 'gap-3' : 'justify-center'} px-3 py-2.5 rounded-lg transition-all ${
-                                    isActive(item.path, item.exact)
-                                        ?  'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                key={item. path}
+                                to={item. path}
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                                    location. pathname === item.path
+                                        ? 'text-blue-600 dark:text-blue-400'
+                                        : 'text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-white'
                                 }`}
-                                title={! sidebarOpen ?  item.label : undefined}
                             >
-                                {item.icon}
-                                {sidebarOpen && <span className="font-medium">{item.label}</span>}
+                                <span>{item.label}</span>
                             </Link>
                         ))}
                     </div>

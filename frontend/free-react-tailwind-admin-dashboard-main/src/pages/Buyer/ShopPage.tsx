@@ -27,6 +27,23 @@ const ShopPage: React.FC = () => {
 
     const isSellerContext = location.pathname.startsWith('/seller');
     const shopBasePath = isSellerContext ? '/seller/shop' : '/shop';
+    const calculateProductScore = (product: Product): number => {
+        const ratingScore = (product.rating || 0) * 1000;
+        const salesScore = (product.salesCount || 0) * 100;
+
+        let rankingBonus = 0;
+        if (product.ranking && product.ranking > 0 && product.ranking <= 100) {
+            rankingBonus = Math.max(0, 100 - product.ranking);
+        }
+
+        return ratingScore + salesScore + rankingBonus;
+    };
+
+// Get products ranked by calculated score
+    const getProductsRankedByScore = (productList: Product[]): Product[] => {
+        return [... productList].sort((a, b) => calculateProductScore(b) - calculateProductScore(a));
+    };
+
 
     useEffect(() => {
         fetchProducts();
@@ -88,7 +105,7 @@ const ShopPage: React.FC = () => {
                 result.sort((a, b) => a.price - b.price);
                 break;
             case 'price-high':
-                result.sort((a, b) => b.price - a.price);
+                result. sort((a, b) => b.price - a.price);
                 break;
             case 'rating':
                 result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
@@ -98,7 +115,7 @@ const ShopPage: React.FC = () => {
                 break;
             case 'ranking':
             default:
-                result.sort((a, b) => (a.ranking || 999) - (b.ranking || 999));
+                result = getProductsRankedByScore(result);
                 break;
         }
 
@@ -123,10 +140,10 @@ const ShopPage: React.FC = () => {
             }, [])
     ];
 
-    // ✅ MODIFIED: Handle add to cart with stock check
     const handleAddToCart = (product: Product) => {
         const stockQuantity = product.stockQuantity || 0;
         const currentInCart = getItemQuantity(product.asin);
+
 
         // Check if out of stock
         if (stockQuantity <= 0) {
@@ -260,9 +277,9 @@ const ShopPage: React.FC = () => {
                             </span>
                         )}
                         {priceRange !== 'all' && (
-                            <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm flex items-center gap-1">
+                            <span className="px-3 py-1 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 rounded-full text-sm flex items-center gap-1">
                                 ${priceRange.replace('-', ' - $')}
-                                <button onClick={() => setPriceRange('all')} className="ml-1 hover:text-purple-600">×</button>
+                                <button onClick={() => setPriceRange('all')} className="ml-1 hover:text-gray-600">×</button>
                             </span>
                         )}
                         <button
@@ -323,7 +340,7 @@ const ShopPage: React.FC = () => {
                                     {isOutOfStock && (
                                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                                             <span className="bg-red-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg">
-                                                ❌ OUT OF STOCK
+                                                OUT OF STOCK
                                             </span>
                                         </div>
                                     )}
@@ -331,23 +348,29 @@ const ShopPage: React.FC = () => {
 
                                 {/* Badges Container */}
                                 <div className="absolute top-2 left-2 flex flex-wrap gap-1">
-                                    {product.ranking && product.ranking <= 10 && (
-                                        <span className="px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
-                                            🏆 Top {product.ranking}
-                                        </span>
-                                    )}
+                                    {(() => {
+                                        // Calculate dynamic ranking position
+                                        const rankedProducts = getProductsRankedByScore(products);
+                                        const dynamicRank = rankedProducts. findIndex(p => p.asin === product.asin) + 1;
+
+                                        return dynamicRank <= 10 && (
+                                            <span className="px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
+                                                Top {dynamicRank}
+                                            </span>
+                                        );
+                                    })()}
                                     {product.isBestseller && (
                                         <span className="px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
                                             Best Seller
                                         </span>
                                     )}
-                                    {/* ✅ NEW: Low Stock Badge */}
                                     {isLowStock && ! isOutOfStock && (
                                         <span className="px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded-full">
                                             ⚠️ Only {stockQuantity} left!
                                         </span>
                                     )}
                                 </div>
+
 
                                 {/* In Cart Badge */}
                                 {isInCart(product.asin) && (
@@ -416,7 +439,6 @@ const ShopPage: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* ✅ MODIFIED: Add to Cart Button with stock handling */}
                                 <button
                                     onClick={() => handleAddToCart(product)}
                                     disabled={isOutOfStock || ! canAddMore}

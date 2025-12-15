@@ -48,12 +48,12 @@ const BuyerLayout: React.FC = () => {
                         <nav className="hidden lg:flex items-center gap-1">
                             {navLinks.map(link => (
                                 <Link
-                                    key={link.path}
-                                    to={link.path}
+                                    key={link. path}
+                                    to={link. path}
                                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                                        location.pathname === link.path
-                                            ? 'bg-gradient-to-r from-shop-500 to-shop-600 text-white shadow-shop'
-                                            : 'text-neutral-700 dark:text-neutral-300 hover:bg-shop-50 dark:hover:bg-neutral-800 hover:text-shop-600 dark:hover:text-shop-400'
+                                        location. pathname === link.path
+                                            ? 'text-blue-600 dark:text-blue-400'
+                                            : 'text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-white'
                                     }`}
                                 >
                                     <span>{link.label}</span>
@@ -64,14 +64,14 @@ const BuyerLayout: React.FC = () => {
                         <div className="flex items-center gap-2">
                             <Link
                                 to="/shop/cart"
-                                className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-accent-500 to-accent-600 text-white hover:shadow-accent transform hover:scale-105 transition-all"
+                                className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-neutral-300 hover:bg-gray-200 dark:hover:bg-neutral-700 border border-gray-200 dark:border-neutral-700 transition-all"
                                 title="Shopping Cart"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                                 {itemCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 w-6 h-6 bg-shop-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-bounce-subtle">
+                                    <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
                                         {itemCount > 99 ? '99+' : itemCount}
                                     </span>
                                 )}

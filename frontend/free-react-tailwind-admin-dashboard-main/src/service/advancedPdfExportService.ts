@@ -201,9 +201,6 @@ const drawSectionHeader = (doc: jsPDF, title: string, x: number, y: number, icon
     return y + 16;
 };
 
-// ============================================
-// 📄 MAIN PDF GENERATION FUNCTION
-// ============================================
 
 export const generateAdvancedPDF = async (): Promise<void> => {
     console.log('Starting advanced PDF generation...');

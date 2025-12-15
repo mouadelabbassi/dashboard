@@ -44,9 +44,9 @@ const BuyerProfilePage: React.FC = () => {
             {/* Profile Card */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-8 py-12">
+                <div className="bg-gray-800 dark:bg-gray-800 px-8 py-12">
                     <div className="flex items-center gap-6">
-                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-4xl font-bold text-blue-600 shadow-lg">
+                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-4xl font-bold text-gray-800 shadow-lg">
                             {user?.fullName?.charAt(0).toUpperCase() || 'U'}
                         </div>
                         <div className="text-white">
@@ -96,9 +96,6 @@ const BuyerProfilePage: React.FC = () => {
                                 Email Address
                             </label>
                             <p className="text-gray-900 dark:text-white py-3">{user?.email}</p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                Email cannot be changed
-                            </p>
                         </div>
 
                         {/* Phone */}

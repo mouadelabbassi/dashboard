@@ -51,10 +51,29 @@ const ProductDetailPage: React.FC = () => {
 
     const handleAddToCart = () => {
         if (product) {
+            // Convert ProductDetail to Product format for cart compatibility
+            const cartProduct = {
+                asin: product.asin,
+                productName: product.productName,
+                description: product.description,
+                price: product.price,
+                rating: product.averageRating || product.rating || 0,
+                reviewsCount: product.totalReviews || product.reviewsCount || 0,
+                imageUrl: product.imageUrl,
+                productLink: product.productLink,
+                ranking: product.ranking,
+                categoryId: product.categoryId,
+                categoryName: product.categoryName,
+                isBestseller: product.isBestseller,
+                sellerId: product.sellerId,
+                sellerName: product.sellerName,
+                stockQuantity: product.stockQuantity || 999, // Default stock if not available
+            };
+
             for (let i = 0; i < quantity; i++) {
-                addToCart(product as any);
+                addToCart(cartProduct as any);
             }
-            setToast({ message: `Added ${quantity} item(s) to cart! `, type: 'success' });
+            setToast({ message: `Added ${quantity} item(s) to cart!`, type: 'success' });
         }
     };
 
@@ -303,10 +322,9 @@ const ProductDetailPage: React.FC = () => {
                                 +
                             </button>
                         </div>
-
                         <button
                             onClick={handleAddToCart}
-                            className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all flex items-center justify-center gap-2"
+                            className="flex-1 py-3 bg-gray-800 dark:bg-gray-800  text-white rounded-lg font-semibold hover:from-blue-700 hover:to-gray-700 transition-all flex items-center justify-center gap-2"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -421,7 +439,7 @@ const ProductDetailPage: React.FC = () => {
                                     <button
                                         onClick={handleSubmitReview}
                                         disabled={submittingReview}
-                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-gray-600 to-gray-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-gray-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                     >
                                         {submittingReview ? (
                                             <>
@@ -474,7 +492,7 @@ const ProductDetailPage: React.FC = () => {
                                     >
                                         <div className="flex items-start justify-between mb-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-gray-500 rounded-full flex items-center justify-center text-white font-semibold">
                                                     {review.userName?.charAt(0).toUpperCase() || 'U'}
                                                 </div>
                                                 <div>

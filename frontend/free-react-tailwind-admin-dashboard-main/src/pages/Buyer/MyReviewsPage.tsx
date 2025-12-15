@@ -79,9 +79,6 @@ const MyReviewsPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                            <span className="text-2xl">📝</span>
-                        </div>
                         <div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">{reviews.length}</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Total Reviews</p>
@@ -91,9 +88,7 @@ const MyReviewsPage: React.FC = () => {
 
                 <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center">
-                            <span className="text-2xl">⭐</span>
-                        </div>
+
                         <div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                 {reviews.length > 0
@@ -108,9 +103,6 @@ const MyReviewsPage: React.FC = () => {
 
                 <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                            <span className="text-2xl">👍</span>
-                        </div>
                         <div>
                             <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                 {reviews.filter(r => r.isLiked === true).length}
@@ -124,7 +116,6 @@ const MyReviewsPage: React.FC = () => {
             {/* Reviews List */}
             {reviews.length === 0 ? (
                 <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-12 text-center">
-                    <div className="text-6xl mb-4">📭</div>
                     <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">
                         No reviews yet
                     </h3>
@@ -135,7 +126,7 @@ const MyReviewsPage: React.FC = () => {
                         to="/shop"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                        🛍️ Browse Products
+                        Browse Products
                     </Link>
                 </div>
             ) : (
@@ -147,7 +138,7 @@ const MyReviewsPage: React.FC = () => {
                         >
                             <div className="flex items-start gap-4">
                                 {/* Product Image */}
-                                <Link to={`/product/${review.productAsin}`} className="flex-shrink-0">
+                                <Link to={`/shop/product/${review.productAsin}`} className="flex-shrink-0">
                                     <img
                                         src={review.productImage || 'https://via.placeholder.com/80?text=No+Image'}
                                         alt={review.productName}
@@ -160,7 +151,7 @@ const MyReviewsPage: React.FC = () => {
                                     <div className="flex items-start justify-between gap-4 mb-2">
                                         <div>
                                             <Link
-                                                to={`/product/${review.productAsin}`}
+                                                to={`/shop/product/${review.productAsin}`}
                                                 className="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 line-clamp-1"
                                             >
                                                 {review.productName}
@@ -176,7 +167,7 @@ const MyReviewsPage: React.FC = () => {
                                         {/* Actions */}
                                         <div className="flex items-center gap-2">
                                             <Link
-                                                to={`/product/${review.productAsin}`}
+                                                to={`/shop/product/${review.productAsin}`}
                                                 className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                                                 title="Edit review"
                                             >
@@ -209,7 +200,7 @@ const MyReviewsPage: React.FC = () => {
                                                     ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                                                     : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                                             }`}>
-                                                {review.isLiked ? '👍 Liked' : '👎 Disliked'}
+                                                {review.isLiked ? 'Liked' : 'Disliked'}
                                             </span>
                                         </div>
                                     )}

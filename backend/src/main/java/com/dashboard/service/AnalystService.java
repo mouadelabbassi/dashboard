@@ -975,58 +975,75 @@ public class AnalystService {
     public Map<String, Object> getPlatformVsSellersComparison() {
         Map<String, Object> comparison = new HashMap<>();
 
-        BigDecimal platformRevenue = platformRevenueRepository.findAll().stream()
-                .filter(pr -> pr.getRevenueType() == PlatformRevenue.RevenueType.DIRECT_SALE)
-                .map(PlatformRevenue::getGrossAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // ========== GET ALL APPROVED PRODUCTS ==========
+        List<Product> allApprovedProducts = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED);
 
-        long platformProducts = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED)
-                .stream()
+        // ========== PLATFORM (MouadVision) PRODUCTS ==========
+        // Platform products = products where seller is NULL (no seller assigned = MouadVision's own products)
+        List<Product> platformProducts = allApprovedProducts.stream()
                 .filter(p -> p.getSeller() == null)
-                .count();
+                .collect(Collectors.toList());
 
-        int platformSales = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED)
-                .stream()
-                .filter(p -> p.getSeller() == null && p.getSalesCount() != null)
+        // ========== SELLER PRODUCTS ==========
+        // Seller products = products where seller is NOT NULL (assigned to a seller)
+        List<Product> sellerProducts = allApprovedProducts.stream()
+                .filter(p -> p.getSeller() != null)
+                .collect(Collectors.toList());
+
+        // ========== PLATFORM STATS ==========
+        BigDecimal platformRevenue = platformRevenueRepository.calculateTotalPlatformRevenue();
+        if (platformRevenue == null) {
+            platformRevenue = BigDecimal.ZERO;
+        }
+
+        long platformProductsCount = platformProducts.size();
+
+        int platformSales = platformProducts.stream()
+                .filter(p -> p.getSalesCount() != null)
                 .mapToInt(Product::getSalesCount)
                 .sum();
 
         comparison.put("platform", Map.of(
                 "name", "MouadVision",
                 "revenue", platformRevenue,
-                "products", platformProducts,
+                "products", platformProductsCount,
                 "sales", platformSales
         ));
 
+        // ========== SELLERS STATS ==========
         BigDecimal sellersRevenue = sellerRevenueRepository.findAll().stream()
                 .map(sr -> sr.getGrossAmount() != null ? sr.getGrossAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        long sellersProducts = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED)
-                .stream()
-                .filter(p -> p.getSeller() != null)
-                .count();
+        long sellerProductsCount = sellerProducts.size();
 
-        int sellersSales = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED)
-                .stream()
-                .filter(p -> p.getSeller() != null && p.getSalesCount() != null)
+        int sellerSales = sellerProducts.stream()
+                .filter(p -> p.getSalesCount() != null)
                 .mapToInt(Product::getSalesCount)
                 .sum();
 
         comparison.put("sellers", Map.of(
                 "name", "All Sellers",
                 "revenue", sellersRevenue,
-                "products", sellersProducts,
-                "sales", sellersSales
+                "products", sellerProductsCount,
+                "sales", sellerSales
         ));
 
+        // ========== CALCULATE SHARES ==========
         BigDecimal totalRevenue = platformRevenue.add(sellersRevenue);
         if (totalRevenue.compareTo(BigDecimal.ZERO) > 0) {
             comparison.put("platformShare", platformRevenue.divide(totalRevenue, 4, RoundingMode.HALF_UP)
                     .multiply(new BigDecimal("100")));
             comparison.put("sellersShare", sellersRevenue.divide(totalRevenue, 4, RoundingMode.HALF_UP)
                     .multiply(new BigDecimal("100")));
+        } else {
+            comparison.put("platformShare", BigDecimal.ZERO);
+            comparison.put("sellersShare", BigDecimal.ZERO);
         }
+
+        // Debug log to see actual counts
+        log.info("Platform vs Sellers - Total:  {}, Platform (seller=null): {}, Sellers (seller!=null): {}",
+                allApprovedProducts.size(), platformProductsCount, sellerProductsCount);
 
         return comparison;
     }
@@ -1140,6 +1157,13 @@ public class AnalystService {
                         .reduce(BigDecimal.ZERO, BigDecimal::add)
                         .divide(BigDecimal.valueOf(prices.size()), 2, RoundingMode.HALF_UP));
             }
+            double avgRating = products.stream()
+                    .filter(p -> p.getRating() != null)
+                    .mapToDouble(p -> p.getRating().doubleValue())
+                    .average()
+                    .orElse(0.0);
+            metrics.put("avgRating", Math.round(avgRating * 10.0) / 10.0);
+
         }
 
         products.stream()

@@ -28,7 +28,7 @@ const SellerLayout: React.FC = () => {
     const navLinks = [
         { path: '/seller/dashboard', label: 'Dashboard' },
         { path: '/seller/products', label: 'My Products' },
-        { path: '/seller/stock', label: 'Stock Management', icon: '🏪' },
+        { path: '/seller/stock', label: 'Stock Management'},
         { path: '/seller/orders', label: 'Orders' },
         { path: '/seller/reviews', label: 'Reviews' },
         { path: '/seller/profile', label: 'Profile' },
@@ -39,9 +39,6 @@ const SellerLayout: React.FC = () => {
         { path: '/seller/shop', label: 'Shop' },
         { path: '/seller/shop/orders', label: 'My Purchases' },
     ];
-
-    const isActive = (path: string) => location.pathname === path;
-
     const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
@@ -54,7 +51,7 @@ const SellerLayout: React.FC = () => {
                         <Link to="/seller/dashboard" className="flex items-center gap-2">
                             <img src="/images/logo/logo.png" alt="Logo" className="h-8 w-auto" />
                             <span className="font-bold text-lg bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                                Seller Portal
+                               MouadVision
                             </span>
                         </Link>
                         <button
@@ -73,33 +70,30 @@ const SellerLayout: React.FC = () => {
                         </p>
                         {navLinks.map(link => (
                             <Link
-                                key={link.path}
-                                to={link.path}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                                    isActive(link.path)
-                                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                key={link. path}
+                                to={link. path}
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                                    location. pathname === link.path
+                                        ? 'text-blue-600 dark:text-blue-400'
+                                        : 'text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                             >
                                 <span>{link.label}</span>
                             </Link>
                         ))}
 
-                        {/* Divider */}
                         <div className="my-4 border-t border-gray-200 dark:border-gray-700"></div>
-
-                        {/* Shop Section - Seller as Buyer */}
                         <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                             Shop as Buyer
                         </p>
                         {shopLinks.map(link => (
                             <Link
-                                key={link.path}
-                                to={link.path}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                                    isActive(link.path) || location.pathname.startsWith(link.path)
-                                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/25'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                key={link. path}
+                                to={link. path}
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                                    location. pathname === link.path
+                                        ? 'text-blue-600 dark:text-blue-400'
+                                        : 'text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-white'
                                 }`}
                             >
                                 <span>{link.label}</span>
