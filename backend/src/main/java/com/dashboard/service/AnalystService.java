@@ -29,7 +29,6 @@ public class AnalystService {
     private final PlatformRevenueRepository platformRevenueRepository;
     private final OrderItemRepository orderItemRepository;
 
-    // ==================== DASHBOARD ====================
 
     @Transactional(readOnly = true)
     public Map<String, Object> getDashboardData() {
@@ -47,18 +46,18 @@ public class AnalystService {
     public Map<String, Object> getKPIs() {
         Map<String, Object> kpis = new HashMap<>();
 
-        // Total Revenue
-        BigDecimal totalRevenue = calculateTotalRevenue();
+        BigDecimal platformRevenue = platformRevenueRepository.calculateTotalPlatformRevenue();
+        if (platformRevenue == null) {
+            platformRevenue = BigDecimal.ZERO;
+        }
         BigDecimal previousRevenue = calculatePreviousPeriodRevenue(30);
-        double revenueGrowth = calculateGrowthPercentage(previousRevenue, totalRevenue);
+        double revenueGrowth = calculateGrowthPercentage(previousRevenue, platformRevenue);
 
         kpis.put("totalRevenue", Map.of(
-                "value", totalRevenue,
+                "value", platformRevenue,
                 "growth", revenueGrowth,
-                "trend", revenueGrowth >= 0 ? "up" :  "down"
+                "trend", revenueGrowth >= 0 ? "up" : "down"
         ));
-
-        // Total Orders
         long totalOrders = orderRepository.count();
         long previousOrders = countPreviousPeriodOrders(30);
         double ordersGrowth = calculateGrowthPercentage((double) previousOrders, (double) totalOrders);
@@ -69,15 +68,13 @@ public class AnalystService {
                 "trend", ordersGrowth >= 0 ? "up" : "down"
         ));
 
-        // Total Products
-        long totalProducts = productRepository.countByApprovalStatus(Product.ApprovalStatus.APPROVED);
+        long totalProducts = productRepository.count();
         kpis.put("totalProducts", Map.of(
                 "value", totalProducts,
                 "growth", 0,
                 "trend", "stable"
         ));
 
-        // Total Sellers
         long totalSellers = userRepository.countByRole(User.Role.SELLER);
         long previousSellers = countPreviousPeriodSellers(30);
         double sellersGrowth = calculateGrowthPercentage((double) previousSellers, (double) totalSellers);
@@ -88,7 +85,6 @@ public class AnalystService {
                 "trend", sellersGrowth >= 0 ? "up" : "down"
         ));
 
-        // Average Order Value
         BigDecimal avgOrderValue = calculateAverageOrderValue();
         kpis.put("avgOrderValue", Map.of(
                 "value", avgOrderValue,
@@ -106,8 +102,7 @@ public class AnalystService {
 
         return kpis;
     }
-
-    // ==================== ADVANCED REPORT DATA ====================
+    
 
     @Transactional(readOnly = true)
     public Map<String, Object> getAdvancedReportData() {
@@ -974,54 +969,37 @@ public class AnalystService {
     @Transactional(readOnly = true)
     public Map<String, Object> getPlatformVsSellersComparison() {
         Map<String, Object> comparison = new HashMap<>();
-
-        // ========== GET ALL APPROVED PRODUCTS ==========
-        List<Product> allApprovedProducts = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED);
-
-        // ========== PLATFORM (MouadVision) PRODUCTS ==========
-        // Platform products = products where seller is NULL (no seller assigned = MouadVision's own products)
-        List<Product> platformProducts = allApprovedProducts.stream()
-                .filter(p -> p.getSeller() == null)
+        List<Product> allProducts = productRepository.findAll();
+        List<Product> sellerProducts = allProducts.stream()
+                .filter(p -> p.getSeller() != null && p.getSeller().getRole() == User.Role.SELLER)
                 .collect(Collectors.toList());
-
-        // ========== SELLER PRODUCTS ==========
-        // Seller products = products where seller is NOT NULL (assigned to a seller)
-        List<Product> sellerProducts = allApprovedProducts.stream()
-                .filter(p -> p.getSeller() != null)
+        List<Product> platformProducts = allProducts.stream()
+                .filter(p -> p.getSeller() == null || p.getSeller().getRole() != User.Role.SELLER)
                 .collect(Collectors.toList());
-
-        // ========== PLATFORM STATS ==========
         BigDecimal platformRevenue = platformRevenueRepository.calculateTotalPlatformRevenue();
         if (platformRevenue == null) {
             platformRevenue = BigDecimal.ZERO;
         }
-
         long platformProductsCount = platformProducts.size();
-
         int platformSales = platformProducts.stream()
                 .filter(p -> p.getSalesCount() != null)
                 .mapToInt(Product::getSalesCount)
                 .sum();
-
         comparison.put("platform", Map.of(
                 "name", "MouadVision",
                 "revenue", platformRevenue,
                 "products", platformProductsCount,
                 "sales", platformSales
         ));
-
-        // ========== SELLERS STATS ==========
         BigDecimal sellersRevenue = sellerRevenueRepository.findAll().stream()
                 .map(sr -> sr.getGrossAmount() != null ? sr.getGrossAmount() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal:: add);
 
         long sellerProductsCount = sellerProducts.size();
-
         int sellerSales = sellerProducts.stream()
                 .filter(p -> p.getSalesCount() != null)
-                .mapToInt(Product::getSalesCount)
+                .mapToInt(Product:: getSalesCount)
                 .sum();
-
         comparison.put("sellers", Map.of(
                 "name", "All Sellers",
                 "revenue", sellersRevenue,
@@ -1029,7 +1007,6 @@ public class AnalystService {
                 "sales", sellerSales
         ));
 
-        // ========== CALCULATE SHARES ==========
         BigDecimal totalRevenue = platformRevenue.add(sellersRevenue);
         if (totalRevenue.compareTo(BigDecimal.ZERO) > 0) {
             comparison.put("platformShare", platformRevenue.divide(totalRevenue, 4, RoundingMode.HALF_UP)
@@ -1041,9 +1018,8 @@ public class AnalystService {
             comparison.put("sellersShare", BigDecimal.ZERO);
         }
 
-        // Debug log to see actual counts
-        log.info("Platform vs Sellers - Total:  {}, Platform (seller=null): {}, Sellers (seller!=null): {}",
-                allApprovedProducts.size(), platformProductsCount, sellerProductsCount);
+        log.info("Platform vs Sellers - Total:  {}, Platform: {}, Sellers: {}",
+                allProducts.size(), platformProductsCount, sellerProductsCount);
 
         return comparison;
     }
@@ -1083,8 +1059,6 @@ public class AnalystService {
 
         return details;
     }
-
-    // ==================== CATEGORY ANALYTICS ====================
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getCategoriesOverview() {

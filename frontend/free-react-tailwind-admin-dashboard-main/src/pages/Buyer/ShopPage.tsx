@@ -423,13 +423,10 @@ const ShopPage: React.FC = () => {
                                         </span>
                                     )}
                                 </div>
-
-                                {/* ✅ MODIFIED: Price and Stock Info */}
                                 <div className="flex items-center justify-between mb-3">
                                     <span className="text-xl font-bold text-gray-900 dark:text-white">
                                         ${product.price.toFixed(2)}
                                     </span>
-                                    {/* ✅ NEW: Stock quantity display */}
                                     {! isOutOfStock && stockQuantity <= 10 && (
                                         <span className={`text-xs font-medium ${
                                             isLowStock ? 'text-orange-500' : 'text-gray-500 dark:text-gray-400'

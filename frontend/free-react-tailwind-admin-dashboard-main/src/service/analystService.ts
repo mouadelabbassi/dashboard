@@ -72,7 +72,6 @@ export interface CategoryOverview {
 }
 
 export const analystService = {
-    // ==================== DASHBOARD ====================
 
     getDashboard: async () => {
         const response = await axios.get(`${API_URL}/analyst/dashboard`, {
@@ -82,13 +81,11 @@ export const analystService = {
     },
 
     getKPIs: async () => {
-        const response = await axios.get(`${API_URL}/analyst/dashboard/kpis`, {
+        const response = await axios. get(`${API_URL}/analyst/kpis`, {
             headers: getAuthHeader(),
         });
-        return response.data.data;
+        return response.data. data;
     },
-
-    // ==================== SALES ANALYTICS ====================
 
     getSalesOverview: async (startDate?: string, endDate?: string) => {
         const params: any = {};
@@ -139,7 +136,6 @@ export const analystService = {
         return response.data.data;
     },
 
-    // ==================== PRODUCT ANALYTICS ====================
 
     getProductsOverview: async () => {
         const response = await axios.get(`${API_URL}/analyst/products/overview`, {
@@ -157,14 +153,14 @@ export const analystService = {
     },
 
     getPriceDistribution: async () => {
-        const response = await axios.get(`${API_URL}/analyst/products/distribution/price`, {
+        const response = await axios.get(`${API_URL}/analyst/products/price-distribution`, {
             headers: getAuthHeader(),
         });
         return response.data.data;
     },
 
     getRatingDistribution: async () => {
-        const response = await axios.get(`${API_URL}/analyst/products/distribution/rating`, {
+        const response = await axios.get(`${API_URL}/analyst/products/rating-distribution`, {
             headers: getAuthHeader(),
         });
         return response.data.data;
@@ -182,8 +178,6 @@ export const analystService = {
         const response = await api.get('/analyst/products/bestseller-trends');
         return response. data. data || [];
     },
-
-    // ==================== SELLER ANALYTICS ====================
 
     getSellersOverview: async () => {
         const response = await axios.get(`${API_URL}/analyst/sellers/overview`, {
@@ -221,7 +215,6 @@ export const analystService = {
         return response.data.data;
     },
 
-    // ==================== CATEGORY ANALYTICS ====================
 
     getCategoriesOverview: async (): Promise<CategoryOverview[]> => {
         const response = await axios.get(`${API_URL}/analyst/categories/overview`, {
@@ -251,7 +244,6 @@ export const analystService = {
         return response.data.data;
     },
 
-    // ==================== REPORTS ====================
 
     getReportSummary: async (startDate: string, endDate: string) => {
         const response = await axios.get(`${API_URL}/analyst/reports/summary`, {
