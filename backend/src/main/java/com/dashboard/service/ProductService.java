@@ -126,6 +126,7 @@ public class ProductService {
                 .productLink(request.getProductLink())
                 .imageUrl(request.getImageUrl())
                 .category(category)
+                .stockQuantity(request.getStockQuantity() != null ? request.getStockQuantity() : 0)
                 .build();
 
         product = productRepository.save(product);
@@ -170,6 +171,9 @@ public class ProductService {
         }
         if (request.getImageUrl() != null) {
             product.setImageUrl(request.getImageUrl());
+        }
+        if (request.getStockQuantity() != null) {
+            product.setStockQuantity(request.getStockQuantity());
         }
 
         if (request.getCategoryId() != null && !request.getCategoryId().equals(product.getCategory().getId())) {
@@ -220,18 +224,16 @@ public class ProductService {
                 .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
 
-                // ✅ Seller information
                 .sellerId(product.getSeller() != null ? product.getSeller().getId() : null)
                 .sellerName(product.getSellerName())  // Uses the helper method from Product entity
                 .sellerStoreName(product.getSeller() != null ? product.getSeller().getStoreName() : null)
                 .isMouadVisionProduct(product.isMouadVisionProduct())
 
-                // Stock & approval
+
                 .stockQuantity(product.getStockQuantity())
                 .salesCount(product.getSalesCount())
                 .approvalStatus(product.getApprovalStatus() != null ? product.getApprovalStatus().name() : null)
 
-                // Flags
                 .isBestseller(product.getIsBestseller())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())

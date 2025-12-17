@@ -62,7 +62,7 @@ const SellerDashboard: React.FC = () => {
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-red-500 text-center">
                     <p className="text-xl font-semibold">{error}</p>
-                    <button onClick={fetchDashboard} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg">
+                    <button onClick={fetchDashboard} className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-lg">
                         Retry
                     </button>
                 </div>
@@ -149,7 +149,7 @@ const SellerDashboard: React.FC = () => {
                 </div>
                 <button
                     onClick={fetchDashboard}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -158,40 +158,39 @@ const SellerDashboard: React.FC = () => {
                 </button>
             </div>
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
-                    <p className="text-blue-100 text-sm font-medium">Total Revenue</p>
+                <div className="bg-gradient-to-r from-gray-500 to-gray-600 rounded-xl shadow-lg p-6 text-white">
+                    <p className="text-gray-100 text-sm font-medium">Total Revenue</p>
                     <p className="text-3xl font-bold mt-2">
                         ${dashboard.totalRevenue?.toFixed(2) || '0.00'}
                     </p>
-                    <p className="text-blue-200 text-xs mt-2">
+                    <p className="text-gray-200 text-xs mt-2">
                         This month: ${dashboard.monthlyRevenue?.toFixed(2) || '0.00'}
                     </p>
                 </div>
 
-                <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
-                    <p className="text-green-100 text-sm font-medium">Today</p>
+                <div className="bg-gradient-to-r from-gray-500 to-gray-600 rounded-xl shadow-lg p-6 text-white">
+                    <p className="text-gray-100 text-sm font-medium">Today</p>
                     <p className="text-3xl font-bold mt-2">
                         ${dashboard.todayRevenue?.toFixed(2) || '0.00'}
                     </p>
-                    <p className="text-green-200 text-xs mt-2">
+                    <p className="text-gray-200 text-xs mt-2">
                         This week: ${dashboard.weeklyRevenue?.toFixed(2) || '0.00'}
                     </p>
                 </div>
 
-                <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
-                    <p className="text-purple-100 text-sm font-medium">Products</p>
+                <div className="bg-gradient-to-r from-gray-500 to-gray-600 rounded-xl shadow-lg p-6 text-white">
+                    <p className="text-gray-100 text-sm font-medium">Products</p>
                     <p className="text-3xl font-bold mt-2">{dashboard.totalProducts || 0}</p>
-                    <p className="text-purple-200 text-xs mt-2">
+                    <p className="text-gray-200 text-xs mt-2">
                         ✓ {dashboard.approvedProducts || 0} approved | ⏳ {dashboard.pendingProducts || 0} pending
                     </p>
                 </div>
 
-                <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
-                    <p className="text-orange-100 text-sm font-medium">Sales</p>
+                <div className="bg-gradient-to-r from-gray-500 to-gray-600 rounded-xl shadow-lg p-6 text-white">
+                    <p className="text-gray-100 text-sm font-medium">Sales</p>
                     <p className="text-3xl font-bold mt-2">{dashboard.totalUnitsSold || 0}</p>
-                    <p className="text-orange-200 text-xs mt-2">
+                    <p className="text-gray-200 text-xs mt-2">
                         Units sold
                     </p>
                 </div>

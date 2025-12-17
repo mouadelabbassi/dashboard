@@ -342,11 +342,8 @@ const ProductDetailPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Reviews Section */}
             <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Rating Summary & Write Review */}
                 <div className="lg:col-span-1 space-y-6">
-                    {/* Rating Summary */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                             Customer Reviews
@@ -368,15 +365,12 @@ const ProductDetailPage: React.FC = () => {
 
                         {renderRatingDistribution()}
                     </div>
-
-                    {/* Write/Edit Review */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                             {product.userHasReviewed && ! isEditing ? 'Your Review' : 'Write a Review'}
                         </h3>
 
                         {product.userHasReviewed && !isEditing ?  (
-                            // Show existing review
                             <div>
                                 <div className="flex items-center gap-2 mb-3">
                                     {renderStars(product.userReview?.rating || 0, false, 'text-lg')}
@@ -408,7 +402,6 @@ const ProductDetailPage: React.FC = () => {
                                 </div>
                             </div>
                         ) : (
-                            // Review form
                             <div>
                                 <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -475,8 +468,6 @@ const ProductDetailPage: React.FC = () => {
                         )}
                     </div>
                 </div>
-
-                {/* Recent Reviews */}
                 <div className="lg:col-span-2">
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
@@ -528,7 +519,6 @@ const ProductDetailPage: React.FC = () => {
                             </div>
                         ) : (
                             <div className="text-center py-12">
-                                <div className="text-6xl mb-4">📝</div>
                                 <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                                     No reviews yet
                                 </h4>

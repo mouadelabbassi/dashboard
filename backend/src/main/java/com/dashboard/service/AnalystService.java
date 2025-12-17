@@ -108,34 +108,24 @@ public class AnalystService {
     public Map<String, Object> getAdvancedReportData() {
         Map<String, Object> reportData = new HashMap<>();
 
-        // Platform Revenue Overview
         reportData.put("platformRevenue", getPlatformRevenueOverview());
 
-        // Top 3 Best Sellers
         reportData.put("top3Sellers", getTop3BestSellers());
 
-        // Top 3 Categories by Revenue
         reportData.put("top3Categories", getTop3CategoriesByRevenue());
 
-        // Top 10 Most Sold Products
         reportData.put("mostSoldProducts", getMostSoldProducts(10));
 
-        // Monthly Revenue Trend (last 12 months)
         reportData.put("monthlyRevenueTrend", getMonthlyRevenueTrend());
 
-        // Category Revenue Distribution
         reportData.put("categoryRevenueDistribution", getCategoryRevenueDistribution());
 
-        // Sales Performance Metrics
         reportData.put("salesPerformance", getSalesPerformanceMetrics());
 
-        // Order Status Distribution
         reportData.put("orderStatusDistribution", getOrderStatusDistribution());
 
-        // Weekly Sales Trend
         reportData.put("weeklySalesTrend", getWeeklySalesTrend());
 
-        // KPIs
         reportData.put("kpis", getKPIs());
 
         return reportData;
@@ -976,6 +966,7 @@ public class AnalystService {
         List<Product> platformProducts = allProducts.stream()
                 .filter(p -> p.getSeller() == null || p.getSeller().getRole() != User.Role.SELLER)
                 .collect(Collectors.toList());
+
         BigDecimal platformRevenue = platformRevenueRepository.calculateTotalPlatformRevenue();
         if (platformRevenue == null) {
             platformRevenue = BigDecimal.ZERO;

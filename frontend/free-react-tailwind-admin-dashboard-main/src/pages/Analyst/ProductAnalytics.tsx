@@ -72,7 +72,7 @@ const ProductAnalytics: React.FC = () => {
         }).format(value);
     };
 
-    // Price Distribution Chart
+
     const priceChartData = {
         labels: Object.keys(priceDistribution),
         datasets: [
@@ -91,7 +91,6 @@ const ProductAnalytics: React.FC = () => {
         ],
     };
 
-    // Rating Distribution Chart
     const ratingChartData = {
         labels: Object.keys(ratingDistribution),
         datasets: [
@@ -109,7 +108,6 @@ const ProductAnalytics: React.FC = () => {
         ],
     };
 
-    // Performance Scatter Chart (Price vs Rating)
     const scatterChartData = {
         datasets: [
             {
@@ -138,21 +136,17 @@ const ProductAnalytics: React.FC = () => {
             {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    📦 Product Analytics
+                    Product Analytics
                 </h1>
                 <p className="text-gray-500 dark:text-gray-400 mt-1">
                     Comprehensive analysis of your product catalog
                 </p>
             </div>
 
-            {/* Overview Cards */}
             {overview && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                                <span className="text-xl">📦</span>
-                            </div>
                             <div>
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {overview.totalProducts}
@@ -164,9 +158,6 @@ const ProductAnalytics: React.FC = () => {
 
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                <span className="text-xl">💰</span>
-                            </div>
                             <div>
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {formatCurrency(overview.avgPrice)}
@@ -178,9 +169,6 @@ const ProductAnalytics: React.FC = () => {
 
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                                <span className="text-xl">⭐</span>
-                            </div>
                             <div>
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {overview.avgRating}
@@ -192,9 +180,6 @@ const ProductAnalytics: React.FC = () => {
 
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                                <span className="text-xl">💬</span>
-                            </div>
                             <div>
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {overview.totalReviews.toLocaleString()}
@@ -206,9 +191,6 @@ const ProductAnalytics: React.FC = () => {
 
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
-                                <span className="text-xl">🏭</span>
-                            </div>
                             <div>
                                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                     {formatCurrency(overview.inventoryValue)}
@@ -220,9 +202,6 @@ const ProductAnalytics: React.FC = () => {
 
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                                <span className="text-xl">⚠️</span>
-                            </div>
                             <div>
                                 <p className="text-2xl font-bold text-red-600">
                                     {overview.lowStockCount}
@@ -234,12 +213,11 @@ const ProductAnalytics: React.FC = () => {
                 </div>
             )}
 
-            {/* Charts Row */}
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Price Distribution */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        💵 Price Distribution
+                        Price Distribution
                     </h3>
                     <div className="h-72">
                         <Bar
@@ -260,10 +238,9 @@ const ProductAnalytics: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Rating Distribution */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        ⭐ Rating Distribution
+                        Rating Distribution
                     </h3>
                     <div className="h-72">
                         <Doughnut
@@ -284,11 +261,10 @@ const ProductAnalytics: React.FC = () => {
                 </div>
             </div>
 
-            {/* Product Performance Matrix */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <div className="mb-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        📊 Product Performance Matrix
+                        Product Performance Matrix
                     </h3>
                     <p className="text-sm text-gray-500">Price vs Rating (bubble size = sales volume)</p>
                 </div>
@@ -333,13 +309,12 @@ const ProductAnalytics: React.FC = () => {
                 </div>
             </div>
 
-            {/* Low Stock Alert & Bestsellers */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Low Stock Products */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            ⚠️ Low Stock Alert
+                            Low Stock Alert
                         </h3>
                         <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-sm font-medium">
                             {lowStockProducts.length} items
@@ -380,10 +355,9 @@ const ProductAnalytics: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Bestseller Trends */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        🏆 Bestseller Rankings
+                        Bestseller Rankings
                     </h3>
                     <div className="space-y-3 max-h-80 overflow-y-auto">
                         {bestsellerTrends.length === 0 ?  (

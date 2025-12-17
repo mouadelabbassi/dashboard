@@ -181,7 +181,6 @@ TOTAL:                    $${receiptOrder.totalAmount.toFixed(2)}
 
             {orders.length === 0 ?  (
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-12 text-center">
-                    <span className="text-6xl">📭</span>
                     <h3 className="text-lg font-medium text-gray-900 dark: text-white mt-4">
                         No orders yet
                     </h3>
@@ -197,14 +196,11 @@ TOTAL:                    $${receiptOrder.totalAmount.toFixed(2)}
                             className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
                         >
                             <div
-                                className="p-4 cursor-pointer hover: bg-gray-50 dark: hover:bg-gray-700/50"
+                                className="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50"
                                 onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                                            <span className="text-xl">🛒</span>
-                                        </div>
                                         <div>
                                             <p className="font-semibold text-gray-900 dark:text-white">
                                                 {order.orderNumber}
@@ -226,7 +222,6 @@ TOTAL:                    $${receiptOrder.totalAmount.toFixed(2)}
                                                 {order.totalItems} item(s)
                                             </p>
                                         </div>
-                                        {/* View Receipt Button */}
                                         <button
                                             onClick={(e) => handleViewReceipt(order, e)}
                                             className="p-2 text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
@@ -301,12 +296,9 @@ TOTAL:                    $${receiptOrder.totalAmount.toFixed(2)}
                     ))}
                 </div>
             )}
-
-            {/* Receipt Modal */}
             {receiptOrder && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden">
-                        {/* Modal Header */}
                         <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                 Order Receipt
@@ -320,10 +312,7 @@ TOTAL:                    $${receiptOrder.totalAmount.toFixed(2)}
                                 </svg>
                             </button>
                         </div>
-
-                        {/* Receipt Content */}
                         <div className="overflow-y-auto max-h-[60vh] p-6" ref={receiptRef}>
-                            {/* Header */}
                             <div className="text-center mb-6 pb-6 border-b-2 border-dashed border-gray-300 dark:border-gray-600">
                                 <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
                                     MouadVision
@@ -331,8 +320,6 @@ TOTAL:                    $${receiptOrder.totalAmount.toFixed(2)}
                                 <p className="text-gray-500 dark:text-gray-400 text-sm">Online Store</p>
                                 <p className="text-gray-500 dark:text-gray-400 text-sm">www.mouadvision.com</p>
                             </div>
-
-                            {/* Order Info */}
                             <div className="mb-6">
                                 <div className="flex justify-between text-sm mb-2">
                                     <span className="text-gray-500 dark:text-gray-400">Order #:</span>
@@ -358,14 +345,12 @@ TOTAL:                    $${receiptOrder.totalAmount.toFixed(2)}
                                 </div>
                             </div>
 
-                            {/* Customer Info */}
                             <div className="mb-6 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                                 <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">Customer</p>
                                 <p className="text-sm text-gray-600 dark:text-gray-300">{receiptOrder.userName}</p>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">{receiptOrder.userEmail}</p>
                             </div>
 
-                            {/* Items */}
                             <div className="mb-6">
                                 <p className="text-sm font-medium text-gray-900 dark: text-white mb-3">Items</p>
                                 <div className="space-y-3">
@@ -387,7 +372,6 @@ TOTAL:                    $${receiptOrder.totalAmount.toFixed(2)}
                                 </div>
                             </div>
 
-                            {/* Totals */}
                             <div className="border-t-2 border-dashed border-gray-300 dark:border-gray-600 pt-4">
                                 <div className="flex justify-between text-sm mb-2">
                                     <span className="text-gray-500 dark:text-gray-400">Subtotal</span>
@@ -407,7 +391,6 @@ TOTAL:                    $${receiptOrder.totalAmount.toFixed(2)}
                                 </div>
                             </div>
 
-                            {/* Footer */}
                             <div className="mt-6 pt-6 border-t-2 border-dashed border-gray-300 dark:border-gray-600 text-center">
                                 <p className="text-gray-500 dark:text-gray-400 text-sm">Thank you for your purchase!</p>
                                 <p className="text-gray-400 dark:text-gray-500 text-xs mt-2">
@@ -416,7 +399,6 @@ TOTAL:                    $${receiptOrder.totalAmount.toFixed(2)}
                             </div>
                         </div>
 
-                        {/* Modal Footer - Actions */}
                         <div className="flex gap-3 p-4 border-t dark:border-gray-700 bg-gray-50 dark: bg-gray-900/50">
                             <button
                                 onClick={handleDownloadReceipt}

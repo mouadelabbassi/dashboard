@@ -33,7 +33,6 @@ const AboutPage: React.FC = () => {
                 </div>
             </nav>
 
-            {/* Hero */}
             <section className="py-20 bg-gradient-to-b from-blue-600/10 to-transparent">
                 <div className="max-w-4xl mx-auto px-4 text-center">
                     <h1 className="text-5xl font-bold text-white mb-6">
@@ -45,8 +44,6 @@ const AboutPage: React.FC = () => {
                     </p>
                 </div>
             </section>
-
-            {/* Mission */}
             <section className="py-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg: px-8">
                     <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -78,8 +75,6 @@ const AboutPage: React.FC = () => {
                     </div>
                 </div>
             </section>
-
-            {/* Team */}
             <section className="py-20 bg-gray-900/30">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-3xl font-bold text-white mb-12">The Founder</h2>
@@ -98,8 +93,6 @@ const AboutPage: React.FC = () => {
                     </div>
                 </div>
             </section>
-
-            {/* CTA */}
             <section className="py-20">
                 <div className="max-w-3xl mx-auto px-4 text-center">
                     <h2 className="text-3xl font-bold text-white mb-6">Ready to Get Started?</h2>
@@ -122,8 +115,6 @@ const AboutPage: React.FC = () => {
                     </div>
                 </div>
             </section>
-
-            {/* Footer */}
             <footer className="border-t border-white/10 py-8">
                 <div className="max-w-7xl mx-auto px-4 text-center text-gray-500">
                     © 2025 MouadVision. All rights reserved.

@@ -26,7 +26,7 @@ ChartJS.register(
     Filler
 );
 
-const SalesAnalytics: React.FC = () => {
+const SalesAnalytics:React.FC = () => {
     const [salesTrend, setSalesTrend] = useState<SalesTrendPoint[]>([]);
     const [categorySales, setCategorySales] = useState<CategorySales[]>([]);
     const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
@@ -65,59 +65,57 @@ const SalesAnalytics: React.FC = () => {
         }
     };
 
-    const formatCurrency = (value: number) => {
+    const formatCurrency = (value:number) => {
         return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
+            style:'currency',
+            currency:'USD',
+            minimumFractionDigits:0,
+            maximumFractionDigits:0,
         }).format(value);
     };
 
     // Revenue Trend Chart
     const trendChartData = {
-        labels: salesTrend.map(d => {
+        labels:salesTrend.map(d => {
             const date = new Date(d.date);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
         }),
-        datasets: [
+        datasets:[
             {
-                label: 'Revenue',
-                data: salesTrend.map(d => d.revenue),
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: chartType === 'line' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.8)',
-                fill: chartType === 'line',
-                tension: 0.4,
-                borderRadius: chartType === 'bar' ? 6 : 0,
+                label:'Revenue',
+                data:salesTrend.map(d => d.revenue),
+                borderColor:'rgb(59, 130, 246)',
+                backgroundColor:chartType === 'line' ? 'rgba(59, 130, 246, 0.1)' :'rgba(59, 130, 246, 0.8)',
+                fill:chartType === 'line',
+                tension:0.4,
+                borderRadius:chartType === 'bar' ? 6 :0,
             },
         ],
     };
 
-    // Orders Trend Chart
     const ordersChartData = {
-        labels: salesTrend.map(d => {
+        labels:salesTrend.map(d => {
             const date = new Date(d.date);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
         }),
-        datasets: [
+        datasets:[
             {
-                label: 'Orders',
-                data: salesTrend.map(d => d.orders),
-                borderColor: 'rgb(16, 185, 129)',
-                backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                borderRadius: 6,
+                label:'Orders',
+                data:salesTrend.map(d => d.orders),
+                borderColor:'rgb(16, 185, 129)',
+                backgroundColor:'rgba(16, 185, 129, 0.8)',
+                borderRadius:6,
             },
         ],
     };
 
-    // Category Sales Chart
     const categorySalesChart = {
-        labels: categorySales.slice(0, 8).map(c => c.categoryName),
-        datasets: [
+        labels:categorySales.slice(0, 8).map(c => c.categoryName),
+        datasets:[
             {
-                label: 'Revenue',
-                data: categorySales.slice(0, 8).map(c => c.revenue),
-                backgroundColor: [
+                label:'Revenue',
+                data:categorySales.slice(0, 8).map(c => c.revenue),
+                backgroundColor:[
                     'rgba(59, 130, 246, 0.8)',
                     'rgba(16, 185, 129, 0.8)',
                     'rgba(245, 158, 11, 0.8)',
@@ -127,7 +125,7 @@ const SalesAnalytics: React.FC = () => {
                     'rgba(20, 184, 166, 0.8)',
                     'rgba(251, 146, 60, 0.8)',
                 ],
-                borderRadius: 6,
+                borderRadius:6,
             },
         ],
     };
@@ -142,11 +140,10 @@ const SalesAnalytics: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        📈 Sales Analytics
+                        Sales Analytics
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
                         Deep dive into your sales performance
@@ -169,7 +166,7 @@ const SalesAnalytics: React.FC = () => {
                             className={`px-3 py-2 text-sm ${
                                 chartType === 'line'
                                     ?  'bg-blue-600 text-white'
-                                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                                    :'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                             }`}
                         >
                             Line
@@ -179,7 +176,7 @@ const SalesAnalytics: React.FC = () => {
                             className={`px-3 py-2 text-sm ${
                                 chartType === 'bar'
                                     ? 'bg-blue-600 text-white'
-                                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                                    :'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400'
                             }`}
                         >
                             Bar
@@ -187,8 +184,6 @@ const SalesAnalytics: React.FC = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Overview Cards */}
             {salesOverview && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
@@ -197,8 +192,8 @@ const SalesAnalytics: React.FC = () => {
                             {formatCurrency(salesOverview.totalRevenue)}
                         </p>
                         {salesGrowth && (
-                            <p className={`text-sm mt-2 ${salesGrowth.weekly.growth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                {salesGrowth.weekly.growth >= 0 ? '↑' : '↓'} {Math.abs(salesGrowth.weekly.growth).toFixed(1)}% vs last week
+                            <p className={`text-sm mt-2 ${salesGrowth.weekly.growth >= 0 ? 'text-green-500' :'text-red-500'}`}>
+                                {salesGrowth.weekly.growth >= 0 ? '↑' :'↓'} {Math.abs(salesGrowth.weekly.growth).toFixed(1)}% vs last week
                             </p>
                         )}
                     </div>
@@ -223,9 +218,7 @@ const SalesAnalytics: React.FC = () => {
                 </div>
             )}
 
-            {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Revenue Trend */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                         Revenue Trend
@@ -235,35 +228,35 @@ const SalesAnalytics: React.FC = () => {
                             <Line
                                 data={trendChartData}
                                 options={{
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: { legend: { display: false } },
-                                    scales: {
-                                        x: { grid: { display: false }, ticks: { color: 'rgb(156, 163, 175)' } },
-                                        y: {
-                                            grid: { color: 'rgba(156, 163, 175, 0.1)' },
-                                            ticks: {
-                                                color: 'rgb(156, 163, 175)',
-                                                callback: (value) => formatCurrency(value as number),
+                                    responsive:true,
+                                    maintainAspectRatio:false,
+                                    plugins:{ legend:{ display:false } },
+                                    scales:{
+                                        x:{ grid:{ display:false }, ticks:{ color:'rgb(156, 163, 175)' } },
+                                        y:{
+                                            grid:{ color:'rgba(156, 163, 175, 0.1)' },
+                                            ticks:{
+                                                color:'rgb(156, 163, 175)',
+                                                callback:(value) => formatCurrency(value as number),
                                             },
                                         },
                                     },
                                 }}
                             />
-                        ) : (
+                        ) :(
                             <Bar
                                 data={trendChartData}
                                 options={{
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    plugins: { legend: { display: false } },
-                                    scales: {
-                                        x: { grid: { display: false }, ticks: { color: 'rgb(156, 163, 175)' } },
-                                        y: {
-                                            grid: { color: 'rgba(156, 163, 175, 0.1)' },
-                                            ticks: {
-                                                color: 'rgb(156, 163, 175)',
-                                                callback: (value) => formatCurrency(value as number),
+                                    responsive:true,
+                                    maintainAspectRatio:false,
+                                    plugins:{ legend:{ display:false } },
+                                    scales:{
+                                        x:{ grid:{ display:false }, ticks:{ color:'rgb(156, 163, 175)' } },
+                                        y:{
+                                            grid:{ color:'rgba(156, 163, 175, 0.1)' },
+                                            ticks:{
+                                                color:'rgb(156, 163, 175)',
+                                                callback:(value) => formatCurrency(value as number),
                                             },
                                         },
                                     },
@@ -273,7 +266,6 @@ const SalesAnalytics: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Orders Trend */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                         Orders Trend
@@ -282,14 +274,14 @@ const SalesAnalytics: React.FC = () => {
                         <Bar
                             data={ordersChartData}
                             options={{
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
-                                scales: {
-                                    x: { grid: { display: false }, ticks: { color: 'rgb(156, 163, 175)' } },
-                                    y: {
-                                        grid: { color: 'rgba(156, 163, 175, 0.1)' },
-                                        ticks: { color: 'rgb(156, 163, 175)' },
+                                responsive:true,
+                                maintainAspectRatio:false,
+                                plugins:{ legend:{ display:false } },
+                                scales:{
+                                    x:{ grid:{ display:false }, ticks:{ color:'rgb(156, 163, 175)' } },
+                                    y:{
+                                        grid:{ color:'rgba(156, 163, 175, 0.1)' },
+                                        ticks:{ color:'rgb(156, 163, 175)' },
                                     },
                                 },
                             }}
@@ -298,7 +290,6 @@ const SalesAnalytics: React.FC = () => {
                 </div>
             </div>
 
-            {/* Category Sales */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Revenue by Category
@@ -307,21 +298,21 @@ const SalesAnalytics: React.FC = () => {
                     <Bar
                         data={categorySalesChart}
                         options={{
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            indexAxis: 'y',
-                            plugins: { legend: { display: false } },
-                            scales: {
-                                x: {
-                                    grid: { color: 'rgba(156, 163, 175, 0.1)' },
-                                    ticks: {
-                                        color: 'rgb(156, 163, 175)',
-                                        callback: (value) => formatCurrency(value as number),
+                            responsive:true,
+                            maintainAspectRatio:false,
+                            indexAxis:'y',
+                            plugins:{ legend:{ display:false } },
+                            scales:{
+                                x:{
+                                    grid:{ color:'rgba(156, 163, 175, 0.1)' },
+                                    ticks:{
+                                        color:'rgb(156, 163, 175)',
+                                        callback:(value) => formatCurrency(value as number),
                                     },
                                 },
-                                y: {
-                                    grid: { display: false },
-                                    ticks: { color: 'rgb(156, 163, 175)' },
+                                y:{
+                                    grid:{ display:false },
+                                    ticks:{ color:'rgb(156, 163, 175)' },
                                 },
                             },
                         }}
@@ -329,21 +320,20 @@ const SalesAnalytics: React.FC = () => {
                 </div>
             </div>
 
-            {/* Peak Sales Times */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    📅 Peak Sales Days
+                    Peak Sales Days
                 </h3>
                 <div className="grid grid-cols-7 gap-2">
                     {peakTimes.map((day, index) => {
                         const maxOrders = Math.max(...peakTimes.map(d => d.orders));
-                        const intensity = maxOrders > 0 ? (day.orders / maxOrders) : 0;
+                        const intensity = maxOrders > 0 ? (day.orders / maxOrders) :0;
                         return (
                             <div
                                 key={index}
                                 className="text-center p-4 rounded-lg"
                                 style={{
-                                    backgroundColor: `rgba(59, 130, 246, ${0.1 + intensity * 0.7})`,
+                                    backgroundColor:`rgba(59, 130, 246, ${0.1 + intensity * 0.7})`,
                                 }}
                             >
                                 <p className="text-xs font-medium text-gray-600 dark:text-gray-300">
@@ -359,10 +349,9 @@ const SalesAnalytics: React.FC = () => {
                 </div>
             </div>
 
-            {/* Top Selling Products */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    🏆 Top Selling Products
+                    Top Selling Products
                 </h3>
                 <div className="overflow-x-auto">
                     <table className="w-full">

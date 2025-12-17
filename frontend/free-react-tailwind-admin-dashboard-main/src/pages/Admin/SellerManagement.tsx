@@ -120,7 +120,6 @@ const SellerManagement: React.FC = () => {
                 </p>
             </div>
 
-            {/* Filters */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-4">
                 <div className="flex gap-2">
                     {(['all', 'verified', 'unverified'] as const). map((status) => (
@@ -137,13 +136,12 @@ const SellerManagement: React.FC = () => {
                             }`}
                         >
                             {status === 'all' ?  'All Sellers' :
-                                status === 'verified' ?  '✓ Verified' : '⏳ Pending Verification'}
+                                status === 'verified' ?  'Verified' : 'Pending Verification'}
                         </button>
                     ))}
                 </div>
             </div>
 
-            {/* Sellers Table */}
             {loading ? (
                 <div className="flex justify-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -213,11 +211,11 @@ const SellerManagement: React.FC = () => {
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     {seller.isVerifiedSeller ? (
                                         <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                ✓ Verified
+                                            Verified
                                             </span>
                                     ) : (
                                         <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                ⏳ Pending
+                                            Pending
                                             </span>
                                     )}
                                 </td>
@@ -256,7 +254,6 @@ const SellerManagement: React.FC = () => {
                 </div>
             )}
 
-            {/* Pagination */}
             {totalPages > 1 && (
                 <div className="flex justify-center mt-6 gap-2">
                     <button

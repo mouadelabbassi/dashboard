@@ -529,6 +529,7 @@ span.flatpickr-weekday,
   fill: none !important;
 }
 
+
 .flatpickr-calendar.static {
   @apply right-0;
 }

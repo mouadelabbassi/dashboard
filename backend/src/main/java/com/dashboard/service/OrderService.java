@@ -129,30 +129,24 @@ public class OrderService {
         if (order.getStatus() != Order.OrderStatus.PENDING) {
             throw new BadRequestException("Only pending orders can be confirmed");
         }
-
-        // 1. Confirm the order first
         order.confirm();
         order = orderRepository.save(order);
         log.info("Order confirmed: {}", order.getOrderNumber());
 
-        // 2. Update product sales count
         try {
             updateProductSalesCount(order);
         } catch (Exception e) {
             log. error("Failed to update sales count: {}", e.getMessage());
         }
 
-        // 3. Add to seller stock if buyer is a seller
         if (currentUser.getRole() == User.Role. SELLER) {
             try {
                 addPurchasedProductsToSellerStock(order);
             } catch (Exception e) {
                 log.error("Failed to add products to seller stock: {}", e. getMessage());
-                // Don't fail the order confirmation
             }
         }
 
-        // 4. Process seller revenue
         try {
             log.info("Processing seller revenue for order: {}", order.getOrderNumber());
             sellerRevenueService.processConfirmedOrderItems(order);
@@ -161,7 +155,6 @@ public class OrderService {
             log.error("Failed to process seller revenue: {}", e. getMessage(), e);
         }
 
-        // 5. Send notifications to sellers
         try {
             log.info("Sending notifications for order: {}", order.getOrderNumber());
             sendPurchaseNotificationsToSellers(order);
@@ -170,7 +163,6 @@ public class OrderService {
             log.error("Failed to send notifications: {}", e.getMessage(), e);
         }
 
-        // 6. Create notification for buyer
         try {
             createOrderNotification(order);
         } catch (Exception e) {

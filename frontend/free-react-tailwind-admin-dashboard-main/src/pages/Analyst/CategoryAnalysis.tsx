@@ -99,7 +99,6 @@ const CategoryAnalysis: React.FC = () => {
         ],
     };
 
-    // Category Comparison Radar
     const radarChartData = {
         labels: ['Products', 'Avg Price', 'Avg Rating', 'Sales', 'Revenue'],
         datasets: categories.slice(0, 5).map((cat, index) => {
@@ -118,7 +117,6 @@ const CategoryAnalysis: React.FC = () => {
                 'rgb(139, 92, 246)',
             ];
 
-            // Normalize values to 0-100 scale for radar
             const maxProducts = Math.max(...categories.map(c => c.productCount));
             const maxPrice = Math.max(...categories.map(c => c.avgPrice));
             const maxSales = Math.max(...categories.map(c => c.totalSales));
@@ -140,7 +138,6 @@ const CategoryAnalysis: React.FC = () => {
         }),
     };
 
-    // Products by Category Bar Chart
     const productsChartData = {
         labels: categories.map(c => c.name),
         datasets: [
@@ -173,7 +170,7 @@ const CategoryAnalysis: React.FC = () => {
                 </p>
             </div>
 
-            {/* Category Selector */}
+
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     📊 Select Category for Detailed Analysis
@@ -198,7 +195,7 @@ const CategoryAnalysis: React.FC = () => {
                 </div>
             </div>
 
-            {/* Selected Category Details */}
+
             {selectedCategory && (
                 <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark: border-gray-700">
                     {detailsLoading ? (
@@ -229,25 +226,23 @@ const CategoryAnalysis: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Best Products */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                                 {selectedCategory.bestRated && (
                                     <div className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
-                                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">🌟 Best Rated</p>
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">Best Rated</p>
                                         <p className="font-medium truncate text-gray-900 dark:text-white">{selectedCategory.bestRated.name}</p>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">⭐ {selectedCategory.bestRated.rating}</p>
                                     </div>
                                 )}
                                 {selectedCategory. bestSelling && (
                                     <div className="bg-white dark:bg-gray-700 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
-                                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">🔥 Best Selling</p>
+                                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">Best Selling</p>
                                         <p className="font-medium truncate text-gray-900 dark:text-white">{selectedCategory.bestSelling.name}</p>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">{selectedCategory.bestSelling. sales} sold</p>
                                     </div>
                                 )}
                             </div>
 
-                            {/* Rating Distribution */}
                             {selectedCategory.ratingDistribution && (
                                 <div className="mt-4">
                                     <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">Rating Distribution</p>
@@ -266,12 +261,10 @@ const CategoryAnalysis: React.FC = () => {
                 </div>
             )}
 
-            {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Revenue Contribution */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        💰 Revenue by Category
+                        Revenue by Category
                     </h3>
                     <div className="h-80">
                         <Doughnut
@@ -299,10 +292,9 @@ const CategoryAnalysis: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Category Comparison Radar */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        📈 Top 5 Categories Comparison
+                        Top 5 Categories Comparison
                     </h3>
                     <div className="h-80">
                         <Radar
@@ -329,10 +321,9 @@ const CategoryAnalysis: React.FC = () => {
                 </div>
             </div>
 
-            {/* Products by Category */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    📦 Products by Category
+                    Products by Category
                 </h3>
                 <div className="h-80">
                     <Bar
@@ -356,10 +347,9 @@ const CategoryAnalysis: React.FC = () => {
                 </div>
             </div>
 
-            {/* Categories Table */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    📋 All Categories Overview
+                    All Categories Overview
                 </h3>
                 <div className="overflow-x-auto">
                     <table className="w-full">

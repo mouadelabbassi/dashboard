@@ -2,31 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { Product, ProductCreateRequest, ProductUpdateRequest, Category, getCategories, createProduct, updateProduct } from '../../service/api';
 
 interface ProductModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    product?: Product | null; // If provided, we're editing
-    onSuccess: () => void;
+    isOpen:boolean;
+    onClose:() => void;
+    product?:Product | null;
+    onSuccess:() => void;
 }
 
-const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, onSuccess }) => {
+const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, onSuccess }) => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [imagePreview, setImagePreview] = useState<string>('');
 
     const [formData, setFormData] = useState({
-        asin: '',
-        productName: '',
-        description: '',
-        price: '',
-        imageUrl: '',
-        productLink: '',
-        categoryId: ''
+        asin:'',
+        productName:'',
+        description:'',
+        price:'',
+        stockQuantity:'',  // ← NEW FIELD
+        imageUrl:'',
+        productLink:'',
+        categoryId:''
     });
 
     const isEditMode = !!product;
 
-    // Fetch categories on mount
     useEffect(() => {
         const fetchCategories = async () => {
             const cats = await getCategories();
@@ -35,46 +35,44 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
         fetchCategories();
     }, []);
 
-    // Populate form when editing
     useEffect(() => {
         if (product) {
             setFormData({
-                asin: product.asin || '',
-                productName: product.productName || '',
-                description: product.description || '',
-                price: product.price?.toString() || '',
-                imageUrl: product.imageUrl || '',
-                productLink: product.productLink || '',
-                categoryId: product.categoryId?.toString() || ''
+                asin:product.asin || '',
+                productName:product.productName || '',
+                description:product.description || '',
+                price:product.price?.toString() || '',
+                stockQuantity:product.stockQuantity?.toString() || '0',  // ← POPULATE STOCK
+                imageUrl:product.imageUrl || '',
+                productLink:product.productLink || '',
+                categoryId:product.categoryId?.toString() || ''
             });
             setImagePreview(product.imageUrl || '');
         } else {
-            // Reset form for new product
             setFormData({
-                asin: '',
-                productName: '',
-                description: '',
-                price: '',
-                imageUrl: '',
-                productLink: '',
-                categoryId: ''
+                asin:'',
+                productName:'',
+                description:'',
+                price:'',
+                stockQuantity:'0',  // ← DEFAULT TO 0
+                imageUrl:'',
+                productLink:'',
+                categoryId:''
             });
             setImagePreview('');
         }
     }, [product, isOpen]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const handleChange = (e:React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]:value }));
 
-        // Update image preview
         if (name === 'imageUrl') {
             setImagePreview(value);
         }
     };
 
     const generateAsin = () => {
-        // Generate a random ASIN-like code
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let asin = 'B';
         for (let i = 0; i < 9; i++) {
@@ -83,42 +81,42 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
         setFormData(prev => ({ ...prev, asin }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e:React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
 
         try {
             if (isEditMode) {
-                // Update existing product
-                const updateData: ProductUpdateRequest = {
-                    productName: formData.productName,
-                    description: formData.description || undefined,
-                    price: parseFloat(formData.price),
-                    imageUrl: formData.imageUrl || undefined,
-                    productLink: formData.productLink || undefined,
-                    categoryId: parseInt(formData.categoryId)
+                const updateData:ProductUpdateRequest = {
+                    productName:formData.productName,
+                    description:formData.description || undefined,
+                    price:parseFloat(formData.price),
+                    stockQuantity:parseInt(formData.stockQuantity) || 0,  // ← INCLUDE STOCK
+                    imageUrl:formData.imageUrl || undefined,
+                    productLink:formData.productLink || undefined,
+                    categoryId:parseInt(formData.categoryId)
                 };
-                await updateProduct(product!.asin, updateData);
+                await updateProduct(product! .asin, updateData);
             } else {
-                // Create new product
-                const createData: ProductCreateRequest = {
-                    asin: formData.asin,
-                    productName: formData.productName,
-                    description: formData.description || undefined,
-                    price: parseFloat(formData.price),
-                    imageUrl: formData.imageUrl || undefined,
-                    productLink: formData.productLink || undefined,
-                    categoryId: parseInt(formData.categoryId)
+                const createData:ProductCreateRequest = {
+                    asin:formData.asin,
+                    productName:formData.productName,
+                    description:formData.description || undefined,
+                    price:parseFloat(formData.price),
+                    stockQuantity:parseInt(formData.stockQuantity) || 0,  // ← INCLUDE STOCK
+                    imageUrl:formData.imageUrl || undefined,
+                    productLink:formData.productLink || undefined,
+                    categoryId:parseInt(formData.categoryId)
                 };
                 await createProduct(createData);
             }
 
             onSuccess();
             onClose();
-        } catch (err: any) {
+        } catch (err:any) {
             console.error('Error saving product:', err);
-            setError(err.response?.data?.message || 'Failed to save product. Please try again.');
+            setError(err.response?.data?.message || 'Failed to save product.Please try again.');
         } finally {
             setLoading(false);
         }
@@ -128,19 +126,17 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-            {/* Backdrop */}
             <div
                 className="fixed inset-0 bg-black/50 transition-opacity"
                 onClick={onClose}
             />
 
-            {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4">
                 <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-xl">
                     {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                            {isEditMode ? '✏️ Edit Product' : '➕ Add New Product'}
+                            {isEditMode ? '✏️ Edit Product' :'➕ Add New Product'}
                         </h3>
                         <button
                             onClick={onClose}
@@ -166,7 +162,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
                                 {/* ASIN */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        ASIN {!isEditMode && <span className="text-red-500">*</span>}
+                                        ASIN {! isEditMode && <span className="text-red-500">*</span>}
                                     </label>
                                     <div className="flex gap-2">
                                         <input
@@ -175,11 +171,11 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
                                             value={formData.asin}
                                             onChange={handleChange}
                                             disabled={isEditMode}
-                                            required={!isEditMode}
+                                            required={! isEditMode}
                                             placeholder="e.g., B00GAC1D2G"
                                             className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white disabled:bg-gray-100 dark:disabled:bg-gray-700 disabled:cursor-not-allowed"
                                         />
-                                        {!isEditMode && (
+                                        {! isEditMode && (
                                             <button
                                                 type="button"
                                                 onClick={generateAsin}
@@ -225,22 +221,76 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
                                     />
                                 </div>
 
-                                {/* Price */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Price ($) <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="number"
-                                        name="price"
-                                        value={formData.price}
-                                        onChange={handleChange}
-                                        required
-                                        min="0.01"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                                    />
+                                {/* Price & Stock Row */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Price */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Price ($) <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="price"
+                                            value={formData.price}
+                                            onChange={handleChange}
+                                            required
+                                            min="0.01"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                        />
+                                    </div>
+
+                                    {/* ✨ NEW:Stock Quantity */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Stock Quantity <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="number"
+                                            name="stockQuantity"
+                                            value={formData.stockQuantity}
+                                            onChange={handleChange}
+                                            required
+                                            min="0"
+                                            step="1"
+                                            placeholder="0"
+                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Stock Status Indicator */}
+                                <div className={`p-3 rounded-lg flex items-center gap-2 ${
+                                    parseInt(formData.stockQuantity) > 10
+                                        ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+                                        :parseInt(formData.stockQuantity) > 0
+                                            ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
+                                            :'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                                }`}>
+                                    <span className={`text-lg ${
+                                        parseInt(formData.stockQuantity) > 10
+                                            ? 'text-green-600'
+                                            :parseInt(formData.stockQuantity) > 0
+                                                ?  'text-yellow-600'
+                                                :'text-red-600'
+                                    }`}>
+                                        {parseInt(formData.stockQuantity) > 10 ? '✅' :parseInt(formData.stockQuantity) > 0 ? '⚠️' :'❌'}
+                                    </span>
+                                    <span className={`text-sm font-medium ${
+                                        parseInt(formData.stockQuantity) > 10
+                                            ?  'text-green-700 dark:text-green-400'
+                                            :parseInt(formData.stockQuantity) > 0
+                                                ? 'text-yellow-700 dark:text-yellow-400'
+                                                :'text-red-700 dark:text-red-400'
+                                    }`}>
+                                        {parseInt(formData.stockQuantity) > 10
+                                            ? 'In Stock'
+                                            :parseInt(formData.stockQuantity) > 0
+                                                ?  `Low Stock (${formData.stockQuantity} units)`
+                                                :'Out of Stock'
+                                        }
+                                    </span>
                                 </div>
 
                                 {/* Category */}
@@ -298,7 +348,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
                                                 className="max-w-full max-h-full object-contain"
                                                 onError={() => setImagePreview('')}
                                             />
-                                        ) : (
+                                        ) :(
                                             <div className="text-center text-gray-400">
                                                 <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -331,7 +381,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
                                             ℹ️ Read-only Fields
                                         </h4>
                                         <p className="text-xs text-blue-600 dark:text-blue-400">
-                                            Rank, Rating, and Reviews cannot be modified. These values are determined by customer activity.
+                                            Rank, Rating, and Reviews cannot be modified.These values are determined by customer activity.
                                         </p>
                                         <div className="mt-2 grid grid-cols-3 gap-2 text-center">
                                             <div className="bg-white dark:bg-gray-800 rounded p-2">
@@ -374,9 +424,9 @@ const ProductModal: React.FC<ProductModalProps> = ({ isOpen, onClose, product, o
                                         </svg>
                                         Saving...
                                     </>
-                                ) : (
+                                ) :(
                                     <>
-                                        {isEditMode ? '💾 Update Product' : '➕ Add Product'}
+                                        {isEditMode ? ' Update Product' :' Add Product'}
                                     </>
                                 )}
                             </button>

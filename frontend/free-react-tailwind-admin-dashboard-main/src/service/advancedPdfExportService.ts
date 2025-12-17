@@ -854,69 +854,16 @@ export const generateAdvancedPDF = async (): Promise<void> => {
 
         yPos += Math.ceil(statusData.length / 3) * 32 + 15;
     }
-
-    // Key Insights Section
-    yPos = drawSectionHeader(doc, 'Key Business Insights', 14, yPos);
-
-    // Generate dynamic insights
-    const insights:  string[] = [];
-
-    const revenueGrowth = data.platformRevenue?.revenueGrowth || 0;
-    if (revenueGrowth > 0) {
-        insights.push(`[+] Revenue has grown by ${revenueGrowth.toFixed(1)}% compared to the previous period.`);
-    } else if (revenueGrowth < 0) {
-        insights.push(`[-] Revenue has decreased by ${Math.abs(revenueGrowth).toFixed(1)}% - consider promotional campaigns.`);
-    }
-
-    if (data.top3Categories && data.top3Categories.length > 0) {
-        const topCategory = data.top3Categories[0];
-        insights.push(`[*] "${topCategory.categoryName}" is the top performing category with ${formatCurrency(topCategory.revenue || 0)} in revenue.`);
-    }
-
-    if (data.top3Sellers && data.top3Sellers.length > 0) {
-        const topSeller = data.top3Sellers[0];
-        insights.push(`[*] Top seller "${topSeller.storeName || topSeller.sellerName}" has generated ${formatCurrency(topSeller.totalRevenue || 0)} in total revenue.`);
-    }
-
-    if (data.orderStatusDistribution) {
-        const delivered = (data.orderStatusDistribution['DELIVERED'] as number) || 0;
-        const total = Object.values(data.orderStatusDistribution).reduce((sum, count) => sum + (count as number), 0);
-        const completionRate = total > 0 ? (delivered / total) * 100 : 0;
-        insights.push(`[>] Order completion rate is ${completionRate.toFixed(1)}% - ${delivered} out of ${total} orders delivered.`);
-    }
-
-    const avgOrderValue = data.platformRevenue?.avgOrderValue || 0;
-    insights.push(`[$] Average order value is ${formatCurrency(avgOrderValue)}.`);
-
-    const conversionRate = data.salesPerformance?.conversionRate || 0;
-    insights.push(`[%] Current conversion rate is ${conversionRate.toFixed(1)}%.`);
-
-    // Draw insights box
-    doc.setFillColor(240, 249, 255);
-    doc.roundedRect(14, yPos, pageWidth - 28, insights.length * 13 + 12, 5, 5, 'F');
-
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...COLORS.dark);
-
-    insights.forEach((insight, index) => {
-        doc.text(insight, 20, yPos + 12 + index * 13);
-    });
-
-    // Footer
     doc.setFontSize(8);
     doc.setTextColor(...COLORS.gray);
     doc.text(`MouadVision Analytics Report | Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
 
-    // ==================== PAGE 7: CLOSING PAGE ====================
     doc.addPage();
     pageNumber++;
 
-    // Full page dark background
     doc.setFillColor(...COLORS.primaryDark);
     doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
-    // Thank you message
     doc.setTextColor(...COLORS.white);
     doc.setFontSize(32);
     doc.setFont('helvetica', 'bold');
@@ -926,7 +873,6 @@ export const generateAdvancedPDF = async (): Promise<void> => {
     doc.setFont('helvetica', 'normal');
     doc.text('For reviewing this comprehensive business report', pageWidth / 2, 100, { align: 'center' });
 
-    // Summary box
     doc.setFillColor(255, 255, 255, 0.1);
     doc.roundedRect(30, 120, pageWidth - 60, 100, 5, 5, 'F');
 
@@ -949,7 +895,6 @@ export const generateAdvancedPDF = async (): Promise<void> => {
         doc.text(`• ${item}`, pageWidth / 2, 158 + index * 12, { align: 'center' });
     });
 
-    // Footer branding
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.text('MouadVision', pageWidth / 2, pageHeight - 35, { align: 'center' });
@@ -959,7 +904,6 @@ export const generateAdvancedPDF = async (): Promise<void> => {
     doc.setFontSize(7);
     doc.text(`Report Generated: ${new Date().toLocaleString()}`, pageWidth / 2, pageHeight - 15, { align: 'center' });
 
-    // ==================== SAVE PDF ====================
     const filename = `MouadVision_Executive_Report_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(filename);
 

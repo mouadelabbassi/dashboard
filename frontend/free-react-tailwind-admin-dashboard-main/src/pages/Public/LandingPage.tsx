@@ -37,18 +37,13 @@ const LandingPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
-            {/* Animated Background - Blue Gradients */}
             <div className="fixed inset-0 z-0 overflow-hidden">
-                {/* Main gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#0d1025] to-[#0a0a0f]" />
 
-                {/* Floating blue orbs */}
                 <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
                 <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] bg-blue-500/15 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '1s' }} />
                 <div className="absolute bottom-[-10%] left-[30%] w-[700px] h-[700px] bg-blue-700/10 rounded-full blur-[180px] animate-pulse" style={{ animationDelay: '2s' }} />
                 <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-blue-500/5 to-transparent rounded-full blur-[100px]" />
-
-                {/* Subtle grid pattern */}
                 <div
                     className="absolute inset-0 opacity-[0.02]"
                     style={{
@@ -59,7 +54,6 @@ const LandingPage: React.FC = () => {
                 />
             </div>
 
-            {/* Navbar */}
             <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
                 isScrolled
                     ? 'bg-[#050508]/95 backdrop-blur-xl border-b border-blue-500/10'
@@ -78,8 +72,6 @@ const LandingPage: React.FC = () => {
                                 Mouad<span className="text-blue-400">Vision</span>
                             </span>
                         </Link>
-
-                        {/* Nav Links */}
                         <div className="hidden md:flex items-center gap-8">
                             <Link to="/" className="text-white font-medium hover:text-blue-400 transition-colors">
                                 Home
@@ -91,8 +83,6 @@ const LandingPage: React.FC = () => {
                                 About Us
                             </Link>
                         </div>
-
-                        {/* Auth Buttons */}
                         <div className="flex items-center gap-3">
                             {isAuthenticated ? (
                                 <button
@@ -118,8 +108,6 @@ const LandingPage: React.FC = () => {
                     </div>
                 </div>
             </nav>
-
-            {/* Hero Section */}
             <section className="relative z-10 min-h-screen flex items-center justify-center pt-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg: px-8 text-center">
                     {/* Live Badge */}
@@ -138,15 +126,11 @@ const LandingPage: React.FC = () => {
                             MouadVision Store
                         </span>
                     </h1>
-
-                    {/* Subtitle */}
                     <p className="text-xl md:text-2xl text-blue-100/60 max-w-3xl mx-auto mb-14 leading-relaxed font-light">
                         Your one-stop marketplace for quality electronics, fashion, and more.
                         <br />
                         <span className="text-white font-medium">Join thousands of happy customers</span>
                     </p>
-
-                    {/* CTA Buttons */}
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
                         <Link
                             to="/explore"
@@ -186,8 +170,6 @@ const LandingPage: React.FC = () => {
                 </div>
 
             </section>
-
-            {/* Features Section */}
             <section className="relative z-10 py-32">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">

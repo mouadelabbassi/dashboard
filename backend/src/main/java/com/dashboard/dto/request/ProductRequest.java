@@ -40,6 +40,9 @@ public class ProductRequest {
     @Min(value = 1, message = "Number of sellers must be at least 1")
     private Integer noOfSellers;
 
+    @Min(value = 0, message = "Stock quantity cannot be negative")
+    private Integer stockQuantity;
+
     private String productLink;
 
     private String imageUrl;

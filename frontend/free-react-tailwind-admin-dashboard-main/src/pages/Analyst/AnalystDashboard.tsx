@@ -99,7 +99,6 @@ const AnalystDashboard: React.FC = () => {
         ],
     };
 
-    // Category Sales Chart
     const categoryChart = {
         labels: categorySales.map(c => c.categoryName),
         datasets: [
@@ -165,7 +164,7 @@ const AnalystDashboard: React.FC = () => {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                        📊 Analytics Overview
+                        Analytics Overview
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
                         Real-time insights into your business performance
@@ -233,9 +232,7 @@ const AnalystDashboard: React.FC = () => {
                 )}
             </div>
 
-            {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Revenue Trend */}
                 <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between mb-6">
                         <div>
@@ -276,8 +273,6 @@ const AnalystDashboard: React.FC = () => {
                         />
                     </div>
                 </div>
-
-                {/* Category Distribution */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                     <div className="mb-6">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -317,7 +312,6 @@ const AnalystDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white">
                     <div className="flex items-center justify-between">
@@ -327,7 +321,6 @@ const AnalystDashboard: React.FC = () => {
                                 {salesTrend.length > 0 ?  salesTrend[salesTrend.length - 1].orders : 0}
                             </p>
                         </div>
-                        <span className="text-4xl opacity-50">📦</span>
                     </div>
                 </div>
 
@@ -339,7 +332,6 @@ const AnalystDashboard: React.FC = () => {
                                 {salesTrend.length > 0 ?  formatCurrency(salesTrend[salesTrend.length - 1].revenue) : '$0'}
                             </p>
                         </div>
-                        <span className="text-4xl opacity-50">💵</span>
                     </div>
                 </div>
 
@@ -351,7 +343,6 @@ const AnalystDashboard: React.FC = () => {
                                 {categorySales.length > 0 ? categorySales[0].categoryName : 'N/A'}
                             </p>
                         </div>
-                        <span className="text-4xl opacity-50">🏆</span>
                     </div>
                 </div>
 
@@ -363,7 +354,6 @@ const AnalystDashboard: React.FC = () => {
                                 {salesTrend.length > 0 ? salesTrend[salesTrend.length - 1].items : 0}
                             </p>
                         </div>
-                        <span className="text-4xl opacity-50">🛒</span>
                     </div>
                 </div>
             </div>

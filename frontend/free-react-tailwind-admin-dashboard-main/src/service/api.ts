@@ -106,6 +106,8 @@ export interface ProductCreateRequest {
     imageUrl?: string;
     productLink?: string;
     categoryId: number;
+    stockQuantity?: number;
+
 }
 
 export interface ProductUpdateRequest {
@@ -115,6 +117,7 @@ export interface ProductUpdateRequest {
     imageUrl?: string;
     productLink?: string;
     categoryId?: number;
+    stockQuantity?: number;
 }
 
 export interface Category {
