@@ -1,4 +1,7 @@
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$MomentumDTO.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$MomentumBreakdown$MomentumBreakdownBuilder.class
 com\dashboard\entity\SellerRevenue.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO.class
 com\dashboard\repository\SellerProductRequestRepository.class
 com\dashboard\dto\response\CategoryStatsResponse.class
 com\dashboard\dto\response\CategoryResponse.class
@@ -6,6 +9,7 @@ com\dashboard\dto\response\ProductResponse.class
 com\dashboard\service\UserService.class
 com\dashboard\dto\response\DashboardResponse.class
 com\dashboard\controller\PublicController.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$MetricBreakdown.class
 com\dashboard\service\NotificationService.class
 com\dashboard\dto\response\PredictionResponseDTO$BestsellerPredictionDTO.class
 com\dashboard\entity\ProductReview$ProductReviewBuilder.class
@@ -39,24 +43,29 @@ com\dashboard\dto\request\LoginRequest$LoginRequestBuilder.class
 com\dashboard\dto\response\PredictionResponseDTO$RankingPredictionDTO$RankingPredictionDTOBuilder.class
 com\dashboard\service\AnalystService.class
 com\dashboard\controller\ProductController.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$SalesForecastDTO$SalesForecastDTOBuilder.class
 com\dashboard\service\DashboardService.class
 com\dashboard\dto\request\ForgotPasswordRequest$ForgotPasswordRequestBuilder.class
 com\dashboard\dto\response\PredictionResponseDTO$PricePredictionDTO.class
 com\dashboard\repository\NotificationRepository.class
 com\dashboard\dto\request\OrderRequest$OrderItemRequest$OrderItemRequestBuilder.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$HealthScoreDTO.class
 com\dashboard\entity\Prediction$PredictionBuilder.class
 com\dashboard\dto\request\StockUpdateRequest$StockUpdateRequestBuilder.class
 com\dashboard\controller\AuthController.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$SalesForecastDTO.class
 com\dashboard\dto\response\OrderResponse$OrderItemResponse$OrderItemResponseBuilder.class
 com\dashboard\dto\request\ReviewRequest$ReviewRequestBuilder.class
 com\dashboard\entity\SellerStock.class
 com\dashboard\dto\response\ApiResponse.class
 com\dashboard\controller\OrderController.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$WeeklySummary$WeeklySummaryBuilder.class
 com\dashboard\dto\response\PredictionResponseDTO.class
 com\dashboard\dto\response\PredictionResponseDTO$PredictionResponseDTOBuilder.class
 com\dashboard\service\ReviewService.class
 com\dashboard\dto\request\CreateOrderRequest$OrderItemRequest$OrderItemRequestBuilder.class
 com\dashboard\util\CsvHelper.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$Projection.class
 com\dashboard\dto\response\AuthResponse.class
 com\dashboard\dto\request\CreateOrderRequest$CreateOrderRequestBuilder.class
 com\dashboard\entity\SellerProductRequest$RequestStatus.class
@@ -69,6 +78,7 @@ com\dashboard\controller\AdminStockController$NotifySellerRequest.class
 com\dashboard\dto\response\SellerDashboardResponse$DailyRevenuePoint.class
 com\dashboard\repository\UserRepository.class
 com\dashboard\entity\Product.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$DailyForecast.class
 com\dashboard\exception\BadRequestException.class
 com\dashboard\controller\UserController.class
 com\dashboard\dto\request\SellerProfileUpdateRequest$SellerProfileUpdateRequestBuilder.class
@@ -84,6 +94,7 @@ com\dashboard\security\JwtAuthenticationFilter.class
 com\dashboard\dto\response\DashboardStatsResponse.class
 com\dashboard\dto\request\ReviewRequest.class
 com\dashboard\dto\request\ProductRequest.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$MomentumDTO$MomentumDTOBuilder.class
 com\dashboard\dto\request\OrderRequest.class
 com\dashboard\dto\response\NotificationResponse$NotificationResponseBuilder.class
 com\dashboard\dto\request\PredictionRequestDTO.class
@@ -94,6 +105,7 @@ com\dashboard\dto\request\StockUpdateRequest.class
 com\dashboard\service\SellerRevenueService.class
 com\dashboard\repository\SellerRevenueRepository.class
 com\dashboard\repository\ProductReviewRepository.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$WeeklySummary.class
 com\dashboard\dto\request\ProductApprovalRequest$ProductApprovalRequestBuilder.class
 com\dashboard\dto\request\SellerProfileUpdateRequest.class
 com\dashboard\dto\response\ProductResponse$ProductResponseBuilder.class
@@ -102,6 +114,7 @@ com\dashboard\security\JwtTokenProvider.class
 com\dashboard\dto\response\CategoryResponse$CategoryResponseBuilder.class
 com\dashboard\dto\request\CreateOrderRequest$OrderItemRequest.class
 com\dashboard\dto\request\ListFromStockRequest$ListFromStockRequestBuilder.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$MetricBreakdown$MetricBreakdownBuilder.class
 com\dashboard\dto\response\SellerStockResponse.class
 com\dashboard\dto\response\DashboardResponse$DashboardResponseBuilder.class
 com\dashboard\entity\User$UserBuilder.class
@@ -121,6 +134,9 @@ com\dashboard\exception\DuplicateResourceException.class
 com\dashboard\dto\request\ListFromStockRequest.class
 com\dashboard\dto\response\ApiResponse$ApiResponseBuilder.class
 com\dashboard\dto\response\PendingProductResponse$PendingProductResponseBuilder.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$AdvancedPredictionResponseDTOBuilder.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$HealthScoreDTO$HealthScoreDTOBuilder.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$Velocities$VelocitiesBuilder.class
 com\dashboard\dto\response\SellerReviewSummary$SellerReviewSummaryBuilder.class
 com\dashboard\entity\Notification$NotificationBuilder.class
 com\dashboard\config\CorsConfig.class
@@ -155,10 +171,12 @@ com\dashboard\repository\OrderRepository.class
 com\dashboard\DashboardApplication.class
 com\dashboard\service\OrderService.class
 com\dashboard\dto\request\SellerRegisterRequest$SellerRegisterRequestBuilder.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$Projection$ProjectionBuilder.class
 com\dashboard\dto\request\CreateOrderRequest.class
 com\dashboard\repository\CategoryRepository.class
 com\dashboard\dto\request\OrderRequest$OrderItemRequest.class
 com\dashboard\entity\User.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$MomentumBreakdown.class
 com\dashboard\controller\AdminDashboardController.class
 com\dashboard\dto\response\PredictionStatsDTO$PredictionStatsDTOBuilder.class
 com\dashboard\controller\ReviewController.class
@@ -176,6 +194,7 @@ com\dashboard\dto\request\UpdateProfileRequest.class
 com\dashboard\dto\response\AuthResponse$AuthResponseBuilder.class
 com\dashboard\entity\SellerRevenue$SellerRevenueBuilder.class
 com\dashboard\dto\request\RegisterRequest$RegisterRequestBuilder.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$Velocities.class
 com\dashboard\controller\ImportController.class
 com\dashboard\service\FlaskMLClientService.class
 com\dashboard\dto\response\SellerProfileResponse$SellerProfileResponseBuilder.class
@@ -188,3 +207,4 @@ com\dashboard\dto\response\OrderResponse.class
 com\dashboard\config\OpenApiConfig.class
 com\dashboard\dto\response\DashboardStatsResponse$DashboardStatsResponseBuilder.class
 com\dashboard\controller\SellerController.class
+com\dashboard\dto\response\AdvancedPredictionResponseDTO$DailyForecast$DailyForecastBuilder.class

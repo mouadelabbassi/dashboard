@@ -3,6 +3,7 @@ package com.dashboard.service;
 import com.dashboard.dto.request.PredictionRequestDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,11 +33,6 @@ public class FlaskMLClientService {
         this.objectMapper = new ObjectMapper();
     }
 
-    /**
-     * Vérifie si le microservice ML est disponible.
-     *
-     * @return true si le service est accessible
-     */
     public boolean isServiceHealthy() {
         try {
             ResponseEntity<String> response = restTemplate.getForEntity(
@@ -48,11 +44,6 @@ public class FlaskMLClientService {
         }
     }
 
-    /**
-     * Récupère le statut détaillé du microservice ML.
-     *
-     * @return Map contenant les informations de statut
-     */
     public Optional<Map<String, Object>> getServiceStatus() {
         try {
             ResponseEntity<String> response = restTemplate.getForEntity(
@@ -69,52 +60,21 @@ public class FlaskMLClientService {
         return Optional.empty();
     }
 
-    /**
-     * Effectue une prédiction de classement futur.
-     *
-     * @param request Données du produit
-     * @return Résultat de la prédiction
-     */
     public Optional<JsonNode> predictRanking(PredictionRequestDTO request) {
         return callPredictionEndpoint("/predict/ranking", request);
     }
 
-    /**
-     * Effectue une prédiction de probabilité bestseller.
-     *
-     * @param request Données du produit
-     * @return Résultat de la prédiction
-     */
     public Optional<JsonNode> predictBestseller(PredictionRequestDTO request) {
         return callPredictionEndpoint("/predict/bestseller", request);
     }
 
-    /**
-     * Effectue une recommandation de prix optimal.
-     *
-     * @param request Données du produit
-     * @return Résultat de la prédiction
-     */
     public Optional<JsonNode> predictPrice(PredictionRequestDTO request) {
         return callPredictionEndpoint("/predict/price", request);
     }
-
-    /**
-     * Effectue toutes les prédictions pour un produit.
-     *
-     * @param request Données du produit
-     * @return Résultat complet des prédictions
-     */
     public Optional<JsonNode> getFullPrediction(PredictionRequestDTO request) {
         return callPredictionEndpoint("/predict/full", request);
     }
 
-    /**
-     * Effectue des prédictions en lot pour plusieurs produits.
-     *
-     * @param requests Liste des données produits
-     * @return Résultats des prédictions
-     */
     public Optional<JsonNode> getBatchPredictions(List<PredictionRequestDTO> requests) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -140,11 +100,6 @@ public class FlaskMLClientService {
         return Optional.empty();
     }
 
-    /**
-     * Récupère les métriques d'entraînement des modèles.
-     *
-     * @return Métriques des modèles ML
-     */
     public Optional<JsonNode> getModelMetrics() {
         try {
             ResponseEntity<String> response = restTemplate.getForEntity(
@@ -159,9 +114,6 @@ public class FlaskMLClientService {
         return Optional.empty();
     }
 
-    /**
-     * Méthode utilitaire pour appeler les endpoints de prédiction.
-     */
     private Optional<JsonNode> callPredictionEndpoint(String endpoint, PredictionRequestDTO request) {
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -186,9 +138,6 @@ public class FlaskMLClientService {
         return Optional.empty();
     }
 
-    /**
-     * Convertit un DTO en Map pour la sérialisation JSON.
-     */
     private Map<String, Object> convertToMap(PredictionRequestDTO request) {
         Map<String, Object> map = new HashMap<>();
         map.put("product_id", request.getProductId());
@@ -204,5 +153,60 @@ public class FlaskMLClientService {
         map.put("category", request.getCategory());
         map.put("current_ranking", request.getCurrentRanking());
         return map;
+    }
+
+    public Optional<JsonNode> getHealthScore(PredictionRequestDTO request) {
+        return callPredictionEndpoint("/predict/health-score", request);
+    }
+
+    public Optional<JsonNode> getSalesForecast(PredictionRequestDTO request, int days) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> body = convertToMap(request);
+            body.put("forecast_days", days);
+
+            HttpEntity<String> entity = new HttpEntity<>(
+                    objectMapper.writeValueAsString(body), headers);
+
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                    flaskServiceUrl + "/predict/forecast", entity, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return Optional.of(objectMapper.readTree(response.getBody()));
+            }
+        } catch (Exception e) {
+            logger.error("Erreur lors de la prévision des ventes: {}", e.getMessage());
+        }
+        return Optional.empty();
+    }
+
+    public Optional<JsonNode> getMomentumAnalysis(PredictionRequestDTO request) {
+        return callPredictionEndpoint("/predict/momentum", request);
+    }
+
+    public Optional<JsonNode> getFullAdvancedAnalysis(PredictionRequestDTO request) {
+        try {
+            // Call all three endpoints and combine
+            Optional<JsonNode> health = getHealthScore(request);
+            Optional<JsonNode> forecast = getSalesForecast(request, 30);
+            Optional<JsonNode> momentum = getMomentumAnalysis(request);
+
+            if (health.isPresent() || forecast.isPresent() || momentum.isPresent()) {
+                ObjectNode combined = objectMapper.createObjectNode();
+                combined.put("product_id", request.getProductId());
+                combined.put("product_name", request.getProductName());
+
+                health.ifPresent(h -> combined.set("health_score", h.get("data")));
+                forecast.ifPresent(f -> combined.set("sales_forecast", f.get("data")));
+                momentum.ifPresent(m -> combined.set("momentum", m.get("data")));
+
+                return Optional.of(combined);
+            }
+        } catch (Exception e) {
+            logger.error("Erreur lors de l'analyse avancée: {}", e.getMessage());
+        }
+        return Optional.empty();
     }
 }
