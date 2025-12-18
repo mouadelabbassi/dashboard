@@ -4,222 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/LICENSE.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/eslint.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/package-lock.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/postcss.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/favicon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/error/404-dark.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/error/404.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/error/500-dark.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/error/500.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/error/503-dark.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/error/503.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/error/maintenance-dark.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/error/maintenance.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/error/success-dark.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/error/success.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/favicon.ico" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/logo/MouadVision.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/logo/logo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/shape/grid-01.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/public/images/user/owner.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/App.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ExportAdvancedPDFButton.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ExportPDFButton.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/UserProfile/UserAddressCard.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/UserProfile/UserInfoCard.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/UserProfile/UserMetaCard.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/admin/AdminSidebar.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/admin/CsvUploader.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/admin/NotificationsPanel.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/auth/ForgotPasswordForm.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/auth/ProtectedRoute.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/auth/SignInForm.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/auth/SignUpForm.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/cart/CartIcon.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/common/ChartTab.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/common/ComponentCard.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/common/GridShape.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/common/PageBreadCrumb.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/common/PageMeta.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/common/ScrollToTop.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/common/ThemeToggleButton.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/common/ThemeTogglerTwo.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/common/Toast.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ecommerce/BestsellerCards.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ecommerce/CategoryDistributionChart.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ecommerce/CategoryProductsChart.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ecommerce/EcommerceMetrics.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ecommerce/PriceDistributionChart.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ecommerce/RatingDistributionChart.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ecommerce/ReviewsCorrelationChart.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ecommerce/TopCategoriesRevenueChart.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ecommerce/TopProductTable.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ecommerce/TopSellersChart.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/form/FileInput.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/form/Form.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/form/Label.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/form/input/Checkbox.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/form/input/InputField.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/header/Header.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/header/NotificationDropdown.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/header/UserDropdown.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/products/ProductModal.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/seller/PredictionNotifications.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/seller/SellerSidebar.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ui/button/Button.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ui/dropdown/Dropdown.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ui/dropdown/DropdownItem.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ui/modal/index.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/components/ui/table/index.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/context/AuthContext.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/context/CartContext.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/context/SidebarContext.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/context/ThemeContext.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/hooks/useDashboard.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/hooks/useGoBack.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/hooks/useModal.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/hooks/useProduct.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/alert-hexa.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/alert.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/angle-down.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/angle-left.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/angle-right.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/angle-up.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/arrow-down.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/arrow-right.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/arrow-up.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/audio.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/bolt.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/box-cube.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/box-line.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/box.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/calendar.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/calender-line.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/chat.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/check-circle.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/check-line.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/chevron-down.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/chevron-left.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/chevron-up.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/close-line.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/close.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/copy.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/docs.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/dollar-line.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/download.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/envelope.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/eye-close.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/eye.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/file.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/folder.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/grid.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/group.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/horizontal-dots.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/index.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/info-error.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/info-hexa.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/info.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/list.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/lock.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/mail-line.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/moredot.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/page.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/paper-plane.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/pencil.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/pie-chart.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/plug-in.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/plus.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/shooting-star.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/table.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/task-icon.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/time.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/trash.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/user-circle.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/user-line.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/icons/videos.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/index.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/layout/AnalystLayout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/layout/AppHeader.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/layout/AppLayout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/layout/AppSidebar.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/layout/Backdrop.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/layout/BuyerLayout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/layout/SellerLayout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/layout/SidebarWidget.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/main.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Admin/AdminOrdersPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Admin/AdminProducts.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Admin/AdminStockManagement.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Admin/AdminUsers.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Admin/ProductApprovals.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Admin/SellerManagement.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Analyst/Advancedpredictioncomponents.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Analyst/AnalystDashboard.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Analyst/CategoryAnalysis.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Analyst/PredictiveDashboard.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Analyst/ProductAnalytics.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Analyst/Reports.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Analyst/SalesAnalytics.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Analyst/SellerAnalytics.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/AuthPages/AuthPageLayout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/AuthPages/ForgotPassword.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/AuthPages/SignIn.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/AuthPages/SignUp.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Buyer/BuyerProfilePage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Buyer/CartPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Buyer/CheckoutPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Buyer/MyReviewsPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Buyer/OrderHistoryPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Buyer/ProductDetailPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Buyer/ShopPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Dashboard/Home.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Dashboard/ProductsPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/NotificationsPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/OtherPage/NotFound.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Public/AboutPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Public/LandingPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Public/PublicShopPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Seller/SellerDashboard.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Seller/SellerOrders.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Seller/SellerProductForm.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Seller/SellerProducts.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Seller/SellerProfile.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Seller/SellerReviews.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/Seller/SellerStockManagement.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/pages/UserProfiles.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/adminService.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/advancedPdfExportService.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/analystService.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/api.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/authService.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/notification.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/notificationService.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/pdfExportService.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/predictionService.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/reportService.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/review.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/service/sellerService.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/svg.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/types/admin.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/types/notification.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/types/product.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/types/seller.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/src/vite-env.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/tsconfig.app.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/tsconfig.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/tsconfig.node.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/free-react-tailwind-admin-dashboard-main/vite.config.ts" beforeDir="false" />
-    </list>
+    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 28" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -307,8 +92,17 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1766090437018</updated>
-      <workItem from="1766090440687" duration="1592000" />
+      <workItem from="1766090440687" duration="1972000" />
     </task>
+    <task id="LOCAL-00001" summary="commit 28">
+      <option name="closed" value="true" />
+      <created>1766092266011</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1766092266011</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -324,5 +118,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="commit 28" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit 28" />
   </component>
 </project>
