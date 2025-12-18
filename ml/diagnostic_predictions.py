@@ -1,10 +1,3 @@
-"""
-Script de Diagnostic Complet - Analyse Prédictive
-Identifie et résout les problèmes de prédictions à zéro
-
-Usage: python diagnostic_predictions.py
-"""
-
 import os
 import json
 import joblib

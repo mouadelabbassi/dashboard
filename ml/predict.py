@@ -1,8 +1,3 @@
-"""
-Module de prédiction avancé
-Plateforme de Gestion et Analyse de Ventes - Mini Projet JEE 2025
-"""
-
 import os
 import json
 import joblib

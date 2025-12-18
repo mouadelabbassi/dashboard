@@ -1,8 +1,3 @@
-"""
-Application Flask - Microservice ML
-Plateforme MouadVision - Mini Projet JEE 2025
-"""
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from functools import wraps
