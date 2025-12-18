@@ -5,6 +5,10 @@ import traceback
 
 from config import Config
 from predict import prediction_service
+from advanced_predictions import AdvancedPredictionService
+
+# Instanciation du service de prédictions avancées
+advanced_service = AdvancedPredictionService()
 
 # Initialisation Flask
 app = Flask(__name__)

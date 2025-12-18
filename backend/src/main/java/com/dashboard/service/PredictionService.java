@@ -205,6 +205,70 @@ public class PredictionService {
     }
 
     /**
+     * Retourne le nombre total de prédictions uniques (dernières par produit).
+     */
+    public long getPredictionCount() {
+        return predictionRepository.findLatestPredictionsForAllProducts().size();
+    }
+
+    /**
+     * Génère des prédictions de manière synchrone avec limite.
+     */
+    @Transactional
+    public Map<String, Object> generatePredictionsSync(int limit) {
+        log.info("Génération synchrone des prédictions pour {} produits max", limit);
+
+        List<Product> products = productRepository.findAll();
+
+        // Filtrer les produits sans prédiction récente (dernières 24h)
+        Set<String> existingPredictions = predictionRepository.findLatestPredictionsForAllProducts()
+                .stream()
+                .filter(p -> p.getGeneratedAt() != null &&
+                        p.getGeneratedAt().isAfter(LocalDateTime.now().minusHours(24)))
+                .map(Prediction::getProductId)
+                .collect(Collectors.toSet());
+
+        List<Product> productsToProcess = products.stream()
+                .filter(p -> !existingPredictions.contains(p.getAsin()))
+                .limit(limit)
+                .collect(Collectors.toList());
+
+        int successCount = 0;
+        int failureCount = 0;
+        List<String> errors = new ArrayList<>();
+
+        for (Product product : productsToProcess) {
+            try {
+                Optional<PredictionResponseDTO> result = generatePredictionForProduct(product.getAsin());
+                if (result.isPresent()) {
+                    successCount++;
+                } else {
+                    failureCount++;
+                    errors.add("Échec pour " + product.getAsin());
+                }
+            } catch (Exception e) {
+                log.error("Erreur pour le produit {}: {}", product.getAsin(), e.getMessage());
+                failureCount++;
+                errors.add(product.getAsin() + ": " + e.getMessage());
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("processed", successCount + failureCount);
+        result.put("successCount", successCount);
+        result.put("failureCount", failureCount);
+        result.put("totalProducts", products.size());
+        result.put("remainingProducts", Math.max(0, products.size() - existingPredictions.size() - successCount));
+        if (!errors.isEmpty() && errors.size() <= 10) {
+            result.put("errors", errors);
+        }
+
+        log.info("Génération synchrone terminée: {} succès, {} échecs", successCount, failureCount);
+        return result;
+    }
+
+    /**
      * Tâche planifiée pour générer des prédictions quotidiennes.
      */
     @Scheduled(cron = "0 0 2 * * ? ")

@@ -147,6 +147,39 @@ export const generateAllPredictions = async (): Promise<{ message: string; statu
 };
 
 /**
+ * Vérifie le nombre de prédictions et si une génération est nécessaire
+ */
+export const getPredictionCount = async (): Promise<{
+    predictionCount: number;
+    productCount: number;
+    needsGeneration: boolean;
+    coveragePercent: number;
+}> => {
+    const response = await axios.get(`${API_BASE_URL}/count`, getAuthHeaders());
+    return response.data;
+};
+
+/**
+ * Génère des prédictions de manière synchrone (avec limite)
+ */
+export const generatePredictionsSync = async (limit: number = 50): Promise<{
+    success: boolean;
+    processed: number;
+    successCount: number;
+    failureCount: number;
+    totalProducts: number;
+    remainingProducts: number;
+    errors?: string[];
+}> => {
+    const response = await axios.post(
+        `${API_BASE_URL}/generate/sync?limit=${limit}`,
+        {},
+        getAuthHeaders()
+    );
+    return response.data;
+};
+
+/**
  * Récupère la dernière prédiction pour un produit
  */
 export const getProductPrediction = async (productId: string): Promise<ProductPrediction> => {

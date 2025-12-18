@@ -24,7 +24,7 @@ interface PredictionNotificationsProps {
 const PredictionNotifications: React.FC<PredictionNotificationsProps> = ({ sellerId }) => {
     const [alerts, setAlerts] = useState<ProductPrediction[]>([]);
     const [loading, setLoading] = useState(true);
-    const [expanded, setExpanded] = useState<number | null>(null);
+    const [expanded, setExpanded] = useState<string | null>(null);
 
     useEffect(() => {
         loadAlerts();

@@ -14,9 +14,10 @@ import {
     getAllPredictions,
     getPredictionStats,
     getPotentialBestsellers,
-    generateAllPredictions,
     checkPredictionServiceHealth,
     getModelMetrics,
+    getPredictionCount,
+    generatePredictionsSync,
     ProductPrediction,
     PredictionStats,
     ModelMetrics,
@@ -248,17 +249,25 @@ const PredictiveDashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'overview' | 'rankings' | 'bestsellers' | 'prices' | 'models'>('overview');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [refreshing, setRefreshing] = useState(false);
+    const [showInitialGenModal, setShowInitialGenModal] = useState(false);
+    const [generationProgress, setGenerationProgress] = useState<{
+        processed: number;
+        total: number;
+        success: number;
+        failures: number;
+    } | null>(null);
 
     // Chargement des données
     const loadDashboardData = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const [predictionsData, statsData, bestsellersData, health] = await Promise.all([
+            const [predictionsData, statsData, bestsellersData, health, countData] = await Promise.all([
                 getAllPredictions().catch(() => []),
                 getPredictionStats().catch(() => null),
                 getPotentialBestsellers().catch(() => []),
-                checkPredictionServiceHealth().catch(() => ({ springBootService:'UP', mlServiceAvailable:false }))
+                checkPredictionServiceHealth().catch(() => ({ springBootService:'UP', mlServiceAvailable:false })),
+                getPredictionCount().catch(() => ({ predictionCount: 0, productCount: 0, needsGeneration: false, coveragePercent: 0 }))
             ]);
 
             setPredictions(predictionsData);
@@ -267,9 +276,14 @@ const PredictiveDashboard: React.FC = () => {
             setHealthStatus(health);
 
             // Charger les métriques seulement si le service ML est disponible
-            if (health?. mlServiceAvailable) {
+            if (health?.mlServiceAvailable) {
                 const metrics = await getModelMetrics().catch(() => null);
                 setModelMetrics(metrics);
+
+                // Vérifier si des prédictions doivent être générées
+                if (countData.needsGeneration && countData.productCount > 0) {
+                    setShowInitialGenModal(true);
+                }
             }
         } catch (err: any) {
             console.error('Erreur:', err);
@@ -278,6 +292,55 @@ const PredictiveDashboard: React.FC = () => {
             setLoading(false);
         }
     }, []);
+
+    // Génération automatique par lots
+    const handleAutoGenerate = async () => {
+        if (!healthStatus?.mlServiceAvailable) {
+            alert('Le service ML n\'est pas disponible.');
+            return;
+        }
+
+        setShowInitialGenModal(false);
+        setGenerating(true);
+        setGenerationProgress({ processed: 0, total: 0, success: 0, failures: 0 });
+
+        try {
+            let remaining = 999;
+            let totalProcessed = 0;
+            let totalSuccess = 0;
+            let totalFailures = 0;
+
+            // Générer par lots de 50 jusqu'à ce qu'il n'y en ait plus
+            while (remaining > 0) {
+                const result = await generatePredictionsSync(50);
+                totalProcessed += result.processed;
+                totalSuccess += result.successCount;
+                totalFailures += result.failureCount;
+                remaining = result.remainingProducts;
+
+                setGenerationProgress({
+                    processed: totalProcessed,
+                    total: result.totalProducts,
+                    success: totalSuccess,
+                    failures: totalFailures
+                });
+
+                // Petite pause entre les lots pour éviter la surcharge
+                if (remaining > 0) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+            }
+
+            // Recharger les données après génération
+            await loadDashboardData();
+        } catch (err: any) {
+            console.error('Erreur génération:', err);
+            setError(err.response?.data?.message || 'Erreur lors de la génération');
+        } finally {
+            setGenerating(false);
+            setGenerationProgress(null);
+        }
+    };
 
     useEffect(() => {
         loadDashboardData();
@@ -290,21 +353,13 @@ const PredictiveDashboard: React.FC = () => {
     };
 
     const handleGenerateAll = async () => {
-        if (!healthStatus?. mlServiceAvailable) {
+        if (!healthStatus?.mlServiceAvailable) {
             alert('Le service ML n\'est pas disponible. Veuillez démarrer le microservice Flask.');
             return;
         }
 
-        setGenerating(true);
-        try {
-            await generateAllPredictions();
-            alert('✅ Génération des prédictions démarrée.  Les résultats seront disponibles dans quelques minutes.');
-            setTimeout(loadDashboardData, 5000);
-        } catch (err: any) {
-            alert('❌ Erreur: ' + (err.response?.data?.message || err.message));
-        } finally {
-            setGenerating(false);
-        }
+        // Utiliser la génération avec progression
+        await handleAutoGenerate();
     };
 
     // Filtrage
@@ -415,6 +470,66 @@ const PredictiveDashboard: React.FC = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Initial Generation Modal */}
+            {showInitialGenModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+                        <div className="text-center">
+                            <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <ChartIcon />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                Bienvenue dans l'Analyse Prédictive
+                            </h3>
+                            <p className="text-gray-600 dark:text-gray-400 mb-6">
+                                Aucune prédiction n'a encore été générée. Voulez-vous lancer l'analyse ML sur tous vos produits ?
+                            </p>
+                            <div className="flex gap-3 justify-center">
+                                <button
+                                    onClick={() => setShowInitialGenModal(false)}
+                                    className="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                                >
+                                    Plus tard
+                                </button>
+                                <button
+                                    onClick={handleAutoGenerate}
+                                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+                                >
+                                    Générer maintenant
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Generation Progress */}
+            {generating && generationProgress && (
+                <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center gap-4 mb-4">
+                        <div className="w-10 h-10 border-4 border-blue-200 dark:border-blue-800 rounded-full animate-spin border-t-blue-500"></div>
+                        <div>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">Génération des prédictions en cours...</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Analyse ML de {generationProgress.processed} / {generationProgress.total} produits
+                            </p>
+                        </div>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden mb-2">
+                        <div
+                            className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-300"
+                            style={{ width: `${generationProgress.total > 0 ? (generationProgress.processed / generationProgress.total) * 100 : 0}%` }}
+                        />
+                    </div>
+                    <div className="flex justify-between text-sm">
+                        <span className="text-green-600 dark:text-green-400">{generationProgress.success} réussies</span>
+                        {generationProgress.failures > 0 && (
+                            <span className="text-red-600 dark:text-red-400">{generationProgress.failures} échecs</span>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Error Alert */}
             {error && (
