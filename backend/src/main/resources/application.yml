@@ -53,28 +53,9 @@ cors:
   allow-credentials: true
   max-age: 3600
 
-
-ml:
-  service:
-    enabled: true
-    url: http://localhost:8000
-    connect-timeout: 5000
-    read-timeout: 30000
-    retry:
-      max-attempts: 3
-      delay: 1000
-    endpoints:
-      health:  /health
-      predictions: /api/predictions
-      training: /api/training
-      dashboard: /api/predictions/dashboard
-      ranking: /api/predictions/ranking
-      bestsellers: /api/predictions/bestsellers/potential
-      price-optimal: /api/predictions/price/optimal
-      price-bulk: /api/predictions/price/bulk-analysis
-      train-all: /api/training/train-all
-      capture-stats: /api/training/data/capture
-
+flask:
+  ml:
+    url: http://localhost:5001
 # CSV Import Configuration
 csv:
   import:

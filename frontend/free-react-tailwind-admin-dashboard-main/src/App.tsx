@@ -30,6 +30,9 @@ import Reports from './pages/Analyst/Reports';
 import SellerStockManagement from './pages/Seller/SellerStockManagement';
 import AdminStockManagement from './pages/Admin/AdminStockManagement';
 
+import PredictiveDashboard from './pages/Analyst/PredictiveDashboard';
+
+
 // Admin Pages
 import Home from './pages/Dashboard/Home';
 import ProductsPage from './pages/Dashboard/ProductsPage';
@@ -121,7 +124,9 @@ function App() {
                             <Route path="sellers" element={<SellerAnalytics />} />
                             <Route path="categories" element={<CategoryAnalysis />} />
                             <Route path="reports" element={<Reports />} />
+                            <Route path="predictions" element={<PredictiveDashboard />} />
                             <Route path="profile" element={<UserProfiles />} />
+
                         </Route>
 
                         {/* Admin Routes */}
@@ -141,6 +146,7 @@ function App() {
                             <Route path="stock" element={<AdminStockManagement />} />
                             <Route path="profile" element={<UserProfiles />} />
                             <Route path="sellers" element={<SellerManagement />} />
+                            <Route path="predictions" element={<PredictiveDashboard />} />
                         </Route>
 
                         {/* Seller Routes */}

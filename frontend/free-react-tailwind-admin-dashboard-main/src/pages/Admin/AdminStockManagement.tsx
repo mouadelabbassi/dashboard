@@ -3,32 +3,32 @@ import axios from 'axios';
 import Toast from '../../components/common/Toast';
 
 interface ProductStock {
-    asin: string;
-    productName: string;
-    imageUrl: string;
-    price: number;
-    stockQuantity: number;
-    categoryName: string;
-    sellerName: string;
-    sellerId: number | null;
-    sellerEmail: string | null;
-    isMouadVisionProduct: boolean;
-    canAdminEdit: boolean;
-    salesCount: number;
-    stockStatus: 'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK';
+    asin:string;
+    productName:string;
+    imageUrl:string;
+    price:number;
+    stockQuantity:number;
+    categoryName:string;
+    sellerName:string;
+    sellerId:number | null;
+    sellerEmail:string | null;
+    isMouadVisionProduct:boolean;
+    canAdminEdit:boolean;
+    salesCount:number;
+    stockStatus:'IN_STOCK' | 'LOW_STOCK' | 'OUT_OF_STOCK';
 }
 
 interface StockDashboard {
-    totalProducts: number;
-    mouadVisionProducts: number;
-    sellerProducts: number;
-    lowStockCount: number;
-    outOfStockCount: number;
-    healthyStockCount: number;
-    totalUnitsInStock: number;
+    totalProducts:number;
+    mouadVisionProducts:number;
+    sellerProducts:number;
+    lowStockCount:number;
+    outOfStockCount:number;
+    healthyStockCount:number;
+    totalUnitsInStock:number;
 }
 
-const AdminStockManagement: React.FC = () => {
+const AdminStockManagement:React.FC = () => {
     const [products, setProducts] = useState<ProductStock[]>([]);
     const [dashboard, setDashboard] = useState<StockDashboard | null>(null);
     const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ const AdminStockManagement: React.FC = () => {
     const [totalElements, setTotalElements] = useState(0);
     const [filter, setFilter] = useState<string>('all');
     const [ownerFilter, setOwnerFilter] = useState<string>('all');
-    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const [toast, setToast] = useState<{ message:string; type:'success' | 'error' } | null>(null);
 
     const [editingProduct, setEditingProduct] = useState<ProductStock | null>(null);
     const [newQuantity, setNewQuantity] = useState<number>(0);
@@ -54,7 +54,7 @@ const AdminStockManagement: React.FC = () => {
         try {
             const token = localStorage.getItem('token');
             const response = await axios.get('http://localhost:8080/api/admin/stock/dashboard', {
-                headers: { Authorization: `Bearer ${token}` }
+                headers:{ Authorization:`Bearer ${token}` }
             });
             setDashboard(response.data?.data);
         } catch (error) {
@@ -76,7 +76,7 @@ const AdminStockManagement: React.FC = () => {
             }
 
             const response = await axios.get(url, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers:{ Authorization:`Bearer ${token}` }
             });
 
             const data = response.data?.data;
@@ -85,7 +85,7 @@ const AdminStockManagement: React.FC = () => {
             setTotalElements(data?.totalElements || 0);
         } catch (error) {
             console.error('Error fetching products:', error);
-            setToast({ message: 'Failed to load products', type: 'error' });
+            setToast({ message:'Failed to load products', type:'error' });
         } finally {
             setLoading(false);
         }
@@ -99,19 +99,19 @@ const AdminStockManagement: React.FC = () => {
         fetchProducts();
     }, [fetchProducts]);
 
-    const handleFilterChange = (newFilter: string) => {
+    const handleFilterChange = (newFilter:string) => {
         setFilter(newFilter);
         setCurrentPage(0);
     };
 
-    const handleOwnerFilterChange = (newOwner: string) => {
+    const handleOwnerFilterChange = (newOwner:string) => {
         setOwnerFilter(newOwner);
         setCurrentPage(0);
     };
 
-    const openEditModal = (product: ProductStock) => {
+    const openEditModal = (product:ProductStock) => {
         if (! product.canAdminEdit) {
-            setToast({ message: 'Cannot edit seller products. Send a notification instead.', type: 'error' });
+            setToast({ message:'Cannot edit seller products. Send a notification instead.', type:'error' });
             return;
         }
         setEditingProduct(product);
@@ -119,7 +119,7 @@ const AdminStockManagement: React.FC = () => {
         setShowEditModal(true);
     };
 
-    const openNotifyModal = (product: ProductStock) => {
+    const openNotifyModal = (product:ProductStock) => {
         setNotifyingProduct(product);
         setNotifyMessage('');
         setShowNotifyModal(true);
@@ -132,44 +132,22 @@ const AdminStockManagement: React.FC = () => {
             const token = localStorage.getItem('token');
             await axios.put(
                 `http://localhost:8080/api/admin/stock/products/${editingProduct.asin}`,
-                { quantity: newQuantity },
-                { headers: { Authorization: `Bearer ${token}` } }
+                { quantity:newQuantity },
+                { headers:{ Authorization:`Bearer ${token}` } }
             );
 
-            setToast({ message: 'Stock updated successfully! ', type: 'success' });
+            setToast({ message:'Stock updated successfully! ', type:'success' });
             setShowEditModal(false);
             setEditingProduct(null);
             fetchProducts();
             fetchDashboard();
-        } catch (error: any) {
+        } catch (error:any) {
             setToast({
-                message: error.response?.data?.message || 'Failed to update stock',
-                type: 'error'
+                message:error.response?.data?.message || 'Failed to update stock',
+                type:'error'
             });
         }
     };
-
-    const handleQuickAdd = async (product: ProductStock, amount: number) => {
-        if (!product.canAdminEdit) {
-            setToast({ message: 'Cannot edit seller products.Send a notification instead.', type: 'error' });
-            return;
-        }
-
-        try {
-            const token = localStorage.getItem('token');
-            await axios.put(
-                `http://localhost:8080/api/admin/stock/products/${product.asin}/add? quantity=${amount}`,
-                {},
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setToast({ message: `Added ${amount} units! `, type: 'success' });
-            fetchProducts();
-            fetchDashboard();
-        } catch (error: any) {
-            setToast({ message: error.response?.data?.message || 'Failed to add stock', type: 'error' });
-        }
-    };
-
     const handleNotifySeller = async () => {
         if (!notifyingProduct) return;
 
@@ -177,17 +155,17 @@ const AdminStockManagement: React.FC = () => {
             const token = localStorage.getItem('token');
             await axios.post(
                 `http://localhost:8080/api/admin/stock/products/${notifyingProduct.asin}/notify-seller`,
-                { message: notifyMessage || null },
-                { headers: { Authorization: `Bearer ${token}` } }
+                { message:notifyMessage || null },
+                { headers:{ Authorization:`Bearer ${token}` } }
             );
 
-            setToast({ message: `Notification sent to ${notifyingProduct.sellerName}!`, type: 'success' });
+            setToast({ message:`Notification sent to ${notifyingProduct.sellerName}!`, type:'success' });
             setShowNotifyModal(false);
             setNotifyingProduct(null);
-        } catch (error: any) {
+        } catch (error:any) {
             setToast({
-                message: error.response?.data?.message || 'Failed to send notification',
-                type: 'error'
+                message:error.response?.data?.message || 'Failed to send notification',
+                type:'error'
             });
         }
     };
@@ -200,20 +178,20 @@ const AdminStockManagement: React.FC = () => {
             const response = await axios.post(
                 'http://localhost:8080/api/admin/stock/notify-low-stock-sellers',
                 {},
-                { headers: { Authorization: `Bearer ${token}` } }
+                { headers:{ Authorization:`Bearer ${token}` } }
             );
 
             const data = response.data?.data;
             setToast({
-                message: `Notified ${data?.sellersNotified} sellers about ${data?.productsAffected} products! `,
-                type: 'success'
+                message:`Notified ${data?.sellersNotified} sellers about ${data?.productsAffected} products! `,
+                type:'success'
             });
-        } catch (error: any) {
-            setToast({ message: 'Failed to send notifications', type: 'error' });
+        } catch (error:any) {
+            setToast({ message:'Failed to send notifications', type:'error' });
         }
     };
 
-    const getStatusBadge = (status: string) => {
+    const getStatusBadge = (status:string) => {
         switch (status) {
             case 'OUT_OF_STOCK':
                 return (
@@ -299,17 +277,17 @@ const AdminStockManagement: React.FC = () => {
                 <div className="flex flex-wrap gap-2">
                     <span className="text-sm text-gray-500 dark:text-gray-400 self-center mr-2">Owner:</span>
                     {[
-                        { value: 'all', label: 'All Products' },
-                        { value: 'mouadvision', label: '🏢 MouadVision' },
-                        { value: 'sellers', label: '👤 Sellers' }
+                        { value:'all', label:'All Products' },
+                        { value:'mouadvision', label:'🏢 MouadVision' },
+                        { value:'sellers', label:'👤 Sellers' }
                     ].map((o) => (
                         <button
                             key={o.value}
                             onClick={() => handleOwnerFilterChange(o.value)}
                             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                                 ownerFilter === o.value
-                                    ? 'bg-purple-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
+                                    ? 'bg-dark-600 text-white'
+                                    :'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
                             }`}
                         >
                             {o.label}
@@ -321,10 +299,10 @@ const AdminStockManagement: React.FC = () => {
                 <div className="flex flex-wrap gap-2">
                     <span className="text-sm text-gray-500 dark:text-gray-400 self-center mr-2">Status:</span>
                     {[
-                        { value: 'all', label: 'All', color: 'blue' },
-                        { value: 'healthy', label: '✓ In Stock', color: 'green' },
-                        { value: 'low', label: '⚠ Low', color: 'yellow' },
-                        { value: 'out', label: '✕ Out', color: 'red' }
+                        { value:'all', label:'All', color:'blue' },
+                        { value:'healthy', label:'✓ In Stock', color:'green' },
+                        { value:'low', label:'⚠ Low', color:'yellow' },
+                        { value:'out', label:'✕ Out', color:'red' }
                     ].map((f) => (
                         <button
                             key={f.value}
@@ -332,10 +310,10 @@ const AdminStockManagement: React.FC = () => {
                             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                                 filter === f.value
                                     ? f.value === 'all' ? 'bg-blue-600 text-white'
-                                        : f.value === 'healthy' ? 'bg-green-600 text-white'
-                                            : f.value === 'low' ? 'bg-yellow-500 text-white'
-                                                : 'bg-red-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
+                                        :f.value === 'healthy' ? 'bg-green-600 text-white'
+                                            :f.value === 'low' ? 'bg-yellow-500 text-white'
+                                                :'bg-red-600 text-white'
+                                    :'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
                             }`}
                         >
                             {f.label}
@@ -356,11 +334,11 @@ const AdminStockManagement: React.FC = () => {
                 <div className="flex justify-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                 </div>
-            ) : products.length === 0 ? (
+            ) :products.length === 0 ? (
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-12 text-center">
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white">No products found</h3>
                 </div>
-            ) : (
+            ) :(
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full">
@@ -393,10 +371,10 @@ const AdminStockManagement: React.FC = () => {
                                     </td>
                                     <td className="px-4 py-3">
                                         {product.isMouadVisionProduct ? (
-                                            <span className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 rounded text-xs font-medium">
+                                            <span className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300 rounded text-xs font-medium">
                                                     🏢 MouadVision
                                                 </span>
-                                        ) : (
+                                        ) :(
                                             <span className="inline-flex items-center px-2 py-1 bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300 rounded text-xs font-medium">
                                                     👤 {product.sellerName}
                                                 </span>
@@ -405,8 +383,8 @@ const AdminStockManagement: React.FC = () => {
                                     <td className="px-4 py-3 text-center">
                                             <span className={`text-lg font-bold ${
                                                 product.stockQuantity === 0 ? 'text-red-600'
-                                                    : product.stockQuantity < 10 ? 'text-yellow-600'
-                                                        : 'text-green-600'
+                                                    :product.stockQuantity < 10 ? 'text-yellow-600'
+                                                        :'text-green-600'
                                             }`}>
                                                 {product.stockQuantity}
                                             </span>
@@ -419,25 +397,13 @@ const AdminStockManagement: React.FC = () => {
                                             {product.canAdminEdit ? (
                                                 <>
                                                     <button
-                                                        onClick={() => handleQuickAdd(product, 10)}
-                                                        className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 rounded text-xs font-medium hover:bg-green-200"
-                                                    >
-                                                        +10
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleQuickAdd(product, 50)}
-                                                        className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300 rounded text-xs font-medium hover:bg-green-200"
-                                                    >
-                                                        +50
-                                                    </button>
-                                                    <button
                                                         onClick={() => openEditModal(product)}
                                                         className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-medium hover:bg-blue-700"
                                                     >
                                                         Edit
                                                     </button>
                                                 </>
-                                            ) : (
+                                            ) :(
                                                 <button
                                                     onClick={() => openNotifyModal(product)}
                                                     className="px-3 py-1 bg-orange-500 text-white rounded text-xs font-medium hover:bg-orange-600 flex items-center gap-1"
@@ -494,7 +460,7 @@ const AdminStockManagement: React.FC = () => {
                             <img src={editingProduct.imageUrl || '/placeholder-product.png'} alt="" className="w-14 h-14 rounded-lg object-cover" />
                             <div>
                                 <p className="font-medium text-gray-900 dark:text-white text-sm line-clamp-2">{editingProduct.productName}</p>
-                                <p className="text-xs text-gray-500">Current: {editingProduct.stockQuantity}</p>
+                                <p className="text-xs text-gray-500">Current:{editingProduct.stockQuantity}</p>
                             </div>
                         </div>
 
@@ -515,7 +481,7 @@ const AdminStockManagement: React.FC = () => {
                                     <button
                                         key={qty}
                                         onClick={() => setNewQuantity(qty)}
-                                        className={`px-3 py-1 rounded-lg text-sm ${newQuantity === qty ?  'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-700'}`}
+                                        className={`px-3 py-1 rounded-lg text-sm ${newQuantity === qty ?  'bg-blue-600 text-white' :'bg-gray-100 dark:bg-gray-700'}`}
                                     >
                                         {qty}
                                     </button>
@@ -543,10 +509,10 @@ const AdminStockManagement: React.FC = () => {
                         <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <p className="text-sm font-medium text-gray-900 dark:text-white">{notifyingProduct.productName}</p>
                             <p className="text-xs text-gray-500 mt-1">
-                                Seller: <span className="font-medium">{notifyingProduct.sellerName}</span>
+                                Seller:<span className="font-medium">{notifyingProduct.sellerName}</span>
                             </p>
                             <p className="text-xs text-gray-500">
-                                Current Stock: <span className={`font-bold ${notifyingProduct.stockQuantity === 0 ? 'text-red-600' : 'text-yellow-600'}`}>
+                                Current Stock:<span className={`font-bold ${notifyingProduct.stockQuantity === 0 ? 'text-red-600' :'text-yellow-600'}`}>
                                     {notifyingProduct.stockQuantity}
                                 </span>
                             </p>

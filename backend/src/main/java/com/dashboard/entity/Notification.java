@@ -72,7 +72,9 @@ public class Notification {
         NEW_SELLER_REGISTRATION("Nouvelle inscription vendeur"),
         STOCK_ALERT("Stock Alert"),
         SYSTEM("Système"),
-        PROMOTION("Promotion");
+        PROMOTION("Promotion"),
+        PREDICTION_BESTSELLER("Bestseller potentiel détecté"),
+        PREDICTION_PRICE("Recommandation de prix");
 
         private final String description;
 
