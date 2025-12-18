@@ -1,73 +1,88 @@
-import axios from 'axios';
+/**
+ * Notification Types - MouadVision Platform
+ * Includes ML Prediction Notification Types
+ */
+
+export type NotificationType =
+    | 'PRODUCT_APPROVED'
+    | 'PRODUCT_REJECTED'
+    | 'PRODUCT_PURCHASED'
+    | 'REVIEW_RECEIVED'
+    | 'RATING_RECEIVED'
+    | 'ORDER_CONFIRMED'
+    | 'ORDER_SHIPPED'
+    | 'ORDER_DELIVERED'
+    | 'NEW_ORDER'
+    | 'NEW_SELLER_PRODUCT'
+    | 'NEW_SELLER_REGISTRATION'
+    | 'STOCK_ALERT'
+    | 'SYSTEM'
+    | 'PROMOTION'
+    | 'PREDICTION_BESTSELLER'  // 🔮 ML Prediction
+    | 'PREDICTION_PRICE';       // 💹 ML Price Recommendation
 
 export interface Notification {
-    id: number;
-    type: string;
-    typeDescription: string;
-    title: string;
-    message: string;
-    referenceId: string;
-    referenceType: string;
-    actionUrl: string;
-    isRead: boolean;
-    readAt: string | null;
-    createdAt: string;
+    id:number;
+    type:NotificationType | string;
+    typeDescription:string;
+    title:string;
+    message:string;
+    referenceId:string;
+    referenceType:string;
+    actionUrl:string;
+    isRead:boolean;
+    readAt:string | null;
+    createdAt:string;
 }
 
-const API_URL = import.meta.env. VITE_API_URL || 'http://localhost:8080/api';
+export interface NotificationState {
+    notifications:Notification[];
+    unreadCount:number;
+    loading:boolean;
+    error:string | null;
+}
 
-const getAuthHeader = () => {
-    const token = localStorage.getItem('token');
-    return { Authorization: `Bearer ${token}` };
+export interface NotificationIconConfig {
+    icon:string;
+    bg:string;
+    gradient?:string;
+    textColor?:string;
+}
+
+export const NOTIFICATION_ICONS:Record<string, NotificationIconConfig> = {
+    PRODUCT_APPROVED:{ icon:'✅', bg:'bg-green-100 dark:bg-green-900/30', textColor:'text-green-600' },
+    PRODUCT_REJECTED:{ icon:'❌', bg:'bg-red-100 dark:bg-red-900/30', textColor:'text-red-600' },
+    PRODUCT_PURCHASED:{ icon:'💰', bg:'bg-yellow-100 dark:bg-yellow-900/30', textColor:'text-yellow-600' },
+    REVIEW_RECEIVED:{ icon:'⭐', bg:'bg-purple-100 dark:bg-purple-900/30', textColor:'text-purple-600' },
+    RATING_RECEIVED:{ icon:'🌟', bg:'bg-amber-100 dark:bg-amber-900/30', textColor:'text-amber-600' },
+    ORDER_CONFIRMED:{ icon:'📦', bg:'bg-blue-100 dark:bg-blue-900/30', textColor:'text-blue-600' },
+    ORDER_SHIPPED:{ icon:'🚚', bg:'bg-cyan-100 dark:bg-cyan-900/30', textColor:'text-cyan-600' },
+    ORDER_DELIVERED:{ icon:'✔️', bg:'bg-emerald-100 dark:bg-emerald-900/30', textColor:'text-emerald-600' },
+    NEW_ORDER:{ icon:'🛒', bg:'bg-indigo-100 dark:bg-indigo-900/30', textColor:'text-indigo-600' },
+    NEW_SELLER_PRODUCT:{ icon:'🆕', bg:'bg-indigo-100 dark:bg-indigo-900/30', textColor:'text-indigo-600' },
+    NEW_SELLER_REGISTRATION:{ icon:'👤', bg:'bg-violet-100 dark:bg-violet-900/30', textColor:'text-violet-600' },
+    STOCK_ALERT:{ icon:'📊', bg:'bg-orange-100 dark:bg-orange-900/30', textColor:'text-orange-600' },
+    SYSTEM:{ icon:'🔔', bg:'bg-gray-100 dark:bg-gray-700', textColor:'text-gray-600' },
+    PROMOTION:{ icon:'🎉', bg:'bg-pink-100 dark:bg-pink-900/30', textColor:'text-pink-600' },
+    // 🔮 ML Prediction Notifications
+    PREDICTION_BESTSELLER:{
+        icon:'🔮',
+        bg:'bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30',
+        gradient:'from-yellow-500 to-orange-500',
+        textColor:'text-orange-600'
+    },
+    PREDICTION_PRICE:{
+        icon:'💹',
+        bg:'bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30',
+        gradient:'from-blue-500 to-purple-500',
+        textColor:'text-purple-600'
+    },
 };
 
-export const notificationService = {
-    getNotifications: async (page = 0, size = 20): Promise<{ content: Notification[]; totalPages: number; totalElements: number }> => {
-        const response = await axios.get(`${API_URL}/notifications`, {
-            headers: getAuthHeader(),
-            params: { page, size },
-        });
-        return response.data. data;
-    },
+export const getNotificationIcon = (type:string):NotificationIconConfig => {
+    return NOTIFICATION_ICONS[type] || NOTIFICATION_ICONS.SYSTEM;
+};
 
-    getUnreadNotifications: async (): Promise<Notification[]> => {
-        const response = await axios.get(`${API_URL}/notifications/unread`, {
-            headers: getAuthHeader(),
-        });
-        return response.data.data;
-    },
-
-    getUnreadCount: async (): Promise<number> => {
-        const response = await axios. get(`${API_URL}/notifications/unread/count`, {
-            headers: getAuthHeader(),
-        });
-        return response.data.data. count;
-    },
-
-    // ✅ FIXED: Changed PUT to PATCH to match backend NotificationController
-    markAsRead: async (id: number): Promise<void> => {
-        await axios.patch(`${API_URL}/notifications/${id}/read`, null, {
-            headers: getAuthHeader(),
-        });
-    },
-
-    // ✅ FIXED: Changed PUT to PATCH to match backend NotificationController
-    markAllAsRead: async (): Promise<void> => {
-        await axios.patch(`${API_URL}/notifications/read-all`, null, {
-            headers: getAuthHeader(),
-        });
-    },
-
-    markMultipleAsRead: async (ids: number[]): Promise<void> => {
-        await axios.patch(`${API_URL}/notifications/read-multiple`, ids, {
-            headers: getAuthHeader(),
-        });
-    },
-
-    // ✅ NEW: Delete notification
-    deleteNotification: async (id: number): Promise<void> => {
-        await axios.delete(`${API_URL}/notifications/${id}`, {
-            headers: getAuthHeader(),
-        });
-    },
+export const isPredictionNotification = (type:string):boolean => {
+    return type === 'PREDICTION_BESTSELLER' || type === 'PREDICTION_PRICE';
 };

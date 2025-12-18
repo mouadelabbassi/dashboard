@@ -42,6 +42,34 @@ public class PredictionController {
         return ResponseEntity.ok(health);
     }
 
+    GetMapping("/count")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
+    public ResponseEntity<Map<String, Object>> getPredictionCount() {
+        long count = predictionService.getPredictionCount();
+        long productCount = productRepository.count();
+        Map<String, Object> response = new HashMap<>();
+        response.put("predictionCount", count);
+        response.put("productCount", productCount);
+        response.put("needsGeneration", count == 0 && productCount > 0);
+        response.put("coveragePercent", productCount > 0 ? (count * 100.0 / productCount) : 0);
+        return ResponseEntity.ok(response);
+    }
+    @PostMapping("/generate/sync")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> generatePredictionsSync(
+            @RequestParam(defaultValue = "50") int limit) {
+        log.info("Génération synchrone des prédictions (limite: {})", limit);
+
+        if (!flaskClient.isServiceHealthy()) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Service ML non disponible. Veuillez démarrer le microservice Flask.");
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+        }
+        Map<String, Object> result = predictionService.generatePredictionsSync(limit);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/metrics")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
     public ResponseEntity<?> getModelMetrics() {
@@ -225,4 +253,6 @@ public class PredictionController {
                 .currentRanking(product.getRanking() != null ? product.getRanking() : 100)
                 .build();
     }
+
+
 }
