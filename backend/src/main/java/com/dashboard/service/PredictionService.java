@@ -174,70 +174,83 @@ public class PredictionService {
     public PredictionStatsDTO getPredictionStats() {
         List<Prediction> allPredictions = predictionRepository.findLatestPredictionsForAllProducts();
 
-        long totalPredictions = allPredictions.size();
+        long totalPredictions = allPredictions. size();
 
         long potentialBestsellersCount = allPredictions.stream()
                 .filter(p -> Boolean.TRUE.equals(p.getIsPotentialBestseller()))
                 .count();
 
+        double avgBestsellerProbability = allPredictions.stream()
+                .filter(p -> p.getBestsellerProbability() != null)
+                .mapToDouble(Prediction:: getBestsellerProbability)
+                .average()
+                .orElse(0.0);
+
+        double avgPriceChange = allPredictions. stream()
+                .filter(p -> p.getPriceChangePercentage() != null)
+                .mapToDouble(p -> Math.abs(p.getPriceChangePercentage()))
+                .average()
+                .orElse(0.0);
+
         long productsWithPriceRecommendation = allPredictions.stream()
-                .filter(p -> !"MAINTENIR".equals(p.getPriceAction()))
+                .filter(p -> p.getPriceAction() != null && ! p.getPriceAction().equals("MAINTENIR"))
                 .count();
 
-        long productsWithRankingImprovement = allPredictions.stream()
-                .filter(p -> "AMÉLIORATION".equals(p.getRankingTrend()))
+        long improvingProducts = allPredictions.stream()
+                .filter(p -> "AMÉLIORATION". equals(p.getRankingTrend()))
                 .count();
 
-        double averageBestsellerProbability = allPredictions.stream()
-                .mapToDouble(p -> p.getBestsellerProbability() != null ? p.getBestsellerProbability() : 0)
-                .average()
-                .orElse(0.0);
+        long decliningProducts = allPredictions. stream()
+                .filter(p -> "DÉCLIN".equals(p.getRankingTrend()))
+                .count();
 
-        double averagePriceChangeRecommended = allPredictions.stream()
-                .mapToDouble(p -> p.getPriceChangePercentage() != null ? Math.abs(p.getPriceChangePercentage()) : 0)
-                .average()
-                .orElse(0.0);
+        long stableProducts = allPredictions.stream()
+                .filter(p -> "STABLE".equals(p. getRankingTrend()))
+                .count();
 
+        // Trend distribution
         Map<String, Long> trendDistribution = allPredictions.stream()
-                .filter(p -> p.getRankingTrend() != null)
+                .filter(p -> p. getRankingTrend() != null)
                 .collect(Collectors.groupingBy(Prediction::getRankingTrend, Collectors.counting()));
 
+        // Price action distribution
         Map<String, Long> priceActionDistribution = allPredictions.stream()
                 .filter(p -> p.getPriceAction() != null)
-                .collect(Collectors.groupingBy(Prediction::getPriceAction, Collectors.counting()));
+                .collect(Collectors.groupingBy(Prediction:: getPriceAction, Collectors.counting()));
 
-        List<PredictionStatsDTO.CategoryStatsDTO> categoryStats = allPredictions.stream()
-                .filter(p -> p.getCategory() != null)
-                .collect(Collectors.groupingBy(Prediction::getCategory))
-                .entrySet().stream()
-                .map(entry -> PredictionStatsDTO.CategoryStatsDTO.builder()
-                        .category(entry.getKey())
-                        .productCount((long) entry.getValue().size())
-                        .avgBestsellerProbability(entry.getValue().stream()
-                                .mapToDouble(p -> p.getBestsellerProbability() != null ? p.getBestsellerProbability() : 0)
-                                .average().orElse(0.0))
-                        .avgPriceChange(entry.getValue().stream()
-                                .mapToDouble(p -> p.getPriceChangePercentage() != null ? p.getPriceChangePercentage() : 0)
-                                .average().orElse(0.0))
-                        .build())
-                .collect(Collectors.toList());
+        // Category stats
+        List<PredictionStatsDTO. CategoryStatsDTO> categoryStats = predictionRepository.getPredictionStatsByCategory()
+                .stream()
+                .map(row -> PredictionStatsDTO.CategoryStatsDTO.builder()
+                        .category((String) row[0])
+                        .count(((Number) row[1]).longValue())
+                        .productCount(((Number) row[1]).longValue())  // ✅ Alias
+                        .avgBestsellerProb(row[2] != null ? ((Number) row[2]).doubleValue() : 0.0)
+                        . avgBestsellerProbability(row[2] != null ? ((Number) row[2]).doubleValue() : 0.0)  // ✅ Alias
+                        .avgPriceChange(row[3] != null ? ((Number) row[3]).doubleValue() : 0.0)
+                        . build())
+                .collect(Collectors. toList());
 
-        return PredictionStatsDTO.builder()
+        PredictionStatsDTO stats = PredictionStatsDTO.builder()
                 .totalPredictions(totalPredictions)
-                .potentialBestsellersCount(potentialBestsellersCount)
-                .productsWithPriceRecommendation(productsWithPriceRecommendation)
-                .productsWithRankingImprovement(productsWithRankingImprovement)
-                .averageBestsellerProbability(averageBestsellerProbability)
-                .averagePriceChangeRecommended(averagePriceChangeRecommended)
+                .potentialBestsellers(potentialBestsellersCount)
+                .potentialBestsellersCount(potentialBestsellersCount)  // ✅ Alias
+                . avgBestsellerProbability(avgBestsellerProbability)
+                .averageBestsellerProbability(avgBestsellerProbability)  // ✅ Alias
+                .avgPriceChange(avgPriceChange)
+                .averagePriceChangeRecommended(avgPriceChange)  // ✅ Alias
+                . productsWithPriceRecommendation(productsWithPriceRecommendation)
+                .productsWithRankingImprovement(improvingProducts)  // ✅ Alias
+                . improvingProducts(improvingProducts)
+                .decliningProducts(decliningProducts)
+                .stableProducts(stableProducts)
                 .trendDistribution(trendDistribution)
                 .priceActionDistribution(priceActionDistribution)
                 .categoryStats(categoryStats)
                 .build();
+        return stats;
     }
 
-    /**
-     * Récupère les prédictions non notifiées pour un vendeur.
-     */
     public List<PredictionResponseDTO> getUnnotifiedPredictionsForSeller(Long sellerId) {
         return predictionRepository.findBySellerIdAndNotificationSentFalse(sellerId)
                 .stream()

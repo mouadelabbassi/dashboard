@@ -193,7 +193,6 @@ public class AdminDashboardController {
                     .sorted((a, b) -> Double.compare((Double) b.get("totalRevenue"), (Double) a.get("totalRevenue")))
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            // Return empty list on error
         }
 
         return ResponseEntity.ok(ApiResponse.success("Top sellers", result));

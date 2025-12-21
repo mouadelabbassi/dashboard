@@ -4,232 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 28">
+    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 29">
+      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/AdminDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/AdminDashboardController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/PredictionStatsDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/PredictionStatsDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Product.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/User.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PredictionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PredictionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/DashboardApplication.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/config/CorsConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/config/OpenApiConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/config/SecurityConfig.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/AdminDashboardController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/AdminProductApprovalController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/AdminSellerController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/AdminStockController$NotifySellerRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/AdminStockController$StockUpdateAdminRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/AdminStockController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/AnalystController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/AuthController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/CategoryController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/DashboardController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/ExportController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/ImportController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/NotificationController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/OrderController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/PredictionController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/ProductController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/PublicController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/ReviewController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/SellerController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/SellerStockController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/controller/UserController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/CreateOrderRequest$CreateOrderRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/CreateOrderRequest$OrderItemRequest$OrderItemRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/CreateOrderRequest$OrderItemRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/CreateOrderRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ForgotPasswordRequest$ForgotPasswordRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ForgotPasswordRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ListFromStockRequest$ListFromStockRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ListFromStockRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/LoginRequest$LoginRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/LoginRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/OrderRequest$OrderItemRequest$OrderItemRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/OrderRequest$OrderItemRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/OrderRequest$OrderRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/OrderRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/PredictionRequestDTO$PredictionRequestDTOBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/PredictionRequestDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ProductApprovalRequest$ProductApprovalRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ProductApprovalRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ProductRequest$ProductRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ProductRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/RegisterRequest$RegisterRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/RegisterRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ResetPasswordRequest$ResetPasswordRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ResetPasswordRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ReviewRequest$ReviewRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/ReviewRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/SellerProductSubmissionRequest$SellerProductSubmissionRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/SellerProductSubmissionRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/SellerProfileUpdateRequest$SellerProfileUpdateRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/SellerProfileUpdateRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/SellerRegisterRequest$SellerRegisterRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/SellerRegisterRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/StockUpdateRequest$StockUpdateRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/StockUpdateRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/UpdateProfileRequest$UpdateProfileRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/request/UpdateProfileRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdminDashboardResponse$AdminDashboardResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdminDashboardResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$AdvancedPredictionResponseDTOBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$DailyForecast$DailyForecastBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$DailyForecast.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$HealthScoreDTO$HealthScoreDTOBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$HealthScoreDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$MetricBreakdown$MetricBreakdownBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$MetricBreakdown.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$MomentumBreakdown$MomentumBreakdownBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$MomentumBreakdown.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$MomentumDTO$MomentumDTOBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$MomentumDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$Projection$ProjectionBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$Projection.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$SalesForecastDTO$SalesForecastDTOBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$SalesForecastDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$Velocities$VelocitiesBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$Velocities.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$WeeklySummary$WeeklySummaryBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO$WeeklySummary.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AdvancedPredictionResponseDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/ApiResponse$ApiResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/ApiResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AuthResponse$AuthResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/AuthResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/CategoryResponse$CategoryResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/CategoryResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/CategoryStatsResponse$CategoryStatsResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/CategoryStatsResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/DashboardResponse$DashboardResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/DashboardResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/DashboardStatsResponse$DashboardStatsResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/DashboardStatsResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/NotificationResponse$NotificationResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/NotificationResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/OrderResponse$OrderItemResponse$OrderItemResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/OrderResponse$OrderItemResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/OrderResponse$OrderResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/OrderResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PendingProductResponse$PendingProductResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PendingProductResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionResponseDTO$BestsellerPredictionDTO$BestsellerPredictionDTOBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionResponseDTO$BestsellerPredictionDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionResponseDTO$PredictionResponseDTOBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionResponseDTO$PricePredictionDTO$PricePredictionDTOBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionResponseDTO$PricePredictionDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionResponseDTO$RankingPredictionDTO$RankingPredictionDTOBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionResponseDTO$RankingPredictionDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionResponseDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionStatsDTO$CategoryStatsDTO$CategoryStatsDTOBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionStatsDTO$CategoryStatsDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionStatsDTO$PredictionStatsDTOBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/PredictionStatsDTO.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/ProductDetailResponse$ProductDetailResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/ProductDetailResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/ProductResponse$ProductResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/ProductResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/ReviewResponse$ReviewResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/ReviewResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerDashboardResponse$DailyRevenuePoint.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerDashboardResponse$SellerDashboardResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerDashboardResponse$TopProductRevenue.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerDashboardResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerOrderResponse$SellerOrderResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerOrderResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerProductRequestResponse$SellerProductRequestResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerProductRequestResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerProfileResponse$SellerProfileResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerProfileResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerReviewSummary$SellerReviewSummaryBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerReviewSummary.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerStockResponse$SellerStockResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/SellerStockResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/StockDashboardResponse$StockDashboardResponseBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/dto/response/StockDashboardResponse.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Category$CategoryBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Category.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Notification$NotificationBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Notification$NotificationType.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Notification.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Order$OrderBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Order$OrderStatus.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Order.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/OrderItem$OrderItemBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/OrderItem.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/PlatformRevenue$PlatformRevenueBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/PlatformRevenue$RevenueType.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/PlatformRevenue.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Prediction$PredictionBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Prediction.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Product$ApprovalStatus.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Product$ProductBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/Product.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/ProductReview$ProductReviewBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/ProductReview.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/SellerProductRequest$RequestStatus.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/SellerProductRequest$SellerProductRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/SellerProductRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/SellerRevenue$SellerRevenueBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/SellerRevenue.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/SellerStock$SellerStockBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/SellerStock$StockStatus.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/SellerStock.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/StockUpdateRequest$RequestStatus.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/StockUpdateRequest$StockUpdateRequestBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/StockUpdateRequest.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/User$Role.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/User$UserBuilder.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/entity/User.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/exception/BadRequestException.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/exception/DuplicateResourceException.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/exception/GlobalExceptionHandler.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/exception/ResourceNotFoundException.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/CategoryRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/NotificationRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/OrderItemRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/OrderRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/PlatformRevenueRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/PredictionRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/ProductRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/ProductReviewRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/SellerProductRequestRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/SellerRevenueRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/SellerStockRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/StockUpdateRequestRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/repository/UserRepository.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/security/JwtAuthenticationFilter.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/security/JwtTokenProvider.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/security/UserDetailsServiceImpl.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/AdminProductApprovalService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/AnalystService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/AuthService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/CategoryService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/CsvImportService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/DashboardService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/ExportService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/FlaskMLClientService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/NotificationService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/OrderService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/PredictionService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/ProductService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/ReviewService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/SellerRevenueService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/SellerService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/SellerStockService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/StockManagementService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/UserService.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/util/CsvHelper.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/.idea/frontend.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/components/seller/PredictionNotifications.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/components/seller/PredictionNotifications.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/dist/assets/index-D20lMW_C.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/dist/assets/index-DkagkbcK.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/dist/assets/index.es-Bu45cjYN.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/dist/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/node_modules/.tmp/tsconfig.app.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/node_modules/.tmp/tsconfig.app.tsbuildinfo" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/PredictiveDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/PredictiveDashboard.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/NotificationsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/pages/NotificationsPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/service/notification.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/service/notification.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/Main/src/service/predictionService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/service/predictionService.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -241,59 +32,59 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="SYNC" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "mouadelabbassi"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;mouadelabbassi&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/mouadelabbassi/dashboard.git",
-    "accountId": "dd64542d-0696-4b47-9835-fbab7eb42180"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/mouadelabbassi/dashboard.git&quot;,
+    &quot;accountId&quot;: &quot;dd64542d-0696-4b47-9835-fbab7eb42180&quot;
   }
-}]]></component>
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 6
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="3729jc75nE4PXLVp3gpwjr9F1dN" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Spring Boot.DashboardApplication.executor": "Debug",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "application.passwordSafe",
-    "to.speed.mode.migration.done": "true",
-    "ts.external.directory.path": "C:\\Users\\mouad\\Downloads\\dashboard\\frontend\\Main\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Spring Boot.DashboardApplication.executor&quot;: &quot;Debug&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;application.passwordSafe&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\mouad\\Downloads\\dashboard\\frontend\\Main\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="DashboardApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
@@ -319,7 +110,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1766090437018</updated>
-      <workItem from="1766090440687" duration="4844000" />
+      <workItem from="1766090440687" duration="13746000" />
+      <workItem from="1766332478613" duration="372000" />
     </task>
     <task id="LOCAL-00001" summary="commit 28">
       <option name="closed" value="true" />
@@ -337,7 +129,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766092596887</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="commit 29">
+      <option name="closed" value="true" />
+      <created>1766095626333</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1766095626333</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -356,6 +156,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="commit 28" />
-    <option name="LAST_COMMIT_MESSAGE" value="commit 28" />
+    <MESSAGE value="commit 29" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit 29" />
   </component>
 </project>

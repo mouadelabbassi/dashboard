@@ -82,6 +82,13 @@ public class User {
     private LocalDateTime updatedAt;
 
 
+    @Column(name = "seller_rating")
+    private Double sellerRating;
+
+    public Double getSellerRating() {
+        return sellerRating != null ? sellerRating : 4.0;
+    }
+
     public enum Role {
         BUYER("Regular Buyer"),
         SELLER("Product Seller"),  // NEW

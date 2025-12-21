@@ -128,13 +128,10 @@ const NotificationsPage:React.FC = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                        <span className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl text-white">
-                            🔔
-                        </span>
                         Notifications
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400 mt-1">
-                        {unreadCount > 0 ?  `${unreadCount} non lue(s)` :'Toutes vos notifications'}
+                        {unreadCount > 0 ?  `${unreadCount} Unread` :'All Notifications'}
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -143,7 +140,7 @@ const NotificationsPage:React.FC = () => {
                             onClick={handleMarkAllAsRead}
                             className="px-4 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition font-medium text-sm"
                         >
-                            ✓ Tout marquer comme lu
+                            ✓ Mark all as read
                         </button>
                     )}
                 </div>
@@ -160,7 +157,7 @@ const NotificationsPage:React.FC = () => {
                                 :'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                         }`}
                     >
-                        📬 Toutes les notifications
+                        All Notifications
                     </button>
                     <button
                         onClick={() => setActiveTab('predictions')}
@@ -170,7 +167,7 @@ const NotificationsPage:React.FC = () => {
                                 :'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                         }`}
                     >
-                        🔮 Alertes Prédictives
+                        Predictive Alerts
                         {predictionNotificationsCount > 0 && (
                             <span className={`px-2 py-0.5 rounded-full text-xs ${
                                 activeTab === 'predictions'
@@ -188,9 +185,9 @@ const NotificationsPage:React.FC = () => {
             {activeTab === 'all' && (
                 <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
                     {[
-                        { key:'all', label:'Toutes', icon:'📬' },
-                        { key:'unread', label:'Non lues', icon:'🔵' },
-                        { key: 'predictions', label:'Prédictions', icon:'🔮' },
+                        { key:'all', label:'All'},
+                        { key:'unread', label:'Unread' },
+                        { key: 'predictions', label:'Predections' },
                     ].map((f) => (
                         <button
                             key={f.key}
@@ -201,15 +198,13 @@ const NotificationsPage:React.FC = () => {
                                     :'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 shadow'
                             }`}
                         >
-                            {f.icon} {f.label}
+                            {f.label}
                         </button>
                     ))}
                 </div>
             )}
 
-            {/* Content */}
             {activeTab === 'predictions' && isSeller && sellerId ?  (
-                // Show dedicated Prediction Notifications component for sellers
                 <PredictionNotifications sellerId={sellerId} />
             ) :loading ? (
                 <div className="flex flex-col items-center justify-center py-12">
@@ -226,10 +221,10 @@ const NotificationsPage:React.FC = () => {
                     </h3>
                     <p className="text-gray-500 dark:text-gray-400 mt-2">
                         {filter === 'unread'
-                            ? 'Vous avez lu toutes vos notifications.'
+                            ? 'You have read all notifications.'
                             :filter === 'predictions'
-                                ? 'Aucune alerte prédictive pour le moment.'
-                                :'Vous n\'avez pas encore de notifications.'}
+                                ? 'No predictive alerts at the moment.'
+                                :'You don\'t have any notifications yet.'}
                     </p>
                 </div>
             ) :(
@@ -249,7 +244,7 @@ const NotificationsPage:React.FC = () => {
                                 {/* Prediction Badge */}
                                 {isPrediction && (
                                     <div className={`px-4 py-1.5 bg-gradient-to-r ${iconInfo.gradient} text-white text-xs font-medium`}>
-                                        🔮 Alerte Prédictive ML
+                                        Predictive Alerts
                                     </div>
                                 )}
 
@@ -291,7 +286,7 @@ const NotificationsPage:React.FC = () => {
                                                     }`}
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
-                                                    Voir les détails
+                                                    See Details
                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                     </svg>

@@ -221,7 +221,6 @@ const Badge:React.FC<{ children:React.ReactNode; variant:'success' | 'warning' |
     );
 };
 
-// ==================== COMPOSANT PRINCIPAL ====================
 
 const PredictiveDashboard: React.FC = () => {
     // États
@@ -385,13 +384,10 @@ const PredictiveDashboard: React.FC = () => {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <span className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl text-white">
-              <ChartIcon />
-            </span>
-                        Analyse Prédictive
+                        High Analysis
                     </h1>
                     <p className="mt-1 text-gray-500 dark:text-gray-400">
-                        Tableau de bord d'aide à la décision prédictive pour la gestion des ventes
+                        Predictive Decision Support Dashboard for Sales Management
                     </p>
                 </div>
 
@@ -422,18 +418,18 @@ const PredictiveDashboard: React.FC = () => {
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${
                             generating || !healthStatus?.mlServiceAvailable
                                 ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5'
+                                : 'bg-gradient-to-r from-gray-500 to-gray-600 text-white hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5'
                         }`}
                     >
                         {generating ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Génération...
+                                Generation...
                             </>
                         ) :(
                             <>
                                 <RefreshIcon />
-                                Générer les prédictions
+                                Generate
                             </>
                         )}
                     </button>
@@ -999,21 +995,6 @@ const PredictiveDashboard: React.FC = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    {/* Academic Note */}
-                                    <div className="p-6 rounded-xl bg-gray-50 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-700">
-                                        <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                                            📚 Note Méthodologique
-                                        </h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                                            Ces modèles d'apprentissage automatique utilisent des algorithmes explicables et adaptés
-                                            au contexte académique. Le <strong>Random Forest</strong> est utilisé pour sa robustesse
-                                            et son interprétabilité, tandis que le <strong>Gradient Boosting</strong> offre une
-                                            précision optimale pour la recommandation de prix.  Les prédictions sont basées sur les
-                                            données transactionnelles de la plateforme et constituent des outils d'aide à la décision,
-                                            non des recommandations absolues.
-                                        </p>
                                     </div>
                                 </>
                             )}

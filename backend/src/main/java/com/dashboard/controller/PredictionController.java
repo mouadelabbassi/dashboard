@@ -8,6 +8,7 @@ import com.dashboard.repository.ProductRepository;
 import com.dashboard.service.FlaskMLClientService;
 import com.dashboard.service.PredictionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -27,6 +29,7 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Predictions", description = "ML Prediction endpoints")
 public class PredictionController {
 
     private final PredictionService predictionService;
@@ -34,6 +37,7 @@ public class PredictionController {
     private final ProductRepository productRepository;
 
     @GetMapping("/health")
+    @Operation(summary = "Check prediction service health")
     public ResponseEntity<Map<String, Object>> checkHealth() {
         Map<String, Object> health = new HashMap<>();
         health.put("springBootService", "UP");
@@ -42,36 +46,9 @@ public class PredictionController {
         return ResponseEntity.ok(health);
     }
 
-    GetMapping("/count")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
-    public ResponseEntity<Map<String, Object>> getPredictionCount() {
-        long count = predictionService.getPredictionCount();
-        long productCount = productRepository.count();
-        Map<String, Object> response = new HashMap<>();
-        response.put("predictionCount", count);
-        response.put("productCount", productCount);
-        response.put("needsGeneration", count == 0 && productCount > 0);
-        response.put("coveragePercent", productCount > 0 ? (count * 100.0 / productCount) : 0);
-        return ResponseEntity.ok(response);
-    }
-    @PostMapping("/generate/sync")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Map<String, Object>> generatePredictionsSync(
-            @RequestParam(defaultValue = "50") int limit) {
-        log.info("Génération synchrone des prédictions (limite: {})", limit);
-
-        if (!flaskClient.isServiceHealthy()) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("success", false);
-            error.put("message", "Service ML non disponible. Veuillez démarrer le microservice Flask.");
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
-        }
-        Map<String, Object> result = predictionService.generatePredictionsSync(limit);
-        return ResponseEntity.ok(result);
-    }
-
     @GetMapping("/metrics")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
+    @Operation(summary = "Get ML model metrics")
     public ResponseEntity<?> getModelMetrics() {
         return flaskClient.getModelMetrics()
                 .map(ResponseEntity::ok)
@@ -80,6 +57,7 @@ public class PredictionController {
 
     @PostMapping("/generate/{productId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
+    @Operation(summary = "Generate prediction for a product")
     public ResponseEntity<PredictionResponseDTO> generatePrediction(@PathVariable String productId) {
         log.info("Demande de prédiction pour le produit: {}", productId);
         return predictionService.generatePredictionForProduct(productId)
@@ -89,6 +67,7 @@ public class PredictionController {
 
     @PostMapping("/generate/seller/{sellerId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
+    @Operation(summary = "Generate predictions for all seller products")
     public ResponseEntity<List<PredictionResponseDTO>> generatePredictionsForSeller(@PathVariable Long sellerId) {
         log.info("Génération des prédictions pour le vendeur: {}", sellerId);
         List<PredictionResponseDTO> predictions = predictionService.generatePredictionsForSeller(sellerId);
@@ -97,6 +76,7 @@ public class PredictionController {
 
     @PostMapping("/generate/all")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Generate predictions for all products")
     public ResponseEntity<Map<String, String>> generateAllPredictions() {
         log.info("Déclenchement de la génération globale des prédictions");
         new Thread(() -> predictionService.generateDailyPredictions()).start();
@@ -109,6 +89,7 @@ public class PredictionController {
 
     @GetMapping("/product/{productId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
+    @Operation(summary = "Get latest prediction for a product")
     public ResponseEntity<PredictionResponseDTO> getProductPrediction(@PathVariable String productId) {
         return predictionService.getLatestPrediction(productId)
                 .map(ResponseEntity::ok)
@@ -117,6 +98,7 @@ public class PredictionController {
 
     @GetMapping("/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
+    @Operation(summary = "Get all latest predictions")
     public ResponseEntity<List<PredictionResponseDTO>> getAllPredictions() {
         List<PredictionResponseDTO> predictions = predictionService.getAllLatestPredictions();
         return ResponseEntity.ok(predictions);
@@ -124,6 +106,7 @@ public class PredictionController {
 
     @GetMapping("/bestsellers")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
+    @Operation(summary = "Get potential bestsellers")
     public ResponseEntity<List<PredictionResponseDTO>> getPotentialBestsellers() {
         List<PredictionResponseDTO> bestsellers = predictionService.getPotentialBestsellers();
         return ResponseEntity.ok(bestsellers);
@@ -131,6 +114,7 @@ public class PredictionController {
 
     @GetMapping("/category/{category}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
+    @Operation(summary = "Get predictions by category")
     public ResponseEntity<List<PredictionResponseDTO>> getPredictionsByCategory(@PathVariable String category) {
         List<PredictionResponseDTO> predictions = predictionService.getPredictionsByCategory(category);
         return ResponseEntity.ok(predictions);
@@ -138,13 +122,32 @@ public class PredictionController {
 
     @GetMapping("/stats")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
+    @Operation(summary = "Get prediction statistics")
     public ResponseEntity<PredictionStatsDTO> getPredictionStats() {
         PredictionStatsDTO stats = predictionService.getPredictionStats();
         return ResponseEntity.ok(stats);
     }
 
+    @GetMapping("/count")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
+    @Operation(summary = "Get prediction count and coverage")
+    public ResponseEntity<Map<String, Object>> getPredictionCount() {
+        long predictionCount = predictionService.getAllLatestPredictions().size();
+        long productCount = productRepository.count();
+        boolean needsGeneration = predictionCount == 0 && productCount > 0;
+        double coveragePercent = productCount > 0 ? ((double) predictionCount / productCount) * 100 : 0;
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("predictionCount", predictionCount);
+        response.put("productCount", productCount);
+        response.put("needsGeneration", needsGeneration);
+        response.put("coveragePercent", coveragePercent);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/seller/{sellerId}/alerts")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
+    @Operation(summary = "Get seller prediction alerts")
     public ResponseEntity<List<PredictionResponseDTO>> getSellerAlerts(@PathVariable Long sellerId) {
         List<PredictionResponseDTO> alerts = predictionService.getUnnotifiedPredictionsForSeller(sellerId);
         return ResponseEntity.ok(alerts);
@@ -152,7 +155,7 @@ public class PredictionController {
 
     @GetMapping("/advanced/{productId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
-    @Operation(summary = "Get advanced analysis", description = "Returns health score, forecast, and momentum for a product")
+    @Operation(summary = "Get advanced analysis")
     public ResponseEntity<?> getAdvancedAnalysis(@PathVariable String productId) {
         log.info("Demande d'analyse avancée pour le produit: {}", productId);
 
@@ -171,7 +174,7 @@ public class PredictionController {
 
     @GetMapping("/health-score/{productId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
-    @Operation(summary = "Get health score", description = "Returns the product health score with breakdown")
+    @Operation(summary = "Get health score")
     public ResponseEntity<?> getHealthScore(@PathVariable String productId) {
         log.info("Demande de health score pour le produit: {}", productId);
 
@@ -190,7 +193,7 @@ public class PredictionController {
 
     @GetMapping("/forecast/{productId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
-    @Operation(summary = "Get sales forecast", description = "Returns 30-day sales forecast")
+    @Operation(summary = "Get sales forecast")
     public ResponseEntity<?> getSalesForecast(
             @PathVariable String productId,
             @RequestParam(defaultValue = "30") int days) {
@@ -211,7 +214,7 @@ public class PredictionController {
 
     @GetMapping("/momentum/{productId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
-    @Operation(summary = "Get momentum analysis", description = "Returns trend and momentum indicators")
+    @Operation(summary = "Get momentum analysis")
     public ResponseEntity<?> getMomentumAnalysis(@PathVariable String productId) {
         log.info("Demande d'analyse de momentum pour le produit: {}", productId);
 
@@ -228,31 +231,80 @@ public class PredictionController {
                 .orElse(ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build());
     }
 
+    /**
+     * Build prediction request from product - handles nullable fields safely
+     */
     private PredictionRequestDTO buildPredictionRequest(Product product) {
+        // Safely get price as double - FIXED: Proper BigDecimal to double conversion
+        double currentPrice = (product.getPrice() != null)
+                ? product.getPrice().doubleValue()
+                : 0.0;
+
+        // Safely get rating
+        double rating = (product.getRating() != null)
+                ? product.getRating().doubleValue()
+                : 0.0;
+
+        // Safely get review count
+        int reviewCount = (product.getReviewCount() != null)
+                ? product.getReviewCount()
+                : 0;
+
+        // Safely get sales count
+        int salesCount = (product.getSalesCount() != null)
+                ? product.getSalesCount()
+                : 0;
+
+        // Safely get stock quantity
+        int stockQuantity = (product.getStockQuantity() != null)
+                ? product.getStockQuantity()
+                : 0;
+
+        // Calculate days since listed
         int daysSinceListed = 30;
         if (product.getCreatedAt() != null) {
-            daysSinceListed = (int) ChronoUnit.DAYS.between(product.getCreatedAt(), LocalDateTime.now());
+            daysSinceListed = (int) ChronoUnit.DAYS.between(
+                    product.getCreatedAt(),
+                    LocalDateTime.now()
+            );
+            if (daysSinceListed < 0) daysSinceListed = 0;
         }
 
-        String categoryName = product.getCategory() != null ? product.getCategory().getName() : "Electronics";
-        Double price = product.getPrice() != null ? product.getPrice().doubleValue() : 0.0;
-        Double rating = product.getRating() != null ? product.getRating().doubleValue() : 3.0;
+        // Safely get seller rating
+        double sellerRating = 4.0;
+        if (product.getSeller() != null && product.getSeller().getSellerRating() != null) {
+            sellerRating = product.getSeller().getSellerRating();
+        }
+
+        // Safely get discount percentage
+        double discountPercentage = (product.getDiscountPercentage() != null)
+                ? product.getDiscountPercentage()
+                : 0.0;
+
+        // Safely get category name
+        String categoryName = "Electronics";
+        if (product.getCategory() != null && product.getCategory().getName() != null) {
+            categoryName = product.getCategory().getName();
+        }
+
+        // Safely get ranking
+        int ranking = (product.getRanking() != null)
+                ? product.getRanking()
+                : 100;
 
         return PredictionRequestDTO.builder()
                 .productId(product.getAsin())
                 .productName(product.getProductName())
-                .currentPrice(price)
+                .currentPrice(currentPrice)
                 .rating(rating)
-                .reviewCount(product.getReviewsCount() != null ? product.getReviewsCount() : 0)
-                .salesCount(product.getSalesCount() != null ? product.getSalesCount() : 0)
-                .stockQuantity(product.getStockQuantity() != null ? product.getStockQuantity() : 0)
+                .reviewCount(reviewCount)
+                .salesCount(salesCount)
+                .stockQuantity(stockQuantity)
                 .daysSinceListed(daysSinceListed)
-                .sellerRating(3.5)
-                .discountPercentage(0.0)
+                .sellerRating(sellerRating)
+                .discountPercentage(discountPercentage)
                 .category(categoryName)
-                .currentRanking(product.getRanking() != null ? product.getRanking() : 100)
+                .currentRanking(ranking)
                 .build();
     }
-
-
 }

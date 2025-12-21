@@ -118,7 +118,26 @@ public class Product {
     @Builder.Default
     private List<ProductReview> reviews = new ArrayList<>();
 
-    // Increment sales count
+    @Column(name = "review_count")
+    private Integer reviewCount;
+
+    @Column(name = "discount_percentage")
+    private Double discountPercentage;
+
+    @Column(name = "days_since_listed")
+    private Integer daysSinceListed;
+
+    @Transient
+    public Integer getDaysSinceListed() {
+        if (this.createdAt == null) {
+            return 30; // default
+        }
+        return (int) java.time.temporal.ChronoUnit.DAYS.between(
+                this.createdAt,
+                java.time.LocalDateTime.now()
+        );
+    }
+
     public void incrementSalesCount(int quantity) {
         if (this.salesCount == null) {
             this.salesCount = 0;
