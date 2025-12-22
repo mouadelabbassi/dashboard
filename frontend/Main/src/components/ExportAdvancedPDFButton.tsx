@@ -37,12 +37,12 @@ const ExportAdvancedPDFButton: React.FC<ExportAdvancedPDFButtonProps> = ({
 
         switch (variant) {
             case 'primary':
-                return `${baseStyles} bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-500/25`;
+                return `${baseStyles} bg-gray-600 hover:bg-gray-700 text-white hover:shadow-gray-500/25`;
             case 'outline':
-                return `${baseStyles} border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white`;
+                return `${baseStyles} border-2 border-gray-600 text-gray-600 hover:bg-gray-600 hover:text-white`;
             case 'gradient':
             default:
-                return `${baseStyles} bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:via-indigo-700 hover:to-blue-700 text-white hover:shadow-purple-500/25`;
+                return `${baseStyles} bg-gradient-to-r from-gray-600 via-gray-600 to-gray-600 hover:from-gray-700 hover:via-gray-700 hover:to-gray-700 text-white hover:shadow-gray-500/25`;
         }
     };
 
@@ -91,7 +91,6 @@ const ExportAdvancedPDFButton: React.FC<ExportAdvancedPDFButtonProps> = ({
                             />
                         </svg>
                         <span>Export Executive Report</span>
-                        <span className="ml-1 px-2 py-0.5 bg-white/20 rounded-full text-xs">PDF</span>
                     </>
                 )}
             </button>

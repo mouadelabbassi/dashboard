@@ -59,32 +59,51 @@ public class PredictionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
     @Operation(summary = "Generate prediction for a product")
     public ResponseEntity<PredictionResponseDTO> generatePrediction(@PathVariable String productId) {
-        log.info("Demande de prédiction pour le produit: {}", productId);
+        log.info("🔮 Demande de prédiction pour le produit: {}", productId);
         return predictionService.generatePredictionForProduct(productId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(pred -> {
+                    log.info("✅ Prédiction générée avec succès pour: {}", productId);
+                    return ResponseEntity.ok(pred);
+                })
+                .orElseGet(() -> {
+                    log.warn("❌ Échec de génération de prédiction pour: {}", productId);
+                    return ResponseEntity.notFound().build();
+                });
     }
 
     @PostMapping("/generate/seller/{sellerId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
     @Operation(summary = "Generate predictions for all seller products")
     public ResponseEntity<List<PredictionResponseDTO>> generatePredictionsForSeller(@PathVariable Long sellerId) {
-        log.info("Génération des prédictions pour le vendeur: {}", sellerId);
+        log.info("🔮 Génération des prédictions pour le vendeur: {}", sellerId);
         List<PredictionResponseDTO> predictions = predictionService.generatePredictionsForSeller(sellerId);
+        log.info("✅ {} prédictions générées pour le vendeur {}", predictions.size(), sellerId);
         return ResponseEntity.ok(predictions);
     }
 
     @PostMapping("/generate/all")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Generate predictions for all products")
-    public ResponseEntity<Map<String, String>> generateAllPredictions() {
-        log.info("Déclenchement de la génération globale des prédictions");
+    @Operation(summary = "Generate predictions for all products (async)")
+    public ResponseEntity<Map<String, Object>> generateAllPredictions() {
+        log.info("🚀 Déclenchement de la génération globale des prédictions");
+
+        // Start async generation
         new Thread(() -> predictionService.generateDailyPredictions()).start();
 
-        Map<String, String> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         response.put("message", "Génération des prédictions démarrée en arrière-plan");
         response.put("status", "PROCESSING");
         return ResponseEntity.accepted().body(response);
+    }
+
+    @PostMapping("/generate/sync")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Generate predictions synchronously (for testing)")
+    public ResponseEntity<Map<String, Object>> generatePredictionsSync(
+            @RequestParam(defaultValue = "10") int limit) {
+        log.info("🔄 Génération synchrone de {} prédictions", limit);
+        Map<String, Object> result = predictionService.generatePredictionsSync(limit);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/product/{productId}")
@@ -132,7 +151,7 @@ public class PredictionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
     @Operation(summary = "Get prediction count and coverage")
     public ResponseEntity<Map<String, Object>> getPredictionCount() {
-        long predictionCount = predictionService.getAllLatestPredictions().size();
+        long predictionCount = predictionService.getPredictionCount();
         long productCount = productRepository.count();
         boolean needsGeneration = predictionCount == 0 && productCount > 0;
         double coveragePercent = productCount > 0 ? ((double) predictionCount / productCount) * 100 : 0;
@@ -142,6 +161,9 @@ public class PredictionController {
         response.put("productCount", productCount);
         response.put("needsGeneration", needsGeneration);
         response.put("coveragePercent", coveragePercent);
+
+        log.info("📊 Prédictions: {}/{} produits ({}%)", predictionCount, productCount, String.format("%.1f", coveragePercent));
+
         return ResponseEntity.ok(response);
     }
 
@@ -157,7 +179,7 @@ public class PredictionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
     @Operation(summary = "Get advanced analysis")
     public ResponseEntity<?> getAdvancedAnalysis(@PathVariable String productId) {
-        log.info("Demande d'analyse avancée pour le produit: {}", productId);
+        log.info("📊 Demande d'analyse avancée pour le produit: {}", productId);
 
         Optional<Product> productOpt = productRepository.findByAsin(productId);
         if (productOpt.isEmpty()) {
@@ -176,7 +198,7 @@ public class PredictionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
     @Operation(summary = "Get health score")
     public ResponseEntity<?> getHealthScore(@PathVariable String productId) {
-        log.info("Demande de health score pour le produit: {}", productId);
+        log.info("💚 Demande de health score pour le produit: {}", productId);
 
         Optional<Product> productOpt = productRepository.findByAsin(productId);
         if (productOpt.isEmpty()) {
@@ -197,7 +219,7 @@ public class PredictionController {
     public ResponseEntity<?> getSalesForecast(
             @PathVariable String productId,
             @RequestParam(defaultValue = "30") int days) {
-        log.info("Demande de prévision pour le produit: {} ({} jours)", productId, days);
+        log.info("📈 Demande de prévision pour le produit: {} ({} jours)", productId, days);
 
         Optional<Product> productOpt = productRepository.findByAsin(productId);
         if (productOpt.isEmpty()) {
@@ -216,7 +238,7 @@ public class PredictionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'SELLER')")
     @Operation(summary = "Get momentum analysis")
     public ResponseEntity<?> getMomentumAnalysis(@PathVariable String productId) {
-        log.info("Demande d'analyse de momentum pour le produit: {}", productId);
+        log.info("🚀 Demande d'analyse de momentum pour le produit: {}", productId);
 
         Optional<Product> productOpt = productRepository.findByAsin(productId);
         if (productOpt.isEmpty()) {
@@ -232,65 +254,38 @@ public class PredictionController {
     }
 
     /**
-     * Build prediction request from product - handles nullable fields safely
+     * 🔧 FIXED: Build prediction request from product with proper NULL handling
+     * Supports both camelCase (Java) and snake_case (Python) field names
      */
     private PredictionRequestDTO buildPredictionRequest(Product product) {
-        // Safely get price as double - FIXED: Proper BigDecimal to double conversion
-        double currentPrice = (product.getPrice() != null)
-                ? product.getPrice().doubleValue()
-                : 0.0;
+        // Safely get price as double
+        Double currentPrice = safeDouble(product.getPrice(), 0.0);
 
         // Safely get rating
-        double rating = (product.getRating() != null)
-                ? product.getRating().doubleValue()
-                : 0.0;
+        Double rating = safeDouble(product.getRating(), 3.0);
 
-        // Safely get review count
-        int reviewCount = (product.getReviewCount() != null)
-                ? product.getReviewCount()
-                : 0;
-
-        // Safely get sales count
-        int salesCount = (product.getSalesCount() != null)
-                ? product.getSalesCount()
-                : 0;
-
-        // Safely get stock quantity
-        int stockQuantity = (product.getStockQuantity() != null)
-                ? product.getStockQuantity()
-                : 0;
+        // Safely get counts
+        Integer reviewCount = safeInt(product.getReviewsCount(), 0);
+        Integer salesCount = safeInt(product.getSalesCount(), 0);
+        Integer stockQuantity = safeInt(product.getStockQuantity(), 100);
 
         // Calculate days since listed
-        int daysSinceListed = 30;
-        if (product.getCreatedAt() != null) {
-            daysSinceListed = (int) ChronoUnit.DAYS.between(
-                    product.getCreatedAt(),
-                    LocalDateTime.now()
-            );
-            if (daysSinceListed < 0) daysSinceListed = 0;
-        }
+        Integer daysSinceListed = calculateDaysSinceListed(product.getCreatedAt());
 
-        // Safely get seller rating
-        double sellerRating = 4.0;
-        if (product.getSeller() != null && product.getSeller().getSellerRating() != null) {
-            sellerRating = product.getSeller().getSellerRating();
-        }
+        // Safely get seller rating with fallback
+        Double sellerRating = getSellerRating(product);
 
         // Safely get discount percentage
-        double discountPercentage = (product.getDiscountPercentage() != null)
-                ? product.getDiscountPercentage()
-                : 0.0;
+        Double discountPercentage = safeDouble(product.getDiscountPercentage(), 0.0);
 
         // Safely get category name
-        String categoryName = "Electronics";
-        if (product.getCategory() != null && product.getCategory().getName() != null) {
-            categoryName = product.getCategory().getName();
-        }
+        String categoryName = getCategoryName(product);
 
         // Safely get ranking
-        int ranking = (product.getRanking() != null)
-                ? product.getRanking()
-                : 100;
+        Integer ranking = safeInt(product.getRanking(), 100);
+
+        log.debug("🔧 Built prediction request - Price: {}, Rating: {}, Reviews: {}, Sales: {}, Stock: {}, Days: {}, Seller: {}, Category: {}",
+                currentPrice, rating, reviewCount, salesCount, stockQuantity, daysSinceListed, sellerRating, categoryName);
 
         return PredictionRequestDTO.builder()
                 .productId(product.getAsin())
@@ -306,5 +301,45 @@ public class PredictionController {
                 .category(categoryName)
                 .currentRanking(ranking)
                 .build();
+    }
+
+    /**
+     * Helper methods for safe NULL handling
+     */
+    private Double safeDouble(BigDecimal value, Double defaultValue) {
+        return (value != null) ? value.doubleValue() : defaultValue;
+    }
+
+    private Double safeDouble(Double value, Double defaultValue) {
+        return (value != null) ? value : defaultValue;
+    }
+
+    private Integer safeInt(Integer value, Integer defaultValue) {
+        return (value != null) ? value : defaultValue;
+    }
+
+    private Integer calculateDaysSinceListed(LocalDateTime createdAt) {
+        if (createdAt != null) {
+            long days = ChronoUnit.DAYS.between(createdAt, LocalDateTime.now());
+            return (int) Math.max(0, days);
+        }
+        return 30; // Default
+    }
+
+    private Double getSellerRating(Product product) {
+        if (product.getSeller() != null) {
+            Double rating = product.getSeller().getSellerRating();
+            if (rating != null && rating >= 1.0 && rating <= 5.0) {
+                return rating;
+            }
+        }
+        return 4.0; // Default seller rating
+    }
+
+    private String getCategoryName(Product product) {
+        if (product.getCategory() != null && product.getCategory().getName() != null) {
+            return product.getCategory().getName();
+        }
+        return "Electronics"; // Default category
     }
 }

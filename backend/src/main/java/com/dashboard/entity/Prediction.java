@@ -24,8 +24,8 @@ public class Prediction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "product_id", nullable = false, length = 20)
-    private String productId;  // Changé de Long à String (asin)
+    @Column(name = "product_asin", nullable = false)
+    private String productAsin;  // ← Vérifiez ça!
 
     @Column(name = "product_name")
     private String productName;

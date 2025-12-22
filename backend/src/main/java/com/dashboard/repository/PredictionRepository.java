@@ -13,9 +13,9 @@ import java.util.Optional;
 @Repository
 public interface PredictionRepository extends JpaRepository<Prediction, Long> {
 
-    List<Prediction> findByProductIdOrderByGeneratedAtDesc(String productId);
+    List<Prediction> findByProductAsinOrderByGeneratedAtDesc(String productAsin);
 
-    Optional<Prediction> findFirstByProductIdOrderByGeneratedAtDesc(String productId);
+    Optional<Prediction> findFirstByProductAsinOrderByGeneratedAtDesc(String productAsin);
 
     List<Prediction> findBySellerIdOrderByGeneratedAtDesc(Long sellerId);
 
@@ -27,13 +27,19 @@ public interface PredictionRepository extends JpaRepository<Prediction, Long> {
 
     List<Prediction> findByPriceActionNotOrderByPriceChangePercentageDesc(String priceAction);
 
+    Optional<Prediction> findTopByProductAsinOrderByGeneratedAtDesc(String productAsin);
+
+    @Query("SELECT p FROM Prediction p WHERE p.id IN " +
+            "(SELECT MAX(p2.id) FROM Prediction p2 GROUP BY p2.productAsin)")
+    List<Prediction> findLatestPredictionsForAllProducts();
+
+    @Query("SELECT p.category, COUNT(p), AVG(p.bestsellerProbability), AVG(p.priceChangePercentage) " +
+            "FROM Prediction p GROUP BY p.category")
+    List<Object[]> getPredictionStatsByCategory();
+
     @Query("SELECT p FROM Prediction p WHERE p.notificationSent = false AND " +
             "(p.isPotentialBestseller = true OR ABS(p.priceChangePercentage) > 15)")
     List<Prediction> findPredictionsRequiringNotification();
-
-    @Query("SELECT p FROM Prediction p WHERE p.generatedAt = " +
-            "(SELECT MAX(p2.generatedAt) FROM Prediction p2 WHERE p2.productId = p.productId)")
-    List<Prediction> findLatestPredictionsForAllProducts();
 
     @Query("SELECT p FROM Prediction p WHERE p.rankingChange >= : minChange ORDER BY p.rankingChange DESC")
     List<Prediction> findPredictionsWithRankingImprovement(@Param("minChange") Integer minChange);
@@ -43,9 +49,4 @@ public interface PredictionRepository extends JpaRepository<Prediction, Long> {
 
     List<Prediction> findBySellerIdAndNotificationSentFalse(Long sellerId);
 
-    @Query("SELECT p.category, COUNT(p), AVG(p.bestsellerProbability), AVG(p.priceChangePercentage) " +
-            "FROM Prediction p WHERE p.generatedAt = " +
-            "(SELECT MAX(p2.generatedAt) FROM Prediction p2 WHERE p2.productId = p.productId) " +
-            "GROUP BY p.category")
-    List<Object[]> getPredictionStatsByCategory();
 }

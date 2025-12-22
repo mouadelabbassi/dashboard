@@ -10,9 +10,9 @@ import RatingDistributionChart from '../../components/ecommerce/RatingDistributi
 import TopCategoriesRevenueChart from '../../components/ecommerce/TopCategoriesRevenueChart';
 import ReviewsCorrelationChart from '../../components/ecommerce/ReviewsCorrelationChart';
 import TopSellersChart from '../../components/ecommerce/TopSellersChart';
-import ExportPDFButton from '../../components/ExportPDFButton';
 import { useAuth } from '../../context/AuthContext';
 import { getAdminDashboard, AdminDashboard } from '../../service/api';
+import ExportAdvancedPDFButton from "../../components/ExportAdvancedPDFButton.tsx";
 
 const Home: React.FC = () => {
     const { user } = useAuth();
@@ -52,7 +52,7 @@ const Home: React.FC = () => {
                             Here's what's happening with your platform today
                         </p>
                     </div>
-                    <ExportPDFButton type="admin" />
+                    <ExportAdvancedPDFButton/>
                 </div>
 
                 {adminStats && (

@@ -217,7 +217,7 @@ const NotificationsPage:React.FC = () => {
                         <span className="text-4xl">📭</span>
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        Aucune notification
+                        No Notification at the moment
                     </h3>
                     <p className="text-gray-500 dark:text-gray-400 mt-2">
                         {filter === 'unread'

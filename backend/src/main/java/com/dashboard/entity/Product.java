@@ -79,26 +79,21 @@ public class Product {
     @Builder.Default
     private Integer salesCount = 0;
 
-    // NEW: Seller reference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private User seller;
 
-    // NEW: Stock quantity
     @Column(name = "stock_quantity")
     private Integer stockQuantity;
 
-    // NEW: Approval status for seller products
     @Enumerated(EnumType.STRING)
     @Column(name = "approval_status", length = 20)
     @Builder.Default
     private ApprovalStatus approvalStatus = ApprovalStatus.APPROVED;
 
-    // NEW: When the product was submitted (for seller products)
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
 
-    // NEW: When approved
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
