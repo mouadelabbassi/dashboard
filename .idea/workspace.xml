@@ -4,19 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 30">
+    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 31">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/DashboardApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/DashboardApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Prediction.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Prediction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Product.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/PredictionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/PredictionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/FlaskMLClientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/FlaskMLClientService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PredictionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PredictionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/components/ExportAdvancedPDFButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/components/ExportAdvancedPDFButton.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/components/ExportPDFButton.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/Dashboard/Home.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/pages/Dashboard/Home.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/NotificationsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/pages/NotificationsPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/ImportController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PublicController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PublicController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/ReviewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/ReviewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/CsvImportService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/util/CsvHelper.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/data.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/dist/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/src/components/admin/CsvUploader.tsx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,7 +112,8 @@
       <workItem from="1766090440687" duration="13746000" />
       <workItem from="1766332478613" duration="6471000" />
       <workItem from="1766415331296" duration="677000" />
-      <workItem from="1766423412369" duration="532000" />
+      <workItem from="1766423412369" duration="4153000" />
+      <workItem from="1766431592622" duration="5627000" />
     </task>
     <task id="LOCAL-00001" summary="commit 28">
       <option name="closed" value="true" />
@@ -149,7 +147,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766332896906</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="commit 31">
+      <option name="closed" value="true" />
+      <created>1766424764135</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1766424764135</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -170,6 +176,7 @@
     <MESSAGE value="commit 28" />
     <MESSAGE value="commit 29" />
     <MESSAGE value="commit 30" />
-    <option name="LAST_COMMIT_MESSAGE" value="commit 30" />
+    <MESSAGE value="commit 31" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit 31" />
   </component>
 </project>
