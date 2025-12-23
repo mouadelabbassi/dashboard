@@ -4,14 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 31">
+    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 32">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Prediction.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Prediction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/components/auth/SignUpForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/components/auth/SignUpForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/PredictiveDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/PredictiveDashboard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/Reports.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/Reports.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PredictionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PredictionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/data.sql" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,7 +110,7 @@
       <workItem from="1766415331296" duration="677000" />
       <workItem from="1766423412369" duration="4153000" />
       <workItem from="1766431592622" duration="7111000" />
-      <workItem from="1766491988250" duration="7371000" />
+      <workItem from="1766491988250" duration="13700000" />
     </task>
     <task id="LOCAL-00001" summary="commit 28">
       <option name="closed" value="true" />
@@ -163,7 +160,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766442733724</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="commit 32">
+      <option name="closed" value="true" />
+      <created>1766512667372</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1766512667372</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -185,6 +190,7 @@
     <MESSAGE value="commit 29" />
     <MESSAGE value="commit 30" />
     <MESSAGE value="commit 31" />
-    <option name="LAST_COMMIT_MESSAGE" value="commit 31" />
+    <MESSAGE value="commit 32" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit 32" />
   </component>
 </project>

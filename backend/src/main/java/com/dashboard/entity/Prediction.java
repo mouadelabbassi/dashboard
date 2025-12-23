@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "predictions", indexes = {
-        @Index(name = "idx_prediction_product", columnList = "product_id"),
+        @Index(name = "idx_prediction_product", columnList = "product_asin"),
         @Index(name = "idx_prediction_seller", columnList = "seller_id"),
         @Index(name = "idx_prediction_generated", columnList = "generated_at"),
         @Index(name = "idx_prediction_bestseller", columnList = "is_potential_bestseller")
@@ -24,8 +24,8 @@ public class Prediction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "product_id", nullable = false)
-    private String productAsin;  // ← Vérifiez ça!
+    @Column(name = "product_asin", nullable = false)
+    private String productAsin;
 
     @Column(name = "product_name")
     private String productName;
@@ -36,7 +36,7 @@ public class Prediction {
     @Column(name = "category")
     private String category;
 
-    // ========== PRÉDICTION DE CLASSEMENT ==========
+    // ========== RANKING PREDICTION ==========
 
     @Column(name = "current_ranking")
     private Integer currentRanking;
@@ -53,7 +53,7 @@ public class Prediction {
     @Column(name = "ranking_confidence")
     private Double rankingConfidence;
 
-    // ========== PRÉDICTION BESTSELLER ==========
+    // ========== BESTSELLER PREDICTION ==========
 
     @Column(name = "bestseller_probability")
     private Double bestsellerProbability;
@@ -68,7 +68,7 @@ public class Prediction {
     @Column(name = "bestseller_confidence")
     private Double bestsellerConfidence;
 
-    // ========== RECOMMANDATION DE PRIX ==========
+    // ========== PRICE PREDICTION ==========
 
     @Column(name = "current_price")
     private Double currentPrice;
@@ -87,6 +87,8 @@ public class Prediction {
 
     @Column(name = "price_confidence")
     private Double priceConfidence;
+
+    // ========== METADATA ==========
 
     @CreationTimestamp
     @Column(name = "generated_at", nullable = false, updatable = false)
