@@ -14,6 +14,46 @@ from utils.db_config import DatabaseConfig
 app = Flask(__name__)
 CORS(app)
 
+def map_spring_boot_to_ml_format(data: dict) -> dict:
+    """Map Spring Boot column names to ML expected format"""
+    mapping = {
+        'productId': 'asin',
+        'currentPrice': 'price',
+        'rating': 'amazon_rating',
+        'reviewCount': 'amazon_reviews',
+        'currentRanking': 'amazon_rank',
+        'salesCount': 'total_units_sold',
+        'stockQuantity': 'stock_quantity',
+        'daysSinceListed': 'days_since_listed',
+        'sellerRating': 'combined_rating',
+        'category': 'category'
+    }
+
+    mapped_data = {}
+    for spring_key, ml_key in mapping.items():
+        if spring_key in data:
+            mapped_data[ml_key] = data[spring_key]
+
+    # Add default values for missing fields
+    mapped_data.setdefault('no_of_sellers', 1)
+    mapped_data.setdefault('product_source', 'Platform')
+    mapped_data.setdefault('has_sales', 1 if mapped_data.get('total_units_sold', 0) > 0 else 0)
+    mapped_data.setdefault('has_amazon_data', 1 if mapped_data.get('amazon_rank') else 0)
+    mapped_data.setdefault('sales_velocity',
+                           float(mapped_data.get('total_units_sold', 0)) / max(float(mapped_data.get('days_since_listed', 1)), 1))
+
+    # Ensure numeric types
+    if 'price' in mapped_data:
+        mapped_data['price'] = float(mapped_data['price'])
+    if 'amazon_rating' in mapped_data:
+        mapped_data['amazon_rating'] = float(mapped_data['amazon_rating']) if mapped_data['amazon_rating'] else 3.5
+    if 'amazon_reviews' in mapped_data:
+        mapped_data['amazon_reviews'] = int(mapped_data['amazon_reviews']) if mapped_data['amazon_reviews'] else 0
+    if 'amazon_rank' in mapped_data:
+        mapped_data['amazon_rank'] = int(mapped_data['amazon_rank']) if mapped_data['amazon_rank'] else 9999
+
+    return mapped_data
+
 class MLPredictionService:
 
     def __init__(self, models_dir='models'):
@@ -103,19 +143,9 @@ class MLPredictionService:
                 WHERE p.asin = %s \
                 """
 
-        print(f"\n=== DEBUG get_product_data for ASIN: {asin} ===")
-
         results = self.db.execute_query(query, (asin,))
-
-        print(f"Query returned: {results}")
-        print(f"Result type: {type(results)}")
-
         if not results:
-            print("ERROR: No results returned!")
             return None
-
-        print(f"First result: {results[0]}")
-        print(f"Result length: {len(results[0])}")
 
         columns = [
             'asin', 'price', 'amazon_rating', 'amazon_reviews', 'amazon_rank',
@@ -124,20 +154,12 @@ class MLPredictionService:
             'combined_rating', 'combined_reviews', 'days_since_listed'
         ]
 
-        print(f"Column names count: {len(columns)}")
-
         product = dict(zip(columns, results[0]))
 
-        print(f"\n=== PRODUCT DICT ===")
-        for key, value in product.items():
-            print(f"  {key}: {value} (type: {type(value)})")
-
-        # Add derived fields
         product['sales_velocity'] = float(product['total_units_sold']) / max(float(product['days_since_listed']), 1)
         product['has_sales'] = 1 if product['total_units_sold'] > 0 else 0
         product['has_amazon_data'] = 1 if product['amazon_rank'] is not None else 0
 
-        # Ensure numeric types
         product['price'] = float(product['price']) if product['price'] is not None else 0.0
         product['amazon_rating'] = float(product['amazon_rating']) if product['amazon_rating'] is not None else 3.5
         product['amazon_reviews'] = int(product['amazon_reviews']) if product['amazon_reviews'] is not None else 0
@@ -145,23 +167,10 @@ class MLPredictionService:
         product['no_of_sellers'] = int(product['no_of_sellers']) if product['no_of_sellers'] is not None else 1
         product['days_since_listed'] = int(product['days_since_listed']) if product['days_since_listed'] is not None else 0
 
-        print(f"\n=== AFTER TYPE CONVERSION ===")
-        print(f"price: {product['price']} (type: {type(product['price'])})")
-        print(f"=== END DEBUG ===\n")
-
         return product
 
     def predict_bestseller(self, product_data: dict) -> dict:
-        print(f"\n=== predict_bestseller START ===")
-        print(f"product_data keys: {product_data.keys()}")
-        print(f"'price' in keys: {'price' in product_data}")
-
         df = pd.DataFrame([product_data])
-
-        print(f"DataFrame columns: {df.columns.tolist()}")
-        print(f"DataFrame shape: {df.shape}")
-        print(f"'price' in df.columns: {'price' in df.columns}")
-
         df = self.feature_engineer.transform(df)
 
         features = self.features['bestseller_detection']
@@ -260,7 +269,7 @@ class MLPredictionService:
             price_pred = self.predict_price(product_data)
 
             return {
-                'productAsin': product_data['asin'],
+                'productAsin': product_data.get('asin', product_data.get('productId', 'unknown')),
                 'bestseller': bestseller_pred,
                 'ranking': ranking_pred,
                 'price': price_pred,
@@ -300,11 +309,13 @@ def predict_full():
             return jsonify({'error': 'No data provided'}), 400
 
         if 'asin' in data:
+            # Request with ASIN - fetch from database
             product_data = ml_service.get_product_data(data['asin'])
             if not product_data:
                 return jsonify({'error': 'Product not found'}), 404
         else:
-            product_data = data
+            # Request with Spring Boot format - map column names
+            product_data = map_spring_boot_to_ml_format(data)
 
         prediction = ml_service.predict_full(product_data)
 
@@ -363,7 +374,7 @@ def predict_bestseller():
         if 'asin' in data:
             product_data = ml_service.get_product_data(data['asin'])
         else:
-            product_data = data
+            product_data = map_spring_boot_to_ml_format(data)
 
         prediction = ml_service.predict_bestseller(product_data)
         return jsonify(prediction), 200
@@ -379,7 +390,7 @@ def predict_ranking():
         if 'asin' in data:
             product_data = ml_service.get_product_data(data['asin'])
         else:
-            product_data = data
+            product_data = map_spring_boot_to_ml_format(data)
 
         prediction = ml_service.predict_ranking(product_data)
         return jsonify(prediction), 200
@@ -395,7 +406,7 @@ def predict_price():
         if 'asin' in data:
             product_data = ml_service.get_product_data(data['asin'])
         else:
-            product_data = data
+            product_data = map_spring_boot_to_ml_format(data)
 
         prediction = ml_service.predict_price(product_data)
         return jsonify(prediction), 200
