@@ -1,28 +1,42 @@
 import os
 from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent
+
 class Config:
-    BASE_DIR = Path(__file__).parent.absolute()
-    HOST = os.getenv('FLASK_HOST', '0.0.0.0')
-    PORT = int(os.getenv('FLASK_PORT', 5001))
-    DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
-    MODELS_DIR = os.path.join(BASE_DIR, 'models')
-    RANKING_MODEL_FILE = 'ranking_model.pkl'
-    BESTSELLER_MODEL_FILE = 'bestseller_model.pkl'
-    PRICE_MODEL_FILE = 'price_recommendation_model.pkl'
-    SCALER_FILE = 'feature_scaler.pkl'
-    LABEL_ENCODERS_FILE = 'label_encoders.pkl'
-    METRICS_FILE = 'training_metrics.json'
-    BESTSELLER_THRESHOLD = 0.7
-    PRICE_VARIATION_THRESHOLD = 0.15
-    SPRING_BOOT_URL = os.getenv('SPRING_BOOT_URL', 'http://localhost:8080')
+
+    DB_CONFIG = {
+        'host': os.getenv('DB_HOST', 'localhost'),
+        'port': int(os.getenv('DB_PORT', 3306)),
+        'database': os.getenv('DB_NAME', 'dashboard_db'),
+        'user': os.getenv('DB_USER', 'root'),
+        'password': os.getenv('DB_PASSWORD', 'kali')
+    }
+
+    MODELS_DIR = BASE_DIR / 'models'
+    DATA_DIR = BASE_DIR / 'data'
+    LOGS_DIR = BASE_DIR / 'logs'
+
+    FLASK_HOST = os.getenv('FLASK_HOST', '0.0.0.0')
+    FLASK_PORT = int(os.getenv('FLASK_PORT', 5001))
+    FLASK_DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
+
+    MODEL_VERSION = '1.0.0'
+
+    BESTSELLER_THRESHOLDS = {
+        'very_high': 80,
+        'high': 60,
+        'medium': 40,
+        'low': 0
+    }
+
+    PRICE_CHANGE_THRESHOLD = 5.0
+    RANKING_CHANGE_THRESHOLD = 100
 
     @classmethod
-    def get_model_path(cls, model_name):
-        """Retourne le chemin complet d'un fichier de modèle"""
-        return os.path.join(cls.MODELS_DIR, model_name)
+    def init_directories(cls):
+        cls.MODELS_DIR.mkdir(exist_ok=True)
+        cls.DATA_DIR.mkdir(exist_ok=True)
+        cls.LOGS_DIR.mkdir(exist_ok=True)
 
-    @classmethod
-    def ensure_models_dir(cls):
-        """Crée le répertoire models s'il n'existe pas"""
-        os.makedirs(cls.MODELS_DIR, exist_ok=True)
+Config.init_directories()

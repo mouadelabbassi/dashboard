@@ -1,0 +1,10 @@
+[
+  "price_scaled",
+  "sales_velocity_scaled",
+  "product_source_binary",
+  "category_encoded",
+  "days_since_listed_scaled",
+  "rank_normalized_scaled",
+  "combined_rating",
+  "reviews_normalized_scaled"
+]

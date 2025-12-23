@@ -1,0 +1,32 @@
+{
+  "bestseller_detection": {
+    "accuracy": 0.9763313609467456,
+    "precision": 1.0,
+    "recall": 0.875,
+    "f1_score": 0.9333333333333333,
+    "training_samples": 393,
+    "test_samples": 169,
+    "feature_count": 8,
+    "bestseller_ratio": 0.18683274021352314,
+    "trained_at": "2025-12-23T18:29:35.127641"
+  },
+  "ranking_prediction": {
+    "r2_score": 0.9333635721126068,
+    "rmse": 5.300055893504308,
+    "mae": 2.614086956521739,
+    "training_samples": 91,
+    "test_samples": 23,
+    "feature_count": 12,
+    "trained_at": "2025-12-23T18:29:35.355045"
+  },
+  "price_optimization": {
+    "r2_score": 0.6439672393170028,
+    "rmse": 353.18019202325746,
+    "mae": 135.52486635851855,
+    "mape": 57.076640713901725,
+    "training_samples": 91,
+    "test_samples": 23,
+    "feature_count": 14,
+    "trained_at": "2025-12-23T18:29:35.451060"
+  }
+}

@@ -1,243 +1,421 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from functools import wraps
+import pickle
+import json
+import pandas as pd
+from datetime import datetime
+import os
+import sys
 import traceback
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from feature_engineering.hybrid_features import HybridFeatureEngineer
+from utils.db_config import DatabaseConfig
 
-from config import Config
-from predict import prediction_service
-
-# Initialisation Flask
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins":  "*"}})
+CORS(app)
 
-# Chargement des modèles au démarrage
-print("\n" + "="*60)
-print("🚀 DÉMARRAGE DU MICROSERVICE ML")
-print("   Plateforme MouadVision")
-print("="*60)
+class MLPredictionService:
 
-models_loaded = prediction_service.load_models()
+    def __init__(self, models_dir='models'):
+        self.models_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), models_dir)
+        self.models = {}
+        self.features = {}
+        self.metrics = {}
+        self.feature_engineer = None
+        self.db = DatabaseConfig()
+        self.load_all_models()
 
-if not models_loaded:
-    print("\n⚠️ ATTENTION:  Les modèles ne sont pas chargés!")
-    print("   Exécutez:  python train_model.py")
-print("="*60)
-
-
-def handle_errors(f):
-    """Décorateur pour la gestion des erreurs."""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def load_all_models(self):
         try:
-            return f(*args, **kwargs)
+            model_types = ['bestseller_detection', 'ranking_prediction', 'price_optimization']
+
+            for model_type in model_types:
+                model_path = os.path.join(self.models_dir, model_type, 'model.pkl')
+                features_path = os.path.join(self.models_dir, model_type, 'features.json')
+
+                with open(model_path, 'rb') as f:
+                    self.models[model_type] = pickle.load(f)
+
+                with open(features_path, 'r') as f:
+                    self.features[model_type] = json.load(f)
+
+            metrics_path = os.path.join(self.models_dir, 'metrics.json')
+            with open(metrics_path, 'r') as f:
+                self.metrics = json.load(f)
+
+            feature_engineer_path = os.path.join(self.models_dir, 'feature_engineer.pkl')
+            self.feature_engineer = HybridFeatureEngineer.load(feature_engineer_path)
+
+            print("✓ All models loaded successfully")
+            print(f"  - Bestseller Detection: {self.metrics['bestseller_detection']['accuracy']:.2%} accuracy")
+            print(f"  - Ranking Prediction: {self.metrics['ranking_prediction']['r2_score']:.3f} R²")
+            print(f"  - Price Optimization: {self.metrics['price_optimization']['mape']:.2f}% MAPE")
+
         except Exception as e:
+            print(f"✗ Error loading models: {str(e)}")
+            raise
+
+    def get_product_data(self, asin: str) -> dict:
+        query = """
+                SELECT
+                    p.asin,
+                    p.price,
+                    p.rating as amazon_rating,
+                    p.reviews_count as amazon_reviews,
+                    p.ranking as amazon_rank,
+                    p.no_of_sellers,
+                    p.sales_count,
+                    p.stock_quantity,
+                    p.created_at,
+                    c.name as category,
+                    CASE WHEN p.seller_id IS NULL THEN 'Platform' ELSE 'Seller' END as product_source,
+                    COALESCE(
+                            (SELECT SUM(oi.quantity)
+                             FROM order_items oi
+                                      JOIN orders o ON oi.order_id = o.id
+                             WHERE oi.product_asin = p.asin
+                               AND o.status NOT IN ('CANCELLED', 'REFUNDED')),
+                            0
+                    ) as total_units_sold,
+                    COALESCE(
+                            (SELECT COUNT(DISTINCT o.id)
+                             FROM order_items oi
+                                      JOIN orders o ON oi.order_id = o.id
+                             WHERE oi.product_asin = p.asin
+                               AND o.status NOT IN ('CANCELLED', 'REFUNDED')),
+                            0
+                    ) as order_count,
+                    COALESCE(
+                            (SELECT AVG(rating)
+                             FROM product_reviews
+                             WHERE product_asin = p.asin),
+                            p.rating
+                    ) as combined_rating,
+                    COALESCE(
+                            (SELECT COUNT(*)
+                             FROM product_reviews
+                             WHERE product_asin = p.asin),
+                            0
+                    ) + COALESCE(p.reviews_count, 0) as combined_reviews,
+                    DATEDIFF(NOW(), p.created_at) as days_since_listed
+                FROM products p
+                         LEFT JOIN categories c ON p.category_id = c.id
+                WHERE p.asin = %s \
+                """
+
+        print(f"\n=== DEBUG get_product_data for ASIN: {asin} ===")
+
+        results = self.db.execute_query(query, (asin,))
+
+        print(f"Query returned: {results}")
+        print(f"Result type: {type(results)}")
+
+        if not results:
+            print("ERROR: No results returned!")
+            return None
+
+        print(f"First result: {results[0]}")
+        print(f"Result length: {len(results[0])}")
+
+        columns = [
+            'asin', 'price', 'amazon_rating', 'amazon_reviews', 'amazon_rank',
+            'no_of_sellers', 'sales_count', 'stock_quantity', 'created_at',
+            'category', 'product_source', 'total_units_sold', 'order_count',
+            'combined_rating', 'combined_reviews', 'days_since_listed'
+        ]
+
+        print(f"Column names count: {len(columns)}")
+
+        product = dict(zip(columns, results[0]))
+
+        print(f"\n=== PRODUCT DICT ===")
+        for key, value in product.items():
+            print(f"  {key}: {value} (type: {type(value)})")
+
+        # Add derived fields
+        product['sales_velocity'] = float(product['total_units_sold']) / max(float(product['days_since_listed']), 1)
+        product['has_sales'] = 1 if product['total_units_sold'] > 0 else 0
+        product['has_amazon_data'] = 1 if product['amazon_rank'] is not None else 0
+
+        # Ensure numeric types
+        product['price'] = float(product['price']) if product['price'] is not None else 0.0
+        product['amazon_rating'] = float(product['amazon_rating']) if product['amazon_rating'] is not None else 3.5
+        product['amazon_reviews'] = int(product['amazon_reviews']) if product['amazon_reviews'] is not None else 0
+        product['amazon_rank'] = int(product['amazon_rank']) if product['amazon_rank'] is not None else 9999
+        product['no_of_sellers'] = int(product['no_of_sellers']) if product['no_of_sellers'] is not None else 1
+        product['days_since_listed'] = int(product['days_since_listed']) if product['days_since_listed'] is not None else 0
+
+        print(f"\n=== AFTER TYPE CONVERSION ===")
+        print(f"price: {product['price']} (type: {type(product['price'])})")
+        print(f"=== END DEBUG ===\n")
+
+        return product
+
+    def predict_bestseller(self, product_data: dict) -> dict:
+        print(f"\n=== predict_bestseller START ===")
+        print(f"product_data keys: {product_data.keys()}")
+        print(f"'price' in keys: {'price' in product_data}")
+
+        df = pd.DataFrame([product_data])
+
+        print(f"DataFrame columns: {df.columns.tolist()}")
+        print(f"DataFrame shape: {df.shape}")
+        print(f"'price' in df.columns: {'price' in df.columns}")
+
+        df = self.feature_engineer.transform(df)
+
+        features = self.features['bestseller_detection']
+        X = df[features]
+
+        prediction = self.models['bestseller_detection'].predict(X)[0]
+        probability = self.models['bestseller_detection'].predict_proba(X)[0]
+
+        bestseller_probability = float(probability[1] * 100)
+
+        if bestseller_probability >= 80:
+            confidence = "Very High"
+        elif bestseller_probability >= 60:
+            confidence = "High"
+        elif bestseller_probability >= 40:
+            confidence = "Medium"
+        else:
+            confidence = "Low"
+
+        return {
+            'isPotentialBestseller': bool(prediction),
+            'bestsellerProbability': round(bestseller_probability, 2),
+            'bestsellerScore': round(float(df['bestseller_score'].iloc[0]) * 100, 2),
+            'confidence': confidence
+        }
+
+    def predict_ranking(self, product_data: dict) -> dict:
+        df = pd.DataFrame([product_data])
+        df = self.feature_engineer.transform(df)
+
+        features = self.features['ranking_prediction']
+        X = df[features]
+
+        predicted_rank = int(self.models['ranking_prediction'].predict(X)[0])
+        current_rank = product_data.get('amazon_rank') or product_data.get('combined_rank', 9999)
+
+        if isinstance(current_rank, float):
+            current_rank = int(current_rank)
+
+        ranking_change = current_rank - predicted_rank
+
+        if ranking_change > 100:
+            trend = "IMPROVING"
+        elif ranking_change < -100:
+            trend = "DECLINING"
+        else:
+            trend = "STABLE"
+
+        mae = self.metrics['ranking_prediction']['mae']
+        confidence = max(0, min(100, 100 - (mae / current_rank * 100)))
+
+        return {
+            'predictedRanking': predicted_rank,
+            'currentRanking': current_rank,
+            'rankingChange': ranking_change,
+            'trend': trend,
+            'confidence': round(confidence, 2)
+        }
+
+    def predict_price(self, product_data: dict) -> dict:
+        df = pd.DataFrame([product_data])
+        df = self.feature_engineer.transform(df)
+
+        features = self.features['price_optimization']
+        X = df[features]
+
+        recommended_price = float(self.models['price_optimization'].predict(X)[0])
+        current_price = float(product_data['price'])
+
+        price_difference = recommended_price - current_price
+        price_change_percentage = (price_difference / current_price) * 100
+
+        if abs(price_change_percentage) < 5:
+            price_action = "MAINTAIN"
+        elif price_change_percentage > 0:
+            price_action = "INCREASE"
+        else:
+            price_action = "DECREASE"
+
+        mape = self.metrics['price_optimization']['mape']
+        confidence = max(0, 100 - mape)
+
+        return {
+            'currentPrice': round(current_price, 2),
+            'recommendedPrice': round(recommended_price, 2),
+            'priceDifference': round(price_difference, 2),
+            'priceChangePercentage': round(price_change_percentage, 2),
+            'priceAction': price_action,
+            'confidence': round(confidence, 2)
+        }
+
+    def predict_full(self, product_data: dict) -> dict:
+        try:
+            bestseller_pred = self.predict_bestseller(product_data)
+            ranking_pred = self.predict_ranking(product_data)
+            price_pred = self.predict_price(product_data)
+
+            return {
+                'productAsin': product_data['asin'],
+                'bestseller': bestseller_pred,
+                'ranking': ranking_pred,
+                'price': price_pred,
+                'generatedAt': datetime.now().isoformat(),
+                'modelVersion': '1.0.0'
+            }
+        except Exception as e:
+            print(f"Error in predict_full: {str(e)}")
             traceback.print_exc()
-            return jsonify({'error': str(e), 'success': False}), 500
-    return decorated_function
+            raise
 
-
-# ============================================================================
-# PAGE D'ACCUEIL
-# ============================================================================
-
-@app.route('/', methods=['GET'])
-def home():
-    """Page d'accueil du service ML."""
-    return jsonify({
-        'service': 'MouadVision ML Prediction Service',
-        'version': '2.0.0',
-        'status': 'running',
-        'models_ready':  prediction_service.is_loaded,
-        'endpoints': {
-            'health': 'GET /health',
-            'status': 'GET /status',
-            'metrics': 'GET /metrics',
-            'predict_ranking': 'POST /predict/ranking',
-            'predict_bestseller': 'POST /predict/bestseller',
-            'predict_price': 'POST /predict/price',
-            'predict_full': 'POST /predict/full',
-            'predict_batch': 'POST /predict/batch'
-        },
-        'documentation': 'Microservice Flask pour les prédictions ML de la plateforme MouadVision'
-    })
-
-
-# ============================================================================
-# ENDPOINTS DE SANTÉ
-# ============================================================================
+ml_service = MLPredictionService()
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    """Vérification de santé du service."""
     return jsonify({
         'status': 'healthy',
-        'service': 'ml-prediction-service',
-        'version': '2.0.0',
-        'models_ready':  prediction_service.is_loaded,
-        'available_models': list(prediction_service.models.keys())
+        'models_loaded': len(ml_service.models),
+        'timestamp': datetime.now().isoformat(),
+        'version': '1.0.0'
     })
-
-
-@app.route('/status', methods=['GET'])
-def get_status():
-    """Statut détaillé du service."""
-    return jsonify(prediction_service.get_model_status())
-
-
-# ============================================================================
-# ENDPOINTS DE PRÉDICTION
-# ============================================================================
-
-@app.route('/predict/ranking', methods=['POST'])
-@handle_errors
-def predict_ranking():
-    """Prédiction du classement futur."""
-    if not prediction_service.is_loaded:
-        return jsonify({'error': 'Modèles non chargés. Exécutez train_model.py', 'success': False}), 503
-
-    data = request.get_json()
-    if not data:
-        return jsonify({'error':  'Données JSON requises', 'success': False}), 400
-
-    result = prediction_service.predict_ranking(data)
-    return jsonify({'success': True, 'data': result})
-
-
-@app.route('/predict/bestseller', methods=['POST'])
-@handle_errors
-def predict_bestseller():
-    """Prédiction de la probabilité bestseller."""
-    if not prediction_service.is_loaded:
-        return jsonify({'error': 'Modèles non chargés.Exécutez train_model.py', 'success':  False}), 503
-
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Données JSON requises', 'success': False}), 400
-
-    result = prediction_service.predict_bestseller(data)
-    return jsonify({'success': True, 'data': result})
-
-
-@app.route('/predict/price', methods=['POST'])
-@handle_errors
-def predict_price():
-    """Recommandation de prix optimal."""
-    if not prediction_service.is_loaded:
-        return jsonify({'error': 'Modèles non chargés. Exécutez train_model.py', 'success': False}), 503
-
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Données JSON requises', 'success': False}), 400
-
-    result = prediction_service.predict_optimal_price(data)
-    return jsonify({'success': True, 'data': result})
-
-
-@app.route('/predict/full', methods=['POST'])
-@handle_errors
-def predict_full():
-    """Toutes les prédictions pour un produit."""
-    if not prediction_service.is_loaded:
-        return jsonify({'error': 'Modèles non chargés. Exécutez train_model.py', 'success': False}), 503
-
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Données JSON requises', 'success': False}), 400
-
-    result = prediction_service.get_full_prediction(data)
-    return jsonify({'success': True, 'data': result})
-
-
-@app.route('/predict/batch', methods=['POST'])
-@handle_errors
-def predict_batch():
-    """Prédictions en lot."""
-    if not prediction_service.is_loaded:
-        return jsonify({'error': 'Modèles non chargés.Exécutez train_model.py', 'success':  False}), 503
-
-    data = request.get_json()
-    if not data or 'products' not in data:
-        return jsonify({'error': 'Liste "products" requise', 'success': False}), 400
-
-    predictions = prediction_service.get_batch_predictions(data['products'])
-    return jsonify({
-        'success': True,
-        'data': {
-            'predictions': predictions,
-            'count': len(predictions)
-        }
-    })
-
 
 @app.route('/metrics', methods=['GET'])
 def get_metrics():
-    """Métriques d'entraînement des modèles."""
-    return jsonify(prediction_service.training_metrics)
+    return jsonify({
+        'metrics': ml_service.metrics,
+        'models': list(ml_service.models.keys()),
+        'timestamp': datetime.now().isoformat()
+    })
 
-@app.route('/predict/health-score', methods=['POST'])
-@handle_errors
-def predict_health_score():
-    '''Calcule le score de santé du produit.'''
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Données JSON requises', 'success': False}), 400
+@app.route('/predict/full', methods=['POST'])
+def predict_full():
+    try:
+        data = request.get_json()
 
-    result = advanced_service.calculate_product_health_score(data)
-    return jsonify({'success': True, 'data': result})
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
 
+        if 'asin' in data:
+            product_data = ml_service.get_product_data(data['asin'])
+            if not product_data:
+                return jsonify({'error': 'Product not found'}), 404
+        else:
+            product_data = data
 
-@app.route('/predict/forecast', methods=['POST'])
-@handle_errors
-def predict_forecast():
-    '''Prévision des ventes sur 30 jours.'''
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Données JSON requises', 'success': False}), 400
+        prediction = ml_service.predict_full(product_data)
 
-    days = data.get('forecast_days', 30)
-    result = advanced_service.forecast_sales(data, days=days)
-    return jsonify({'success': True, 'data': result})
+        return jsonify(prediction), 200
 
+    except Exception as e:
+        print(f"Error in predict_full endpoint: {str(e)}")
+        traceback.print_exc()
+        return jsonify({
+            'error': 'Prediction failed',
+            'message': str(e)
+        }), 500
 
-@app.route('/predict/momentum', methods=['POST'])
-@handle_errors
-def predict_momentum():
-    '''Détection de la tendance et du momentum.'''
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Données JSON requises', 'success': False}), 400
+@app.route('/predict/batch', methods=['POST'])
+def predict_batch():
+    try:
+        data = request.get_json()
+        asins = data.get('asins', [])
 
-    result = advanced_service.detect_trend_momentum(data)
-    return jsonify({'success': True, 'data': result})
+        if not asins:
+            return jsonify({'error': 'No ASINs provided'}), 400
 
+        predictions = []
+        errors = []
 
-@app.route('/predict/category-analysis', methods=['POST'])
-@handle_errors
-def predict_category_analysis():
-    '''Analyse de position dans la catégorie.'''
-    data = request.get_json()
-    if not data or 'product' not in data or 'category_products' not in data:
-        return jsonify({'error': 'product et category_products requis', 'success': False}), 400
+        for asin in asins:
+            try:
+                product_data = ml_service.get_product_data(asin)
+                if product_data:
+                    prediction = ml_service.predict_full(product_data)
+                    predictions.append(prediction)
+                else:
+                    errors.append({'asin': asin, 'error': 'Product not found'})
+            except Exception as e:
+                errors.append({'asin': asin, 'error': str(e)})
 
-    result = advanced_service.analyze_category_position(
-        data['product'],
-        data['category_products']
-    )
-    return jsonify({'success': True, 'data': result})
+        return jsonify({
+            'predictions': predictions,
+            'errors': errors,
+            'total': len(asins),
+            'successful': len(predictions),
+            'failed': len(errors)
+        }), 200
 
+    except Exception as e:
+        return jsonify({
+            'error': 'Batch prediction failed',
+            'message': str(e)
+        }), 500
+
+@app.route('/predict/bestseller', methods=['POST'])
+def predict_bestseller():
+    try:
+        data = request.get_json()
+
+        if 'asin' in data:
+            product_data = ml_service.get_product_data(data['asin'])
+        else:
+            product_data = data
+
+        prediction = ml_service.predict_bestseller(product_data)
+        return jsonify(prediction), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/predict/ranking', methods=['POST'])
+def predict_ranking():
+    try:
+        data = request.get_json()
+
+        if 'asin' in data:
+            product_data = ml_service.get_product_data(data['asin'])
+        else:
+            product_data = data
+
+        prediction = ml_service.predict_ranking(product_data)
+        return jsonify(prediction), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/predict/price', methods=['POST'])
+def predict_price():
+    try:
+        data = request.get_json()
+
+        if 'asin' in data:
+            product_data = ml_service.get_product_data(data['asin'])
+        else:
+            product_data = data
+
+        prediction = ml_service.predict_price(product_data)
+        return jsonify(prediction), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    print(f"\n🌐 Serveur démarré sur http://{Config.HOST}:{Config.PORT}")
-    print(f"📊 Endpoints disponibles:")
-    print(f"   - GET  /          (page d'accueil)")
-    print(f"   - GET  /health")
-    print(f"   - GET  /status")
-    print(f"   - GET  /metrics")
-    print(f"   - POST /predict/ranking")
-    print(f"   - POST /predict/bestseller")
-    print(f"   - POST /predict/price")
-    print(f"   - POST /predict/full")
-    print(f"   - POST /predict/batch")
-    print("="*60 + "\n")
+    print("\n" + "="*80)
+    print("MOUADVISION ML PREDICTION SERVICE")
+    print("="*80)
+    print("\nStarting Flask server on http://localhost:5001")
+    print("\nAvailable endpoints:")
+    print("  GET  /health              - Health check")
+    print("  GET  /metrics             - Model metrics")
+    print("  POST /predict/full        - Full prediction")
+    print("  POST /predict/batch       - Batch predictions")
+    print("  POST /predict/bestseller  - Bestseller only")
+    print("  POST /predict/ranking     - Ranking only")
+    print("  POST /predict/price       - Price only")
+    print("\n" + "="*80 + "\n")
 
-    app.run(host=Config.HOST, port=Config.PORT, debug=Config.DEBUG)
+    app.run(host='0.0.0.0', port=5001, debug=False)

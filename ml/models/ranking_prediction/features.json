@@ -1,0 +1,14 @@
+[
+  "price_scaled",
+  "amazon_rating_scaled",
+  "amazon_reviews_scaled",
+  "no_of_sellers_scaled",
+  "sales_velocity_scaled",
+  "category_encoded",
+  "price_vs_category_scaled",
+  "combined_rating",
+  "product_source_binary",
+  "sales_momentum_scaled",
+  "reviews_normalized_scaled",
+  "product_maturity"
+]
