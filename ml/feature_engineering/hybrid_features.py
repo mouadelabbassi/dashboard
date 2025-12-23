@@ -19,7 +19,7 @@ class HybridFeatureEngineer:
         df = self._impute_missing_values(df)
         df = self._create_ratio_features(df)
         df = self._create_categorical_features(df)
-        df = self._create_bestseller_labels(df)
+        df = self._create_bestseller_labels(df)  # This creates bestseller_score
         df = self._create_ranking_targets(df)
 
         numerical_features = self._get_numerical_features()
@@ -48,11 +48,15 @@ class HybridFeatureEngineer:
         return df, metadata
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Transform for prediction - MUST create bestseller_score"""
         df = df.copy()
 
         df = self._impute_missing_values(df)
         df = self._create_ratio_features(df)
         df = self._create_categorical_features(df)
+
+        # ✅ CRITICAL FIX: Always create bestseller_score during transform
+        df = self._create_bestseller_score(df)
 
         numerical_features = self._get_numerical_features()
         df = self._scale_features(df, numerical_features, fit=False)
@@ -144,7 +148,31 @@ class HybridFeatureEngineer:
 
         return df
 
+    def _create_bestseller_score(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        ✅ CRITICAL FIX: Standalone method to create bestseller_score
+        This is called during both fit_transform AND transform
+        """
+        # Normalize components
+        max_rank_norm = df['rank_normalized'].max() if df['rank_normalized'].max() > 0 else 1
+        max_sales_norm = df['sales_normalized'].max() if df['sales_normalized'].max() > 0 else 1
+        max_reviews_norm = df['reviews_normalized'].max() if df['reviews_normalized'].max() > 0 else 1
+
+        # Calculate bestseller score (0 to 1 scale)
+        df['bestseller_score'] = (
+                (1 - df['rank_normalized'] / max_rank_norm) * 0.4 +
+                (df['sales_normalized'] / max_sales_norm) * 0.3 +
+                (df.get('combined_rating', df['amazon_rating']) / 5.0) * 0.15 +
+                (df['reviews_normalized'] / max_reviews_norm) * 0.15
+        )
+
+        # Ensure score is between 0 and 1
+        df['bestseller_score'] = df['bestseller_score'].clip(0, 1)
+
+        return df
+
     def _create_bestseller_labels(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Create is_bestseller binary label AND bestseller_score"""
         if 'amazon_rank' in df.columns and df['amazon_rank'].notna().any():
             rank_threshold = df['amazon_rank'].quantile(0.1)
         else:
@@ -160,16 +188,8 @@ class HybridFeatureEngineer:
                 (df.get('sales_velocity', 0) >= velocity_threshold)
         ).astype(int)
 
-        max_rank_norm = df['rank_normalized'].max() if df['rank_normalized'].max() > 0 else 1
-        max_sales_norm = df['sales_normalized'].max() if df['sales_normalized'].max() > 0 else 1
-        max_reviews_norm = df['reviews_normalized'].max() if df['reviews_normalized'].max() > 0 else 1
-
-        df['bestseller_score'] = (
-                (1 - df['rank_normalized'] / max_rank_norm) * 0.4 +
-                (df['sales_normalized'] / max_sales_norm) * 0.3 +
-                (df.get('combined_rating', df['amazon_rating']) / 5.0) * 0.15 +
-                (df['reviews_normalized'] / max_reviews_norm) * 0.15
-        )
+        # Create bestseller_score
+        df = self._create_bestseller_score(df)
 
         return df
 

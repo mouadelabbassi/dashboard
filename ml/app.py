@@ -42,6 +42,15 @@ def map_spring_boot_to_ml_format(data: dict) -> dict:
     mapped_data.setdefault('sales_velocity',
                            float(mapped_data.get('total_units_sold', 0)) / max(float(mapped_data.get('days_since_listed', 1)), 1))
 
+    # Add missing fields with defaults
+    mapped_data.setdefault('days_since_last_sale', 9999)
+    mapped_data.setdefault('combined_reviews', mapped_data.get('amazon_reviews', 0))
+    mapped_data.setdefault('total_revenue', mapped_data.get('price', 0) * mapped_data.get('total_units_sold', 0))
+    mapped_data.setdefault('order_count', 0)
+    mapped_data.setdefault('unique_customers', 0)
+    mapped_data.setdefault('sales_acceleration', 0)
+    mapped_data.setdefault('revenue_per_order', 0)
+
     # Ensure numeric types
     if 'price' in mapped_data:
         mapped_data['price'] = float(mapped_data['price'])
@@ -140,7 +149,7 @@ class MLPredictionService:
                     DATEDIFF(NOW(), p.created_at) as days_since_listed
                 FROM products p
                          LEFT JOIN categories c ON p.category_id = c.id
-                WHERE p.asin = %s \
+                WHERE p.asin = %s
                 """
 
         results = self.db.execute_query(query, (asin,))
@@ -160,6 +169,14 @@ class MLPredictionService:
         product['has_sales'] = 1 if product['total_units_sold'] > 0 else 0
         product['has_amazon_data'] = 1 if product['amazon_rank'] is not None else 0
 
+        # Add missing fields with safe defaults
+        product['days_since_last_sale'] = 9999
+        product['total_revenue'] = float(product.get('price', 0)) * float(product.get('total_units_sold', 0))
+        product['unique_customers'] = 0
+        product['sales_acceleration'] = 0
+        product['revenue_per_order'] = 0
+
+        # Ensure numeric types
         product['price'] = float(product['price']) if product['price'] is not None else 0.0
         product['amazon_rating'] = float(product['amazon_rating']) if product['amazon_rating'] is not None else 3.5
         product['amazon_reviews'] = int(product['amazon_reviews']) if product['amazon_reviews'] is not None else 0
@@ -170,8 +187,9 @@ class MLPredictionService:
         return product
 
     def predict_bestseller(self, product_data: dict) -> dict:
+        """✅ FIXED: Properly handle bestseller_score from transformed DataFrame"""
         df = pd.DataFrame([product_data])
-        df = self.feature_engineer.transform(df)
+        df = self.feature_engineer.transform(df)  # This now creates bestseller_score
 
         features = self.features['bestseller_detection']
         X = df[features]
@@ -179,23 +197,45 @@ class MLPredictionService:
         prediction = self.models['bestseller_detection'].predict(X)[0]
         probability = self.models['bestseller_detection'].predict_proba(X)[0]
 
-        bestseller_probability = float(probability[1] * 100)
+        bestseller_probability = float(probability[1])
 
-        if bestseller_probability >= 80:
-            confidence = "Very High"
-        elif bestseller_probability >= 60:
-            confidence = "High"
-        elif bestseller_probability >= 40:
-            confidence = "Medium"
+        # ✅ FIXED: Safely extract bestseller_score
+        bestseller_score = float(df['bestseller_score'].iloc[0]) if 'bestseller_score' in df.columns else bestseller_probability
+
+        if bestseller_probability >= 0.80:
+            potential_level = "TRÈS ÉLEVÉ"
+            confidence = "TRÈS ÉLEVÉ"
+        elif bestseller_probability >= 0.60:
+            potential_level = "ÉLEVÉ"
+            confidence = "ÉLEVÉ"
+        elif bestseller_probability >= 0.40:
+            potential_level = "MODÉRÉ"
+            confidence = "MODÉRÉ"
         else:
-            confidence = "Low"
+            potential_level = "FAIBLE"
+            confidence = "FAIBLE"
+
+        recommendation = self._get_bestseller_recommendation(bestseller_probability)
 
         return {
             'isPotentialBestseller': bool(prediction),
-            'bestsellerProbability': round(bestseller_probability, 2),
-            'bestsellerScore': round(float(df['bestseller_score'].iloc[0]) * 100, 2),
-            'confidence': confidence
+            'bestsellerProbability': round(bestseller_probability, 4),
+            'bestsellerScore': round(bestseller_score, 4),
+            'potentialLevel': potential_level,
+            'confidence': round(bestseller_probability, 4),
+            'recommendation': recommendation
         }
+
+    def _get_bestseller_recommendation(self, probability: float) -> str:
+        """Generate actionable recommendation based on bestseller probability"""
+        if probability >= 0.80:
+            return "Excellent potentiel! Augmentez la visibilité marketing et optimisez le stock."
+        elif probability >= 0.60:
+            return "Bon potentiel. Considérez des promotions ciblées pour maximiser les ventes."
+        elif probability >= 0.40:
+            return "Potentiel modéré. Analysez les avis clients pour améliorer le produit."
+        else:
+            return "Potentiel faible. Réévaluez le positionnement prix et la stratégie marketing."
 
     def predict_ranking(self, product_data: dict) -> dict:
         df = pd.DataFrame([product_data])
@@ -213,21 +253,25 @@ class MLPredictionService:
         ranking_change = current_rank - predicted_rank
 
         if ranking_change > 100:
-            trend = "IMPROVING"
+            trend = "AMÉLIORATION"
+            trend_description = f"Amélioration prévue de {ranking_change} positions"
         elif ranking_change < -100:
-            trend = "DECLINING"
+            trend = "DÉCLIN"
+            trend_description = f"Déclin prévu de {abs(ranking_change)} positions"
         else:
             trend = "STABLE"
+            trend_description = "Classement stable prévu"
 
         mae = self.metrics['ranking_prediction']['mae']
-        confidence = max(0, min(100, 100 - (mae / current_rank * 100)))
+        confidence = max(0, min(1, 1 - (mae / max(current_rank, 1))))
 
         return {
             'predictedRanking': predicted_rank,
             'currentRanking': current_rank,
             'rankingChange': ranking_change,
             'trend': trend,
-            'confidence': round(confidence, 2)
+            'trendDescription': trend_description,
+            'confidence': round(confidence, 4)
         }
 
     def predict_price(self, product_data: dict) -> dict:
@@ -244,14 +288,20 @@ class MLPredictionService:
         price_change_percentage = (price_difference / current_price) * 100
 
         if abs(price_change_percentage) < 5:
-            price_action = "MAINTAIN"
+            price_action = "MAINTENIR"
+            action_description = "Le prix actuel est optimal"
+            should_notify = False
         elif price_change_percentage > 0:
-            price_action = "INCREASE"
+            price_action = "AUGMENTER"
+            action_description = f"Augmentation de {abs(price_change_percentage):.1f}% recommandée"
+            should_notify = abs(price_change_percentage) > 15
         else:
-            price_action = "DECREASE"
+            price_action = "DIMINUER"
+            action_description = f"Réduction de {abs(price_change_percentage):.1f}% recommandée"
+            should_notify = abs(price_change_percentage) > 15
 
         mape = self.metrics['price_optimization']['mape']
-        confidence = max(0, 100 - mape)
+        confidence = max(0, min(1, 1 - (mape / 100)))
 
         return {
             'currentPrice': round(current_price, 2),
@@ -259,7 +309,9 @@ class MLPredictionService:
             'priceDifference': round(price_difference, 2),
             'priceChangePercentage': round(price_change_percentage, 2),
             'priceAction': price_action,
-            'confidence': round(confidence, 2)
+            'actionDescription': action_description,
+            'shouldNotifySeller': should_notify,
+            'confidence': round(confidence, 4)
         }
 
     def predict_full(self, product_data: dict) -> dict:
@@ -366,54 +418,6 @@ def predict_batch():
             'message': str(e)
         }), 500
 
-@app.route('/predict/bestseller', methods=['POST'])
-def predict_bestseller():
-    try:
-        data = request.get_json()
-
-        if 'asin' in data:
-            product_data = ml_service.get_product_data(data['asin'])
-        else:
-            product_data = map_spring_boot_to_ml_format(data)
-
-        prediction = ml_service.predict_bestseller(product_data)
-        return jsonify(prediction), 200
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/predict/ranking', methods=['POST'])
-def predict_ranking():
-    try:
-        data = request.get_json()
-
-        if 'asin' in data:
-            product_data = ml_service.get_product_data(data['asin'])
-        else:
-            product_data = map_spring_boot_to_ml_format(data)
-
-        prediction = ml_service.predict_ranking(product_data)
-        return jsonify(prediction), 200
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/predict/price', methods=['POST'])
-def predict_price():
-    try:
-        data = request.get_json()
-
-        if 'asin' in data:
-            product_data = ml_service.get_product_data(data['asin'])
-        else:
-            product_data = map_spring_boot_to_ml_format(data)
-
-        prediction = ml_service.predict_price(product_data)
-        return jsonify(prediction), 200
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
 if __name__ == '__main__':
     print("\n" + "="*80)
     print("MOUADVISION ML PREDICTION SERVICE")
@@ -424,9 +428,6 @@ if __name__ == '__main__':
     print("  GET  /metrics             - Model metrics")
     print("  POST /predict/full        - Full prediction")
     print("  POST /predict/batch       - Batch predictions")
-    print("  POST /predict/bestseller  - Bestseller only")
-    print("  POST /predict/ranking     - Ranking only")
-    print("  POST /predict/price       - Price only")
     print("\n" + "="*80 + "\n")
 
     app.run(host='0.0.0.0', port=5001, debug=False)
