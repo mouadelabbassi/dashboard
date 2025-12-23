@@ -25,7 +25,7 @@ export default function SignUpForm() {
         email: "",
         password: "",
         role: "BUYER",
-        storeName: "", // NEW: Store name for sellers
+        storeName: "",
         securityQuestion: securityQuestions[0],
         securityAnswer: ""
     });

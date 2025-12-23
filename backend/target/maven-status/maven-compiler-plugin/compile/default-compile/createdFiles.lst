@@ -29,7 +29,6 @@ com\dashboard\entity\Order$OrderBuilder.class
 com\dashboard\repository\SellerStockRepository.class
 com\dashboard\service\AdminProductApprovalService.class
 com\dashboard\repository\OrderItemRepository.class
-com\dashboard\service\CsvImportService.class
 com\dashboard\dto\response\StockDashboardResponse$StockDashboardResponseBuilder.class
 com\dashboard\entity\SellerStock$StockStatus.class
 com\dashboard\dto\request\RegisterRequest.class
@@ -64,7 +63,6 @@ com\dashboard\dto\response\PredictionResponseDTO.class
 com\dashboard\dto\response\PredictionResponseDTO$PredictionResponseDTOBuilder.class
 com\dashboard\service\ReviewService.class
 com\dashboard\dto\request\CreateOrderRequest$OrderItemRequest$OrderItemRequestBuilder.class
-com\dashboard\util\CsvHelper.class
 com\dashboard\dto\response\AdvancedPredictionResponseDTO$Projection.class
 com\dashboard\dto\response\AuthResponse.class
 com\dashboard\dto\request\CreateOrderRequest$CreateOrderRequestBuilder.class
@@ -195,7 +193,6 @@ com\dashboard\dto\response\AuthResponse$AuthResponseBuilder.class
 com\dashboard\entity\SellerRevenue$SellerRevenueBuilder.class
 com\dashboard\dto\request\RegisterRequest$RegisterRequestBuilder.class
 com\dashboard\dto\response\AdvancedPredictionResponseDTO$Velocities.class
-com\dashboard\controller\ImportController.class
 com\dashboard\service\FlaskMLClientService.class
 com\dashboard\dto\response\SellerProfileResponse$SellerProfileResponseBuilder.class
 com\dashboard\controller\DashboardController.class

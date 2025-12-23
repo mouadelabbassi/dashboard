@@ -109,7 +109,7 @@ const Reports:React.FC = () => {
         URL.revokeObjectURL(link.href);
     };
 
-    // Excel export using XLSX format simulation (Tab-separated with .xls extension)
+
     const exportToExcel = (data:any[], filename:string, columns?:{ key:string; header:string }[]) => {
         if (!data || data.length === 0) {
             alert('No data to export');
@@ -580,7 +580,7 @@ const Reports:React.FC = () => {
                 </div>
 
                 {/* Products Export Card */}
-                <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-xl p-6 text-white relative overflow-hidden">
+                <div className="bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl shadow-xl p-6 text-white relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
 
@@ -653,7 +653,7 @@ const Reports:React.FC = () => {
                 </div>
 
                 {/* Sellers Export Card */}
-                <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-xl p-6 text-white relative overflow-hidden">
+                <div className="bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl shadow-xl p-6 text-white relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
 

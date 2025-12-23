@@ -223,7 +223,6 @@ const Badge:React.FC<{ children:React.ReactNode; variant:'success' | 'warning' |
 
 
 const PredictiveDashboard: React.FC = () => {
-    // États
     const [predictions, setPredictions] = useState<ProductPrediction[]>([]);
     const [stats, setStats] = useState<PredictionStats | null>(null);
     const [bestsellers, setBestsellers] = useState<ProductPrediction[]>([]);
