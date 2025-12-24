@@ -11,8 +11,10 @@ import java.time.LocalDateTime;
         @Index(name = "idx_prediction_product", columnList = "product_asin"),
         @Index(name = "idx_prediction_seller", columnList = "seller_id"),
         @Index(name = "idx_prediction_generated", columnList = "generated_at"),
-        @Index(name = "idx_prediction_bestseller", columnList = "is_potential_bestseller")
+        @Index(name = "idx_prediction_bestseller", columnList = "is_potential_bestseller"),
+        @Index(name = "idx_prediction_product_generated", columnList = "product_asin, generated_at")  // ✅ NEW: Composite index
 })
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -35,8 +37,6 @@ public class Prediction {
 
     @Column(name = "category")
     private String category;
-
-    // ========== RANKING PREDICTION ==========
 
     @Column(name = "current_ranking")
     private Integer currentRanking;

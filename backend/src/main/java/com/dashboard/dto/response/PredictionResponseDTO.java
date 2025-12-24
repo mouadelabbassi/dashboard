@@ -59,5 +59,7 @@ public class PredictionResponseDTO {
         private String actionDescription;
         private Boolean shouldNotifySeller;
         private Double confidence;
+        private Boolean isReliable;
+        private String reliabilityReason;
     }
 }

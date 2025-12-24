@@ -38,6 +38,11 @@ spring:
       max-file-size: 50MB
       max-request-size: 50MB
 
+  task:
+    scheduling:
+      pool:
+        size: 5
+
 # JWT Configuration
 jwt:
   secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
@@ -90,9 +95,3 @@ pagination:
   default-page-size: 20
   max-page-size: 100
 
-scheduling:
-  enabled:  true
-  daily-stats:
-    cron: "0 0 1 * * ?"
-  weekly-cleanup:
-    cron: "0 0 3 ?  * SUN"

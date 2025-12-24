@@ -87,12 +87,12 @@ public class PredictionController {
     public ResponseEntity<Map<String, Object>> generateAllPredictions() {
         log.info("🚀 Déclenchement de la génération globale des prédictions");
 
-        // Start async generation
-        new Thread(() -> predictionService.generateDailyPredictions()).start();
+        predictionService.generateDailyPredictionsAsync();
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Génération des prédictions démarrée en arrière-plan");
         response.put("status", "PROCESSING");
+        response.put("timestamp", LocalDateTime.now());
         return ResponseEntity.accepted().body(response);
     }
 

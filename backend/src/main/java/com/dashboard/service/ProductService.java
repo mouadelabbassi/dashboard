@@ -10,6 +10,7 @@ import com.dashboard.repository.CategoryRepository;
 import com.dashboard.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,6 +28,9 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+
+    @Autowired
+    private MLTrackingService mlTrackingService;
 
     @Transactional(readOnly = true)
     public Page<ProductResponse> getAllProducts(Pageable pageable) {
@@ -139,6 +143,53 @@ public class ProductService {
     }
 
     @Transactional
+    public ProductResponse updateProduct(String asin, ProductUpdateRequestDTO updateRequest) {
+        log.info("Updating product: {}", asin);
+
+        Product product = productRepository.findByAsin(asin)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + asin));
+
+        // ✅ FIXED: Track price changes BEFORE updating
+        if (updateRequest.getPrice() != null &&
+                updateRequest.getPrice().compareTo(product.getPrice()) != 0) {
+
+            mlTrackingService.trackPriceChange(
+                    asin,
+                    product.getPrice(),
+                    updateRequest.getPrice(),
+                    "MANUAL_UPDATE"
+            );
+        }
+
+        // Update fields
+        if (updateRequest.getPrice() != null) {
+            product.setPrice(updateRequest.getPrice());
+        }
+        if (updateRequest.getProductName() != null) {
+            product.setProductName(updateRequest.getProductName());
+        }
+        if (updateRequest.getStockQuantity() != null) {
+            product.setStockQuantity(updateRequest.getStockQuantity());
+        }
+        if (updateRequest.getCategoryId() != null) {
+            Category category = categoryRepository.findById(updateRequest.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            product.setCategory(category);
+        }
+        if (updateRequest.getDescription() != null) {
+            product.setDescription(updateRequest.getDescription());
+        }
+        if (updateRequest.getImageUrl() != null) {
+            product.setImageUrl(updateRequest.getImageUrl());
+        }
+
+        Product updatedProduct = productRepository.save(product);
+        log.info("✅ Product updated successfully: {}", asin);
+
+        return convertToDTO(updatedProduct);
+    }
+
+    @Transactional
     public ProductResponse updateProduct(String asin, ProductRequest request) {
         log.info("Updating product with ASIN: {}", asin);
 
@@ -148,6 +199,7 @@ public class ProductService {
         if (request.getProductName() != null) {
             product.setProductName(request.getProductName());
         }
+
         if (request.getDescription() != null) {
             product.setDescription(request.getDescription());
         }
@@ -239,4 +291,5 @@ public class ProductService {
                 .updatedAt(product.getUpdatedAt())
                 .build();
     }
+
 }

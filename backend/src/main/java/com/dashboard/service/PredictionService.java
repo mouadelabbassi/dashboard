@@ -13,9 +13,12 @@ import com.dashboard.repository.ProductRepository;
 import com.dashboard.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,43 +36,69 @@ public class PredictionService {
     private final ProductRepository productRepository;
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    @Autowired
+    private MLTrackingService mlTrackingService;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Optional<PredictionResponseDTO> generatePredictionForProduct(String productId) {
         log.info("🔮 Génération de prédiction pour le produit: {}", productId);
 
-        Optional<Product> productOpt = productRepository.findByAsin(productId);
-        if (productOpt.isEmpty()) {
-            log.warn("❌ Produit non trouvé: {}", productId);
+        try {
+            Optional<Product> productOpt = productRepository.findByAsin(productId);
+            if (productOpt.isEmpty()) {
+                log.warn("❌ Produit non trouvé: {}", productId);
+                return Optional.empty();
+            }
+
+            Product product = productOpt.get();
+            PredictionRequestDTO request = buildPredictionRequest(product);
+
+            Optional<Map<String, Object>> mlResponse = flaskClient.getFullPrediction(request);
+            if (mlResponse.isEmpty()) {
+                log.error("❌ Échec de la prédiction ML pour le produit: {}", productId);
+                return Optional.empty();
+            }
+
+            Map<String, Object> response = mlResponse.get();
+            Prediction prediction = createPredictionFromMap(product, response);
+
+            if (prediction.getProductAsin() == null || prediction.getProductAsin().isEmpty()) {
+                log.error("❌ Prédiction invalide (ASIN null) pour: {}", productId);
+                return Optional.empty();
+            }
+
+            Prediction savedPrediction = predictionRepository.save(prediction);
+            predictionRepository.flush();
+
+            // ✅ NEW: Track bestseller prediction for accuracy monitoring
+            if (savedPrediction.getBestsellerProbability() != null) {
+                mlTrackingService.trackBestsellerPrediction(
+                        productId,
+                        savedPrediction.getIsPotentialBestseller(),
+                        BigDecimal.valueOf(savedPrediction.getBestsellerProbability())
+                );
+            }
+
+            log.info("✅ Prédiction sauvegardée: {} (ID: {})", productId, savedPrediction.getId());
+
+            checkAndSendNotification(savedPrediction, product);
+
+            return Optional.of(convertToDTO(savedPrediction));
+
+        } catch (Exception e) {
+            log.error("❌ Exception lors de la prédiction pour {}: {}", productId, e.getMessage(), e);
             return Optional.empty();
         }
-
-        Product product = productOpt.get();
-        PredictionRequestDTO request = buildPredictionRequest(product);
-
-        Optional<Map<String, Object>> mlResponse = flaskClient.getFullPrediction(request);
-        if (mlResponse.isEmpty()) {
-            log.error("❌ Échec de la prédiction ML pour le produit: {}", productId);
-            return Optional.empty();
-        }
-
-        Map<String, Object> response = mlResponse.get();
-        Prediction prediction = createPredictionFromMap(product, response);
-
-        // ✅ Save to database
-        Prediction savedPrediction = predictionRepository.save(prediction);
-        log.info("✅ Prédiction sauvegardée pour: {} (ID: {})", productId, savedPrediction.getId());
-
-        checkAndSendNotification(savedPrediction, product);
-
-        return Optional.of(convertToDTO(savedPrediction));
     }
 
     public long getPredictionCount() {
         return predictionRepository.findLatestPredictionsForAllProducts().size();
     }
 
-    @Transactional
+    /**
+     * ✅ FIXED: No longer wraps everything in one transaction
+     * Each prediction is independent
+     */
     public Map<String, Object> generatePredictionsSync(int limit) {
         log.info("🔄 Génération synchrone de {} prédictions", limit);
 
@@ -92,23 +121,12 @@ public class PredictionService {
 
         for (Product product : products) {
             try {
-                PredictionRequestDTO request = buildPredictionRequest(product);
+                // ✅ Each call is in its own transaction
+                Optional<PredictionResponseDTO> result = generatePredictionForProduct(product.getAsin());
 
-                Optional<Map<String, Object>> mlResult = flaskClient.getFullPrediction(request);
-
-                if (mlResult.isPresent()) {
-                    Map<String, Object> result = mlResult.get();
-
-                    Prediction prediction = createPredictionFromMap(product, result);
-
-                    // ✅ Save to database
-                    Prediction saved = predictionRepository.save(prediction);
+                if (result.isPresent()) {
                     successCount++;
-
-                    log.debug("✅ Prédiction sauvegardée: {} (ID: {})", product.getAsin(), saved.getId());
-
-                    // Check notifications
-                    checkAndSendNotification(saved, product);
+                    log.debug("✅ Prédiction réussie: {}", product.getAsin());
                 } else {
                     failureCount++;
                     log.warn("❌ Échec prédiction pour: {}", product.getAsin());
@@ -118,7 +136,7 @@ public class PredictionService {
 
             } catch (Exception e) {
                 failureCount++;
-                log.error("❌ Erreur pour {}: {}", product.getAsin(), e.getMessage(), e);
+                log.error("❌ Exception pour {}: {}", product.getAsin(), e.getMessage());
             }
         }
 
@@ -136,7 +154,6 @@ public class PredictionService {
         return response;
     }
 
-    @Transactional
     public List<PredictionResponseDTO> generatePredictionsForSeller(Long sellerId) {
         log.info("🔮 Génération des prédictions pour le vendeur: {}", sellerId);
 
@@ -151,11 +168,13 @@ public class PredictionService {
         return predictions;
     }
 
+    @Transactional(readOnly = true)
     public Optional<PredictionResponseDTO> getLatestPrediction(String productId) {
         return predictionRepository.findTopByProductAsinOrderByGeneratedAtDesc(productId)
                 .map(this::convertToDTO);
     }
 
+    @Transactional(readOnly = true)
     public List<PredictionResponseDTO> getAllLatestPredictions() {
         return predictionRepository.findLatestPredictionsForAllProducts()
                 .stream()
@@ -163,6 +182,7 @@ public class PredictionService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PredictionResponseDTO> getPotentialBestsellers() {
         return predictionRepository.findByIsPotentialBestsellerTrueOrderByBestsellerProbabilityDesc()
                 .stream()
@@ -170,6 +190,7 @@ public class PredictionService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PredictionResponseDTO> getPredictionsByCategory(String category) {
         return predictionRepository.findByCategoryOrderByGeneratedAtDesc(category)
                 .stream()
@@ -177,6 +198,7 @@ public class PredictionService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public PredictionStatsDTO getPredictionStats() {
         List<Prediction> allPredictions = predictionRepository.findLatestPredictionsForAllProducts();
 
@@ -253,6 +275,7 @@ public class PredictionService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public List<PredictionResponseDTO> getUnnotifiedPredictionsForSeller(Long sellerId) {
         return predictionRepository.findBySellerIdAndNotificationSentFalse(sellerId)
                 .stream()
@@ -263,28 +286,10 @@ public class PredictionService {
     }
 
     @Scheduled(cron = "0 0 2 * * ?")
-    @Transactional
     public void generateDailyPredictions() {
-        log.info("🌙 Début de la génération quotidienne des prédictions");
-
-        List<Product> allProducts = productRepository.findAll();
-        int successCount = 0;
-        int failureCount = 0;
-
-        for (Product product : allProducts) {
-            try {
-                generatePredictionForProduct(product.getAsin());
-                successCount++;
-            } catch (Exception e) {
-                log.error("❌ Erreur pour le produit {}: {}", product.getAsin(), e.getMessage());
-                failureCount++;
-            }
-        }
-
-        log.info("✅ Génération quotidienne terminée: {} succès, {} échecs", successCount, failureCount);
+        log.info("⏰ Déclenchement planifié de la génération quotidienne");
+        generateDailyPredictionsAsync();
     }
-
-    // ==================== PRIVATE METHODS ====================
 
     private PredictionRequestDTO buildPredictionRequest(Product product) {
         return PredictionRequestDTO.builder()
@@ -304,51 +309,80 @@ public class PredictionService {
     }
 
     /**
-     * ✅ FIXED: Properly extract nested prediction data from ML response
+     * ✅ ULTRA-DEFENSIVE: Comprehensive null checking for ALL nested fields
      */
     private Prediction createPredictionFromMap(Product product, Map<String, Object> response) {
         Long sellerId = product.getSeller() != null ? product.getSeller().getId() : null;
         String categoryName = product.getCategory() != null ? product.getCategory().getName() : null;
 
         Prediction.PredictionBuilder builder = Prediction.builder()
-                .productAsin(product.getAsin())  // ✅ Correct field name
+                .productAsin(product.getAsin())  // ✅ CRITICAL: Must be set!
                 .productName(product.getProductName())
                 .sellerId(sellerId)
                 .category(categoryName)
                 .generatedAt(LocalDateTime.now())
                 .notificationSent(false);
 
-        // ✅ Extract Ranking Prediction
-        if (response.containsKey("ranking") && response.get("ranking") instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> ranking = (Map<String, Object>) response.get("ranking");
-            builder.currentRanking(getIntValue(ranking, "currentRanking"))
-                    .predictedRanking(getIntValue(ranking, "predictedRanking"))
-                    .rankingChange(getIntValue(ranking, "rankingChange"))
-                    .rankingTrend(getStringValue(ranking, "trend"))
-                    .rankingConfidence(getDoubleValue(ranking, "confidence"));
-        }
+        // ✅ DEFENSIVE: Extract with comprehensive null checks
+        try {
+            // Extract Ranking Prediction
+            if (response.containsKey("ranking") && response.get("ranking") instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> ranking = (Map<String, Object>) response.get("ranking");
+                builder.currentRanking(safeGetInt(ranking, "currentRanking", 9999))
+                        .predictedRanking(safeGetInt(ranking, "predictedRanking", 9999))
+                        .rankingChange(safeGetInt(ranking, "rankingChange", 0))
+                        .rankingTrend(safeGetString(ranking, "trend", "STABLE"))
+                        .rankingConfidence(safeGetDouble(ranking, "confidence", 0.5));
+            } else {
+                // Set defaults if ranking data is missing
+                builder.currentRanking(9999)
+                        .predictedRanking(9999)
+                        .rankingChange(0)
+                        .rankingTrend("STABLE")
+                        .rankingConfidence(0.5);
+            }
 
-        // ✅ Extract Bestseller Prediction
-        if (response.containsKey("bestseller") && response.get("bestseller") instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> bestseller = (Map<String, Object>) response.get("bestseller");
-            builder.bestsellerProbability(getDoubleValue(bestseller, "bestsellerProbability"))
-                    .isPotentialBestseller(getBooleanValue(bestseller, "isPotentialBestseller"))
-                    .potentialLevel(getStringValue(bestseller, "potentialLevel"))
-                    .bestsellerConfidence(getDoubleValue(bestseller, "confidence"));
-        }
+            // Extract Bestseller Prediction
+            if (response.containsKey("bestseller") && response.get("bestseller") instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> bestseller = (Map<String, Object>) response.get("bestseller");
+                builder.bestsellerProbability(safeGetDouble(bestseller, "bestsellerProbability", 0.0))
+                        .isPotentialBestseller(safeGetBoolean(bestseller, "isPotentialBestseller", false))
+                        .potentialLevel(safeGetString(bestseller, "potentialLevel", "FAIBLE"))
+                        .bestsellerConfidence(safeGetDouble(bestseller, "confidence", 0.5));
+            } else {
+                // Set defaults if bestseller data is missing
+                builder.bestsellerProbability(0.0)
+                        .isPotentialBestseller(false)
+                        .potentialLevel("FAIBLE")
+                        .bestsellerConfidence(0.5);
+            }
 
-        // ✅ Extract Price Prediction
-        if (response.containsKey("price") && response.get("price") instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> price = (Map<String, Object>) response.get("price");
-            builder.currentPrice(getDoubleValue(price, "currentPrice"))
-                    .recommendedPrice(getDoubleValue(price, "recommendedPrice"))
-                    .priceDifference(getDoubleValue(price, "priceDifference"))
-                    .priceChangePercentage(getDoubleValue(price, "priceChangePercentage"))
-                    .priceAction(getStringValue(price, "priceAction"))
-                    .priceConfidence(getDoubleValue(price, "confidence"));
+            // Extract Price Prediction
+            if (response.containsKey("price") && response.get("price") instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> price = (Map<String, Object>) response.get("price");
+                builder.currentPrice(safeGetDouble(price, "currentPrice", 0.0))
+                        .recommendedPrice(safeGetDouble(price, "recommendedPrice", 0.0))
+                        .priceDifference(safeGetDouble(price, "priceDifference", 0.0))
+                        .priceChangePercentage(safeGetDouble(price, "priceChangePercentage", 0.0))
+                        .priceAction(safeGetString(price, "priceAction", "MAINTENIR"))
+                        .priceConfidence(safeGetDouble(price, "confidence", 0.5));
+            } else {
+                // Set defaults if price data is missing
+                double currentPrice = safeDouble(product.getPrice(), 0.0);
+                builder.currentPrice(currentPrice)
+                        .recommendedPrice(currentPrice)
+                        .priceDifference(0.0)
+                        .priceChangePercentage(0.0)
+                        .priceAction("MAINTENIR")
+                        .priceConfidence(0.5);
+            }
+
+        } catch (Exception e) {
+            log.error("❌ Error extracting prediction data for {}: {}", product.getAsin(), e.getMessage());
+            // Even if extraction fails, we have defaults set
         }
 
         Prediction prediction = builder.build();
@@ -362,46 +396,102 @@ public class PredictionService {
         return prediction;
     }
 
+    /**
+     * ✅ NEW: Safe extraction helpers with defaults
+     */
+    private Integer safeGetInt(Map<String, Object> map, String key, Integer defaultValue) {
+        try {
+            Object value = map.get(key);
+            if (value == null) return defaultValue;
+            if (value instanceof Number) {
+                return ((Number) value).intValue();
+            }
+            return Integer.parseInt(value.toString());
+        } catch (Exception e) {
+            log.warn("Failed to extract int for key {}: {}", key, e.getMessage());
+            return defaultValue;
+        }
+    }
+
+    private Double safeGetDouble(Map<String, Object> map, String key, Double defaultValue) {
+        try {
+            Object value = map.get(key);
+            if (value == null) return defaultValue;
+            if (value instanceof Number) {
+                return ((Number) value).doubleValue();
+            }
+            return Double.parseDouble(value.toString());
+        } catch (Exception e) {
+            log.warn("Failed to extract double for key {}: {}", key, e.getMessage());
+            return defaultValue;
+        }
+    }
+
+    private String safeGetString(Map<String, Object> map, String key, String defaultValue) {
+        try {
+            Object value = map.get(key);
+            return value != null ? value.toString() : defaultValue;
+        } catch (Exception e) {
+            log.warn("Failed to extract string for key {}: {}", key, e.getMessage());
+            return defaultValue;
+        }
+    }
+
+    private Boolean safeGetBoolean(Map<String, Object> map, String key, Boolean defaultValue) {
+        try {
+            Object value = map.get(key);
+            if (value == null) return defaultValue;
+            if (value instanceof Boolean) {
+                return (Boolean) value;
+            }
+            return Boolean.parseBoolean(value.toString());
+        } catch (Exception e) {
+            log.warn("Failed to extract boolean for key {}: {}", key, e.getMessage());
+            return defaultValue;
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void checkAndSendNotification(Prediction prediction, Product product) {
-        if (product.getSeller() == null) return;
+        try {
+            if (product.getSeller() == null) return;
 
-        User seller = product.getSeller();
-        boolean shouldNotify = false;
-        String title = "";
-        String message = "";
-        Notification.NotificationType type = Notification.NotificationType.SYSTEM;
+            User seller = product.getSeller();
+            boolean shouldNotify = false;
+            String title = "";
+            String message = "";
+            Notification.NotificationType type = Notification.NotificationType.SYSTEM;
 
-        // Bestseller notification
-        if (Boolean.TRUE.equals(prediction.getIsPotentialBestseller())) {
-            shouldNotify = true;
-            type = Notification.NotificationType.PREDICTION_BESTSELLER;
-            title = "🌟 Produit à fort potentiel détecté";
-            message = String.format(
-                    "Votre produit '%s' a été identifié comme un bestseller potentiel avec une probabilité de %.0f%%. Niveau: %s.",
-                    product.getProductName(),
-                    (prediction.getBestsellerProbability() != null ? prediction.getBestsellerProbability() : 0.0) * 100,
-                    prediction.getPotentialLevel()
-            );
-        }
+            // Bestseller notification
+            if (Boolean.TRUE.equals(prediction.getIsPotentialBestseller())) {
+                shouldNotify = true;
+                type = Notification.NotificationType.PREDICTION_BESTSELLER;
+                title = "🌟 Produit à fort potentiel détecté";
+                message = String.format(
+                        "Votre produit '%s' a été identifié comme un bestseller potentiel avec une probabilité de %.0f%%. Niveau: %s.",
+                        product.getProductName(),
+                        (prediction.getBestsellerProbability() != null ? prediction.getBestsellerProbability() : 0.0) * 100,
+                        prediction.getPotentialLevel()
+                );
+            }
 
-        // Price notification
-        if (prediction.getPriceChangePercentage() != null && Math.abs(prediction.getPriceChangePercentage()) > 15) {
-            shouldNotify = true;
-            type = Notification.NotificationType.PREDICTION_PRICE;
-            String action = prediction.getPriceChangePercentage() > 0 ? "augmenter" : "réduire";
-            title = "💰 Recommandation de prix";
-            message = String.format(
-                    "Notre analyse suggère de %s le prix de '%s' de %.1f%% (de %.2f€ à %.2f€) pour optimiser vos ventes.",
-                    action,
-                    product.getProductName(),
-                    Math.abs(prediction.getPriceChangePercentage()),
-                    prediction.getCurrentPrice(),
-                    prediction.getRecommendedPrice()
-            );
-        }
+            // Price notification
+//            if (prediction.getPriceChangePercentage() != null && Math.abs(prediction.getPriceChangePercentage()) > 15) {
+//                shouldNotify = true;
+//                type = Notification.NotificationType.PREDICTION_PRICE;
+//                String action = prediction.getPriceChangePercentage() > 0 ? "augmenter" : "réduire";
+//                title = "💰 Recommandation de prix";
+//                message = String.format(
+//                        "Notre analyse suggère de %s le prix de '%s' de %.1f%% (de %.2f€ à %.2f€) pour optimiser vos ventes.",
+//                        action,
+//                        product.getProductName(),
+//                        Math.abs(prediction.getPriceChangePercentage()),
+//                        prediction.getCurrentPrice(),
+//                        prediction.getRecommendedPrice()
+//                );
+//            }
 
-        if (shouldNotify) {
-            try {
+            if (shouldNotify) {
                 Notification notification = Notification.builder()
                         .recipient(seller)
                         .type(type)
@@ -417,18 +507,16 @@ public class PredictionService {
                 predictionRepository.save(prediction);
 
                 log.info("📧 Notification envoyée au vendeur {} pour le produit {}", seller.getId(), product.getAsin());
-            } catch (Exception e) {
-                log.error("❌ Erreur lors de l'envoi de la notification: {}", e.getMessage());
             }
+        } catch (Exception e) {
+            log.error("❌ Erreur lors de l'envoi de la notification: {}", e.getMessage());
+            // Don't propagate - notification failure shouldn't fail the prediction
         }
     }
 
-    /**
-     * ✅ FIXED: Convert entity to DTO with correct field mapping
-     */
     private PredictionResponseDTO convertToDTO(Prediction prediction) {
         return PredictionResponseDTO.builder()
-                .productId(prediction.getProductAsin())  // ✅ Map productAsin → productId for DTO
+                .productId(prediction.getProductAsin())
                 .productName(prediction.getProductName())
                 .category(prediction.getCategory())
                 .generatedAt(prediction.getGeneratedAt())
@@ -454,23 +542,40 @@ public class PredictionService {
                         .priceChangePercentage(prediction.getPriceChangePercentage())
                         .priceAction(prediction.getPriceAction())
                         .actionDescription(getPriceActionDescription(prediction.getPriceAction(), prediction.getPriceChangePercentage()))
-                        .shouldNotifySeller(prediction.getPriceChangePercentage() != null &&
-                                Math.abs(prediction.getPriceChangePercentage()) > 15)
+                        .shouldNotifySeller(false)
                         .confidence(prediction.getPriceConfidence())
+                        .isReliable(false)
+                        .reliabilityReason("Modèle nécessite plus de données de ventes (MAPE: 60%)")  // ✅ NEW
                         .build())
                 .build();
     }
 
-    // Helper methods for descriptions
     private String getTrendDescription(String trend, Integer change) {
         if (trend == null) return "Tendance inconnue";
+
+        int changeAbs = Math.abs(change != null ? change : 0);
+
         switch (trend) {
             case "AMÉLIORATION":
-                return String.format("Amélioration prévue de %d positions", Math.abs(change != null ? change : 0));
+                if (changeAbs > 500) {
+                    return "🚀 Forte amélioration prévue du classement";
+                } else if (changeAbs > 100) {
+                    return "📈 Amélioration significative prévue";
+                } else {
+                    return "📊 Légère amélioration prévue";
+                }
+
             case "DÉCLIN":
-                return String.format("Déclin prévu de %d positions", Math.abs(change != null ? change : 0));
+                if (changeAbs > 500) {
+                    return "⚠️ Déclin important prévu - action recommandée";
+                } else if (changeAbs > 100) {
+                    return "📉 Déclin modéré prévu";
+                } else {
+                    return "📊 Légère baisse prévue";
+                }
+
             default:
-                return "Classement stable prévu";
+                return "✅ Classement stable prévu (±" + changeAbs + " positions)";
         }
     }
 
@@ -494,36 +599,6 @@ public class PredictionService {
             default:
                 return "Le prix actuel est optimal";
         }
-    }
-
-    // Helper methods for Map extraction
-    private Integer getIntValue(Map<String, Object> map, String key) {
-        Object value = map.get(key);
-        if (value instanceof Number) {
-            return ((Number) value).intValue();
-        }
-        return null;
-    }
-
-    private Double getDoubleValue(Map<String, Object> map, String key) {
-        Object value = map.get(key);
-        if (value instanceof Number) {
-            return ((Number) value).doubleValue();
-        }
-        return null;
-    }
-
-    private String getStringValue(Map<String, Object> map, String key) {
-        Object value = map.get(key);
-        return value != null ? value.toString() : null;
-    }
-
-    private Boolean getBooleanValue(Map<String, Object> map, String key) {
-        Object value = map.get(key);
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-        return false;
     }
 
     // Safe conversion helpers
@@ -563,4 +638,39 @@ public class PredictionService {
         }
         return "Electronics";
     }
+
+    @Async("predictionExecutor")
+    public void generateDailyPredictionsAsync() {
+        log.info("🌙 Début de la génération quotidienne des prédictions (async)");
+
+        List<Product> allProducts = productRepository.findAll();
+        int successCount = 0;
+        int failureCount = 0;
+
+        for (Product product : allProducts) {
+            try {
+                generatePredictionForProduct(product.getAsin());
+                successCount++;
+                if ((successCount + failureCount) % 50 == 0) {
+                    log.info("📊 Progression: {}/{} produits traités",
+                            successCount + failureCount, allProducts.size());
+                }
+            } catch (Exception e) {
+                log.error("❌ Erreur pour le produit {}: {}",
+                        product.getAsin(), e.getMessage());
+                failureCount++;
+            }
+        }
+        log.info("✅ Génération quotidienne terminée: {} succès, {} échecs",
+                successCount, failureCount);
+    }
+
+    private boolean validatePrediction(Prediction prediction) {
+        if (prediction.getProductAsin() == null || prediction.getProductAsin().isEmpty()) {
+            log.warn("⚠️  Product ASIN is null");
+            return false;
+        }
+        return true;
+    }
+
 }
