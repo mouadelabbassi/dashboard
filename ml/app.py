@@ -189,7 +189,7 @@ class MLPredictionService:
     def predict_bestseller(self, product_data: dict) -> dict:
         """✅ FIXED: Properly handle bestseller_score from transformed DataFrame"""
         df = pd.DataFrame([product_data])
-        df = self.feature_engineer.transform(df)  # This now creates bestseller_score
+        df = self.feature_engineer.transform(df)
 
         features = self.features['bestseller_detection']
         X = df[features]
@@ -198,8 +198,6 @@ class MLPredictionService:
         probability = self.models['bestseller_detection'].predict_proba(X)[0]
 
         bestseller_probability = float(probability[1])
-
-        # ✅ FIXED: Safely extract bestseller_score
         bestseller_score = float(df['bestseller_score'].iloc[0]) if 'bestseller_score' in df.columns else bestseller_probability
 
         if bestseller_probability >= 0.80:
@@ -227,7 +225,6 @@ class MLPredictionService:
         }
 
     def _get_bestseller_recommendation(self, probability: float) -> str:
-        """Generate actionable recommendation based on bestseller probability"""
         if probability >= 0.80:
             return "Excellent potentiel! Augmentez la visibilité marketing et optimisez le stock."
         elif probability >= 0.60:
@@ -244,26 +241,69 @@ class MLPredictionService:
         features = self.features['ranking_prediction']
         X = df[features]
 
-        predicted_rank = int(self.models['ranking_prediction'].predict(X)[0])
-        current_rank = product_data.get('amazon_rank') or product_data.get('combined_rank', 9999)
+        # ✅ Check if model uses log transform
+        uses_log = self.models['ranking_prediction'].get('uses_log_transform', False)
 
-        if isinstance(current_rank, float):
-            current_rank = int(current_rank)
+        if uses_log:
+            # Predict in log space, then convert back
+            predicted_log = float(self.models['ranking_prediction']['model'].predict(X)[0])
+            predicted_rank = int(np.expm1(predicted_log))
+        else:
+            predicted_rank = int(self.models['ranking_prediction']['model'].predict(X)[0])
 
+        # Ensure predicted rank is valid
+        predicted_rank = max(1, min(predicted_rank, 999999))
+
+        # Get current rank
+        current_rank = product_data.get('amazon_rank')
+        if current_rank is None or current_rank == 0:
+            current_rank = product_data.get('combined_rank', 9999)
+
+        current_rank = int(current_rank)
+
+        # Calculate ranking change (positive = improvement)
         ranking_change = current_rank - predicted_rank
 
-        if ranking_change > 100:
+        # ✅ IMPROVED: More nuanced trend classification
+        if ranking_change > 500:
             trend = "AMÉLIORATION"
-            trend_description = f"Amélioration prévue de {ranking_change} positions"
-        elif ranking_change < -100:
-            trend = "DÉCLIN"
-            trend_description = f"Déclin prévu de {abs(ranking_change)} positions"
-        else:
+            trend_description = "🚀 Forte amélioration prévue"
+            confidence_boost = 0.1
+        elif ranking_change > 100:
+            trend = "AMÉLIORATION"
+            trend_description = "📈 Amélioration significative prévue"
+            confidence_boost = 0.05
+        elif ranking_change > 20:
+            trend = "STABLE_POSITIF"
+            trend_description = "📊 Légère amélioration prévue"
+            confidence_boost = 0
+        elif ranking_change > -20:
             trend = "STABLE"
-            trend_description = "Classement stable prévu"
+            trend_description = "✅ Classement stable"
+            confidence_boost = 0.05  # We're more confident about stability
+        elif ranking_change > -100:
+            trend = "STABLE_NEGATIF"
+            trend_description = "📊 Légère baisse prévue"
+            confidence_boost = 0
+        elif ranking_change > -500:
+            trend = "DÉCLIN"
+            trend_description = "📉 Déclin modéré prévu"
+            confidence_boost = 0.05
+        else:
+            trend = "DÉCLIN"
+            trend_description = "⚠️ Déclin important prévu"
+            confidence_boost = 0.1
 
+        # ✅ IMPROVED: Confidence based on trend accuracy
+        trend_accuracy = self.metrics['ranking_prediction'].get('trend_accuracy', 0.5)
         mae = self.metrics['ranking_prediction']['mae']
-        confidence = max(0, min(1, 1 - (mae / max(current_rank, 1))))
+
+        # Base confidence on trend accuracy (more important than exact position)
+        confidence = trend_accuracy + confidence_boost
+
+        # Reduce confidence for extreme predictions
+        if abs(ranking_change) > 1000:
+            confidence *= 0.8
 
         return {
             'predictedRanking': predicted_rank,
@@ -271,7 +311,8 @@ class MLPredictionService:
             'rankingChange': ranking_change,
             'trend': trend,
             'trendDescription': trend_description,
-            'confidence': round(confidence, 4)
+            'confidence': round(min(confidence, 0.95), 4),  # Cap at 95%
+            'trendAccuracy': round(trend_accuracy, 4)  # ✅ NEW: Show trend accuracy
         }
 
     def predict_price(self, product_data: dict) -> dict:
@@ -281,11 +322,24 @@ class MLPredictionService:
         features = self.features['price_optimization']
         X = df[features]
 
-        recommended_price = float(self.models['price_optimization'].predict(X)[0])
+        recommended_price = float(self.models['price_optimization']['model'].predict(X)[0])
         current_price = float(product_data['price'])
+
+        # ✅ Check model reliability
+        training_samples = self.models['price_optimization'].get('training_samples', 0)
+        is_reliable = training_samples >= 50
+        mape = self.metrics['price_optimization']['mape']
 
         price_difference = recommended_price - current_price
         price_change_percentage = (price_difference / current_price) * 100
+
+        # ✅ IMPROVED: More conservative actions if model is unreliable
+        if not is_reliable:
+            # Limit recommendations to ±15% when unreliable
+            if abs(price_change_percentage) > 15:
+                recommended_price = current_price * (1 + 0.15 * np.sign(price_change_percentage))
+                price_difference = recommended_price - current_price
+                price_change_percentage = (price_difference / current_price) * 100
 
         if abs(price_change_percentage) < 5:
             price_action = "MAINTENIR"
@@ -294,14 +348,17 @@ class MLPredictionService:
         elif price_change_percentage > 0:
             price_action = "AUGMENTER"
             action_description = f"Augmentation de {abs(price_change_percentage):.1f}% recommandée"
-            should_notify = abs(price_change_percentage) > 15
+            should_notify = abs(price_change_percentage) > 15 and is_reliable
         else:
             price_action = "DIMINUER"
             action_description = f"Réduction de {abs(price_change_percentage):.1f}% recommandée"
-            should_notify = abs(price_change_percentage) > 15
+            should_notify = abs(price_change_percentage) > 15 and is_reliable
 
-        mape = self.metrics['price_optimization']['mape']
-        confidence = max(0, min(1, 1 - (mape / 100)))
+        # ✅ IMPROVED: Confidence based on model reliability
+        if is_reliable:
+            confidence = max(0, min(1, 1 - (mape / 100)))
+        else:
+            confidence = 0.3  # Low confidence for unreliable models
 
         return {
             'currentPrice': round(current_price, 2),
@@ -310,12 +367,20 @@ class MLPredictionService:
             'priceChangePercentage': round(price_change_percentage, 2),
             'priceAction': price_action,
             'actionDescription': action_description,
-            'shouldNotifySeller': should_notify,
-            'confidence': round(confidence, 4)
+            'shouldNotifySeller': should_notify and is_reliable,  # ✅ Only notify if reliable
+            'confidence': round(confidence, 4),
+            'isReliable': is_reliable,  # ✅ NEW
+            'modelMAPE': round(mape, 2),  # ✅ NEW
+            'trainingSamples': training_samples  # ✅ NEW
         }
 
     def predict_full(self, product_data: dict) -> dict:
         try:
+
+            required_fields = ['price', 'amazon_rating', 'amazon_reviews']
+            missing = [f for f in required_fields if f not in product_data or product_data[f] is None]
+            if missing:
+                raise ValueError(f"Missing required fields: {missing}")
             bestseller_pred = self.predict_bestseller(product_data)
             ranking_pred = self.predict_ranking(product_data)
             price_pred = self.predict_price(product_data)
@@ -344,6 +409,23 @@ def health_check():
         'version': '1.0.0'
     })
 
+# ✅ NEW: Added missing /status endpoint
+@app.route('/status', methods=['GET'])
+def get_status():
+    return jsonify({
+        'status': 'operational',
+        'service': 'MouadVision ML Prediction Service',
+        'models': {
+            'bestseller_detection': 'loaded',
+            'ranking_prediction': 'loaded',
+            'price_optimization': 'loaded'
+        },
+        'models_count': len(ml_service.models),
+        'database': 'connected',
+        'version': '1.0.0',
+        'timestamp': datetime.now().isoformat()
+    })
+
 @app.route('/metrics', methods=['GET'])
 def get_metrics():
     return jsonify({
@@ -361,12 +443,10 @@ def predict_full():
             return jsonify({'error': 'No data provided'}), 400
 
         if 'asin' in data:
-            # Request with ASIN - fetch from database
             product_data = ml_service.get_product_data(data['asin'])
             if not product_data:
                 return jsonify({'error': 'Product not found'}), 404
         else:
-            # Request with Spring Boot format - map column names
             product_data = map_spring_boot_to_ml_format(data)
 
         prediction = ml_service.predict_full(product_data)
@@ -425,6 +505,7 @@ if __name__ == '__main__':
     print("\nStarting Flask server on http://localhost:5001")
     print("\nAvailable endpoints:")
     print("  GET  /health              - Health check")
+    print("  GET  /status              - Service status ✅ NEW")
     print("  GET  /metrics             - Model metrics")
     print("  POST /predict/full        - Full prediction")
     print("  POST /predict/batch       - Batch predictions")

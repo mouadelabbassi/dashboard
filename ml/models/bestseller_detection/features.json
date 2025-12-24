@@ -1,10 +1,13 @@
 [
   "price_scaled",
+  "amazon_rating_scaled",
+  "amazon_reviews_scaled",
   "sales_velocity_scaled",
-  "product_source_binary",
+  "no_of_sellers_scaled",
   "category_encoded",
   "days_since_listed_scaled",
-  "rank_normalized_scaled",
-  "combined_rating",
-  "reviews_normalized_scaled"
+  "review_quality_score",
+  "competitive_score",
+  "sales_per_day_normalized",
+  "product_maturity"
 ]

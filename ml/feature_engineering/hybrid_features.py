@@ -19,7 +19,7 @@ class HybridFeatureEngineer:
         df = self._impute_missing_values(df)
         df = self._create_ratio_features(df)
         df = self._create_categorical_features(df)
-        df = self._create_bestseller_labels(df)  # This creates bestseller_score
+        df = self._create_bestseller_labels(df)
         df = self._create_ranking_targets(df)
 
         numerical_features = self._get_numerical_features()
@@ -30,7 +30,7 @@ class HybridFeatureEngineer:
             'no_of_sellers_scaled', 'sales_velocity_scaled', 'product_source_binary',
             'category_encoded', 'price_vs_category_scaled', 'combined_rating',
             'days_since_listed_scaled', 'sales_momentum_scaled', 'recency_score_scaled',
-            'rank_normalized_scaled', 'reviews_normalized_scaled', 'product_maturity',
+            'reviews_normalized_scaled', 'product_maturity',
             'sales_acceleration', 'revenue_per_order', 'order_count', 'unique_customers',
             'total_units_sold', 'price_tier_encoded', 'has_sales', 'has_amazon_data'
         ]
@@ -54,8 +54,6 @@ class HybridFeatureEngineer:
         df = self._impute_missing_values(df)
         df = self._create_ratio_features(df)
         df = self._create_categorical_features(df)
-
-        # ✅ CRITICAL FIX: Always create bestseller_score during transform
         df = self._create_bestseller_score(df)
 
         numerical_features = self._get_numerical_features()
@@ -87,36 +85,87 @@ class HybridFeatureEngineer:
         return df
 
     def _create_ratio_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        if 'category' not in df.columns:
-            df['price_vs_category'] = 1.0
-        else:
+
+        # ===== PRICE FEATURES =====
+        if 'category' in df.columns:
             for category in df['category'].unique():
                 cat_mask = df['category'] == category
                 cat_avg_price = df.loc[cat_mask, 'price'].mean()
-                df.loc[cat_mask, 'price_vs_category'] = df.loc[cat_mask, 'price'] / max(cat_avg_price, 1)
+                cat_median_price = df.loc[cat_mask, 'price'].median()
 
-        df['rank_normalized'] = np.log1p(df['amazon_rank'])
-        df['reviews_normalized'] = np.log1p(df.get('combined_reviews', df['amazon_reviews']))
-        df['sales_normalized'] = np.log1p(df.get('total_units_sold', 0))
+                df.loc[cat_mask, 'price_vs_category_avg'] = df.loc[cat_mask, 'price'] / max(cat_avg_price, 1)
+                df.loc[cat_mask, 'price_vs_category_median'] = df.loc[cat_mask, 'price'] / max(cat_median_price, 1)
+                df.loc[cat_mask, 'is_premium_price'] = (df.loc[cat_mask, 'price'] > cat_avg_price * 1.5).astype(int)
+                df.loc[cat_mask, 'is_budget_price'] = (df.loc[cat_mask, 'price'] < cat_avg_price * 0.7).astype(int)
+        else:
+            df['price_vs_category_avg'] = 1.0
+            df['price_vs_category_median'] = 1.0
+            df['is_premium_price'] = 0
+            df['is_budget_price'] = 0
+
+        # ===== REVIEW FEATURES =====
+        combined_reviews = df.get('combined_reviews', df['amazon_reviews'])
+        df['reviews_normalized'] = np.log1p(combined_reviews)
 
         combined_rating = df.get('combined_rating', df.get('amazon_rating', 3.5))
+        df['rating_reviews_interaction'] = combined_rating * np.log1p(df['amazon_reviews'])
+        df['review_quality_score'] = (combined_rating - 3.0) * np.log1p(combined_reviews)
+
+        # ===== SALES FEATURES =====
+        df['sales_normalized'] = np.log1p(df.get('total_units_sold', 0))
+
+        total_units = df.get('total_units_sold', 1).replace(0, 1)
+        days_listed = df.get('days_since_listed', 1).replace(0, 1)
+
+        df['sales_per_day'] = total_units / days_listed
+        df['sales_per_day_normalized'] = np.log1p(df['sales_per_day'])
+
+        total_revenue = df.get('total_revenue', df['price'] * total_units)
+        order_count = df.get('order_count', 1).replace(0, 1)
+        df['avg_order_value'] = total_revenue / order_count
+        df['units_per_order'] = total_units / order_count
+
+        # ===== COMPETITIVE FEATURES =====
         df['price_per_rating'] = df['price'] / combined_rating.replace(0, 1)
-
-        total_units = df.get('total_units_sold', 1)
-        total_revenue = df.get('total_revenue', df['price'])
-        df['revenue_per_unit'] = total_revenue / total_units.replace(0, 1)
-
-        combined_reviews = df.get('combined_reviews', df['amazon_reviews'])
-        df['rating_to_reviews_ratio'] = combined_rating / combined_reviews.replace(0, 1)
+        df['revenue_per_unit'] = total_revenue / total_units
         df['reviews_per_seller'] = df['amazon_reviews'] / df['no_of_sellers'].replace(0, 1)
 
+        # ✅ CRITICAL FIX: Competitive score WITHOUT any rank features
+        df['competitive_score'] = (
+                (combined_rating / 5.0) * 0.5 +           # Rating component
+                (np.log1p(combined_reviews) / 10) * 0.3 + # Reviews component
+                (1 / df['no_of_sellers']) * 0.2           # Competition component
+        )
+        # ❌ REMOVED: rank_inverse completely
+
+        # ===== TEMPORAL FEATURES =====
         sales_velocity = df.get('sales_velocity', 0)
         days_since_last = df.get('days_since_last_sale', 9999)
+
         df['sales_momentum'] = sales_velocity * np.exp(-days_since_last / 30)
         df['recency_score'] = 1 / (1 + days_since_last / 30)
 
         days_listed = df.get('days_since_listed', 0)
+        df['product_age_months'] = days_listed / 30
+        df['is_new_product'] = (days_listed <= 60).astype(int)
+        df['is_mature_product'] = (days_listed >= 180).astype(int)
         df['product_maturity'] = np.minimum(days_listed / 365, 1)
+
+        if 'sales_acceleration' in df.columns:
+            df['is_growing'] = (df['sales_acceleration'] > 0).astype(int)
+        else:
+            df['is_growing'] = 0
+
+        # ===== INTERACTION FEATURES =====
+        df['price_quality_ratio'] = df['price'] / (combined_rating + 1)
+        df['value_score'] = combined_rating / (df['price'] + 1)
+
+        # ✅ FIXED: Demand indicator without rank
+        df['demand_indicator'] = (
+                np.log1p(total_units) * 0.5 +
+                np.log1p(combined_reviews) * 0.3 +
+                combined_rating * 0.2
+        )
 
         return df
 
@@ -149,46 +198,36 @@ class HybridFeatureEngineer:
         return df
 
     def _create_bestseller_score(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        ✅ CRITICAL FIX: Standalone method to create bestseller_score
-        This is called during both fit_transform AND transform
-        """
+        """✅ FIXED: Calculate score without using rank"""
         # Normalize components
-        max_rank_norm = df['rank_normalized'].max() if df['rank_normalized'].max() > 0 else 1
         max_sales_norm = df['sales_normalized'].max() if df['sales_normalized'].max() > 0 else 1
         max_reviews_norm = df['reviews_normalized'].max() if df['reviews_normalized'].max() > 0 else 1
 
-        # Calculate bestseller score (0 to 1 scale)
+        # ✅ FIXED: Score based only on sales, rating, reviews (no rank)
         df['bestseller_score'] = (
-                (1 - df['rank_normalized'] / max_rank_norm) * 0.4 +
-                (df['sales_normalized'] / max_sales_norm) * 0.3 +
-                (df.get('combined_rating', df['amazon_rating']) / 5.0) * 0.15 +
-                (df['reviews_normalized'] / max_reviews_norm) * 0.15
+                (df['sales_normalized'] / max_sales_norm) * 0.5 +
+                (df.get('combined_rating', df['amazon_rating']) / 5.0) * 0.25 +
+                (df['reviews_normalized'] / max_reviews_norm) * 0.25
         )
 
-        # Ensure score is between 0 and 1
         df['bestseller_score'] = df['bestseller_score'].clip(0, 1)
 
         return df
 
     def _create_bestseller_labels(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Create is_bestseller binary label AND bestseller_score"""
-        if 'amazon_rank' in df.columns and df['amazon_rank'].notna().any():
-            rank_threshold = df['amazon_rank'].quantile(0.1)
-        else:
-            rank_threshold = 1000
-
+        """✅ FIXED: Define bestseller by sales velocity, not rank"""
+        # Use sales velocity percentile instead of rank
         if 'sales_velocity' in df.columns and df['sales_velocity'].notna().any():
-            velocity_threshold = df['sales_velocity'].quantile(0.9)
+            velocity_threshold = df['sales_velocity'].quantile(0.85)  # Top 15%
+            df['is_bestseller'] = (df.get('sales_velocity', 0) >= velocity_threshold).astype(int)
         else:
-            velocity_threshold = 1.0
+            # Fallback: use rank if sales not available (for existing products)
+            if 'amazon_rank' in df.columns and df['amazon_rank'].notna().any():
+                rank_threshold = df['amazon_rank'].quantile(0.15)  # Top 15%
+                df['is_bestseller'] = (df['amazon_rank'] <= rank_threshold).astype(int)
+            else:
+                df['is_bestseller'] = 0
 
-        df['is_bestseller'] = (
-                (df['amazon_rank'] <= rank_threshold) |
-                (df.get('sales_velocity', 0) >= velocity_threshold)
-        ).astype(int)
-
-        # Create bestseller_score
         df = self._create_bestseller_score(df)
 
         return df
@@ -216,13 +255,14 @@ class HybridFeatureEngineer:
         return df
 
     def _get_numerical_features(self) -> List[str]:
+        """✅ FIXED: Removed rank_normalized from numerical features"""
         return [
             'price', 'amazon_rating', 'amazon_reviews', 'no_of_sellers',
             'sales_velocity', 'sales_acceleration', 'revenue_per_order',
             'days_since_listed', 'days_since_last_sale', 'combined_reviews',
-            'price_vs_category', 'rank_normalized', 'reviews_normalized',
+            'price_vs_category', 'reviews_normalized',
             'sales_normalized', 'price_per_rating', 'revenue_per_unit',
-            'rating_to_reviews_ratio', 'reviews_per_seller', 'sales_momentum',
+            'reviews_per_seller', 'sales_momentum',
             'recency_score', 'product_maturity', 'total_units_sold',
             'order_count', 'unique_customers'
         ]
@@ -269,7 +309,7 @@ class HybridFeatureEngineer:
             'no_of_sellers_scaled', 'sales_velocity_scaled', 'product_source_binary',
             'category_encoded', 'price_vs_category_scaled', 'combined_rating',
             'days_since_listed_scaled', 'sales_momentum_scaled', 'recency_score_scaled',
-            'rank_normalized_scaled', 'reviews_normalized_scaled'
+            'reviews_normalized_scaled'
         ]
 
         available_features = [f for f in feature_columns if f in df.columns]
