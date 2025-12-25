@@ -1,0 +1,59 @@
+package com.dashboard.dto.request;
+
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProductUpdateRequestDTO {
+
+    @Size(max = 500, message = "Product name must not exceed 500 characters")
+    private String productName;
+
+    private String description;
+
+    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
+    private BigDecimal price;
+
+    @DecimalMin(value = "1.0", message = "Rating must be at least 1.0")
+    @DecimalMax(value = "5.0", message = "Rating must not exceed 5.0")
+    private BigDecimal rating;
+
+    @Min(value = 0, message = "Reviews count cannot be negative")
+    private Integer reviewsCount;
+
+    @Min(value = 1, message = "Ranking must be at least 1")
+    private Integer ranking;
+
+    @Min(value = 1, message = "Number of sellers must be at least 1")
+    private Integer noOfSellers;
+
+    @Min(value = 0, message = "Stock quantity cannot be negative")
+    private Integer stockQuantity;
+
+    private String productLink;
+
+    private String imageUrl;
+
+    private Long categoryId;
+    public boolean hasUpdates() {
+        return productName != null ||
+                description != null ||
+                price != null ||
+                rating != null ||
+                reviewsCount != null ||
+                ranking != null ||
+                noOfSellers != null ||
+                stockQuantity != null ||
+                productLink != null ||
+                imageUrl != null ||
+                categoryId != null;
+    }
+}

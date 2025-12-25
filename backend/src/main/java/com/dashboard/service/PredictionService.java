@@ -44,7 +44,7 @@ public class PredictionService {
         log.info("🔮 Génération de prédiction pour le produit: {}", productId);
 
         try {
-            Optional<Product> productOpt = productRepository.findByAsin(productId);
+            Optional<Product> productOpt = productRepository.findByAsinWithRelations(productId);
             if (productOpt.isEmpty()) {
                 log.warn("❌ Produit non trouvé: {}", productId);
                 return Optional.empty();

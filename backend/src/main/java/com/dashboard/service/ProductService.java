@@ -1,6 +1,7 @@
 package com.dashboard.service;
 
 import com.dashboard.dto.request.ProductRequest;
+import com.dashboard.dto.request.ProductUpdateRequestDTO;
 import com.dashboard.dto.response.ProductResponse;
 import com.dashboard.entity.Category;
 import com.dashboard.entity.Product;
@@ -142,52 +143,52 @@ public class ProductService {
         return convertToResponse(product);
     }
 
-    @Transactional
-    public ProductResponse updateProduct(String asin, ProductUpdateRequestDTO updateRequest) {
-        log.info("Updating product: {}", asin);
-
-        Product product = productRepository.findByAsin(asin)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + asin));
-
-        // ✅ FIXED: Track price changes BEFORE updating
-        if (updateRequest.getPrice() != null &&
-                updateRequest.getPrice().compareTo(product.getPrice()) != 0) {
-
-            mlTrackingService.trackPriceChange(
-                    asin,
-                    product.getPrice(),
-                    updateRequest.getPrice(),
-                    "MANUAL_UPDATE"
-            );
-        }
-
-        // Update fields
-        if (updateRequest.getPrice() != null) {
-            product.setPrice(updateRequest.getPrice());
-        }
-        if (updateRequest.getProductName() != null) {
-            product.setProductName(updateRequest.getProductName());
-        }
-        if (updateRequest.getStockQuantity() != null) {
-            product.setStockQuantity(updateRequest.getStockQuantity());
-        }
-        if (updateRequest.getCategoryId() != null) {
-            Category category = categoryRepository.findById(updateRequest.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-            product.setCategory(category);
-        }
-        if (updateRequest.getDescription() != null) {
-            product.setDescription(updateRequest.getDescription());
-        }
-        if (updateRequest.getImageUrl() != null) {
-            product.setImageUrl(updateRequest.getImageUrl());
-        }
-
-        Product updatedProduct = productRepository.save(product);
-        log.info("✅ Product updated successfully: {}", asin);
-
-        return convertToDTO(updatedProduct);
-    }
+//    @Transactional
+//    public ProductResponse updateProductDTO (String asin, ProductUpdateRequestDTO updateRequest) {
+//        log.info("Updating product: {}", asin);
+//
+//        Product product = productRepository.findByAsin(asin)
+//                .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + asin));
+//
+//        // ✅ FIXED: Track price changes BEFORE updating
+//        if (updateRequest.getPrice() != null &&
+//                updateRequest.getPrice().compareTo(product.getPrice()) != 0) {
+//
+//            mlTrackingService.trackPriceChange(
+//                    asin,
+//                    product.getPrice(),
+//                    updateRequest.getPrice(),
+//                    "MANUAL_UPDATE"
+//            );
+//        }
+//
+//        // Update fields
+//        if (updateRequest.getPrice() != null) {
+//            product.setPrice(updateRequest.getPrice());
+//        }
+//        if (updateRequest.getProductName() != null) {
+//            product.setProductName(updateRequest.getProductName());
+//        }
+//        if (updateRequest.getStockQuantity() != null) {
+//            product.setStockQuantity(updateRequest.getStockQuantity());
+//        }
+//        if (updateRequest.getCategoryId() != null) {
+//            Category category = categoryRepository.findById(updateRequest.getCategoryId())
+//                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+//            product.setCategory(category);
+//        }
+//        if (updateRequest.getDescription() != null) {
+//            product.setDescription(updateRequest.getDescription());
+//        }
+//        if (updateRequest.getImageUrl() != null) {
+//            product.setImageUrl(updateRequest.getImageUrl());
+//        }
+//
+//        Product updatedProduct = productRepository.save(product);
+//        log.info("✅ Product updated successfully: {}", asin);
+//
+//        return convertToResponse(product);
+//    }
 
     @Transactional
     public ProductResponse updateProduct(String asin, ProductRequest request) {
