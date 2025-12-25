@@ -1,576 +1,624 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold, KFold
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from xgboost import XGBClassifier, XGBRegressor
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-import pickle
+import requests
+import joblib
 import json
-import os
-import sys
-from datetime import datetime
 import warnings
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, Optional
+
+# ML Libraries
+from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
+from sklearn.preprocessing import StandardScaler, LabelEncoder, RobustScaler
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingRegressor
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    mean_absolute_error, mean_squared_error, r2_score
+)
+from xgboost import XGBClassifier, XGBRegressor
+from imblearn.over_sampling import SMOTE
+
 warnings.filterwarnings('ignore')
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from data_loaders.comprehensive_loader import ComprehensiveDataLoader
-from feature_engineering.hybrid_features import HybridFeatureEngineer
 
-class ImprovedModelTrainer:
+class Config:
+    SPRING_BOOT_URL = "http://localhost:8080"
 
-    def __init__(self, models_dir: str = 'models'):
-        self.models_dir = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            models_dir
+    # Model paths
+    MODELS_DIR = Path(__file__).parent.parent / "models"
+
+    BESTSELLER_MODEL = "bestseller_model_v2.pkl"
+    RANKING_MODEL = "ranking_model_v2.pkl"
+    PRICE_MODEL = "price_model_v2.pkl"
+    SCALER_FILE = "scaler_v2.pkl"
+    LABEL_ENCODERS = "label_encoders_v2.pkl"
+    METRICS_FILE = "training_metrics_v2.json"
+
+    # Thresholds
+    BESTSELLER_RANK_THRESHOLD = 100
+    MIN_REVIEWS_FOR_BESTSELLER = 50
+    MIN_SAMPLES = 50
+
+    @classmethod
+    def get_model_path(cls, filename: str) -> Path:
+        cls.MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        return cls.MODELS_DIR / filename
+
+
+class ImprovedFeatureEngineer:
+
+    def __init__(self):
+        self.category_stats = {}
+        self.global_stats = {}
+
+    def fit_transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Fit on training data and transform."""
+        df = df.copy()
+
+        # Calculate global statistics
+        self.global_stats = {
+            'mean_price': df['price'].mean(),
+            'mean_rating': df['rating'].mean(),
+            'mean_reviews': df['reviewsCount'].mean(),
+            'mean_ranking': df['ranking'].mean(),
+        }
+
+        # Calculate category-level statistics
+        for cat in df['category'].unique():
+            cat_data = df[df['category'] == cat]
+            self.category_stats[cat] = {
+                'mean_price': cat_data['price'].mean(),
+                'std_price': cat_data['price'].std() or 1,
+                'mean_rating': cat_data['rating'].mean(),
+                'mean_reviews': cat_data['reviewsCount'].mean(),
+                'mean_ranking': cat_data['ranking'].mean(),
+                'count': len(cat_data)
+            }
+
+        return self._engineer_features(df)
+
+    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Transform using fitted statistics."""
+        return self._engineer_features(df)
+
+    def _engineer_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Create all engineered features."""
+        df = df.copy()
+
+        # Handle missing values
+        df['rating'] = df['rating'].fillna(3.0)
+        df['reviewsCount'] = df['reviewsCount'].fillna(0)
+        df['price'] = df['price'].fillna(df['price'].median())
+        df['noOfSellers'] = df['noOfSellers'].fillna(1)
+        df['ranking'] = df['ranking'].fillna(df['ranking'].median())
+
+        # === PRICE FEATURES ===
+        df['log_price'] = np.log1p(df['price'])
+        df['price_normalized'] = df['price'] / self.global_stats['mean_price']
+
+        # Category-relative price
+        df['price_vs_category'] = df.apply(
+            lambda x: x['price'] / self.category_stats.get(x['category'], {}).get('mean_price', x['price']),
+            axis=1
         )
-        os.makedirs(self.models_dir, exist_ok=True)
 
+        # Price tier (1-5)
+        df['price_tier'] = pd.qcut(df['price'], q=5, labels=[1, 2, 3, 4, 5], duplicates='drop').astype(float)
+        df['price_tier'] = df['price_tier'].fillna(3)
+
+        # === RATING FEATURES ===
+        df['rating_normalized'] = df['rating'] / 5.0
+        df['rating_vs_category'] = df.apply(
+            lambda x: x['rating'] / self.category_stats.get(x['category'], {}).get('mean_rating', 3.0),
+            axis=1
+        )
+        df['is_highly_rated'] = (df['rating'] >= 4.0).astype(int)
+
+        # === REVIEW FEATURES ===
+        df['log_reviews'] = np.log1p(df['reviewsCount'])
+        df['has_reviews'] = (df['reviewsCount'] > 0).astype(int)
+        df['reviews_vs_category'] = df.apply(
+            lambda x: x['reviewsCount'] / max(1, self.category_stats.get(x['category'], {}).get('mean_reviews', 1)),
+            axis=1
+        )
+
+        # === SELLER FEATURES ===
+        df['reviews_per_seller'] = df['reviewsCount'] / df['noOfSellers'].clip(lower=1)
+        df['is_multi_seller'] = (df['noOfSellers'] > 1).astype(int)
+
+        # === COMPOSITE FEATURES ===
+        # Quality-popularity score
+        df['quality_popularity_score'] = df['rating'] * np.log1p(df['reviewsCount'])
+
+        # Value score (rating per dollar)
+        df['value_score'] = df['rating'] / df['price'].clip(lower=1) * 100
+
+        # Competitive advantage (low price + high rating)
+        df['competitive_advantage'] = (5 - df['price_normalized'].clip(upper=5)) + df['rating_normalized']
+
+        # Market position score
+        df['market_position'] = (
+                df['rating_normalized'] * 0.3 +
+                df['log_reviews'] / 10 * 0.3 +
+                (1 - df['price_normalized'].clip(upper=2) / 2) * 0.2 +
+                df['reviews_per_seller'] / 100 * 0.2
+        )
+
+        # === RANKING FEATURES (for price model) ===
+        df['log_ranking'] = np.log1p(df['ranking'])
+        df['ranking_normalized'] = df['ranking'] / df['ranking'].max()
+        df['is_top_100'] = (df['ranking'] <= 100).astype(int)
+        df['is_top_500'] = (df['ranking'] <= 500).astype(int)
+
+        # Ranking vs category
+        df['ranking_vs_category'] = df.apply(
+            lambda x: x['ranking'] / max(1, self.category_stats.get(x['category'], {}).get('mean_ranking', x['ranking'])),
+            axis=1
+        )
+
+        return df
+
+    def get_feature_names(self) -> list:
+        """Return list of engineered feature names."""
+        return [
+            # Price features
+            'log_price', 'price_normalized', 'price_vs_category', 'price_tier',
+            # Rating features
+            'rating_normalized', 'rating_vs_category', 'is_highly_rated',
+            # Review features
+            'log_reviews', 'has_reviews', 'reviews_per_seller',
+            # Seller features
+            'is_multi_seller',
+            # Composite features
+            'quality_popularity_score', 'value_score', 'competitive_advantage', 'market_position',
+            # Ranking features
+            'log_ranking', 'ranking_normalized', 'is_top_100', 'is_top_500', 'ranking_vs_category',
+            # Base features
+            'category_encoded'
+        ]
+
+
+class ImprovedMLTrainer:
+    """Improved ML trainer with better algorithms and validation."""
+
+    def __init__(self):
+        self.feature_engineer = ImprovedFeatureEngineer()
+        self.scaler = RobustScaler()  # More robust to outliers
+        self.label_encoders = {}
         self.models = {}
         self.metrics = {}
-        self.feature_engineer = None
 
-    def train_all_models(self):
-        print("=" * 80)
-        print("MOUADVISION ML TRAINING PIPELINE - FIXED (NO OVERFITTING)")
-        print("=" * 80)
+    def load_data_from_api(self) -> Optional[pd.DataFrame]:
+        print("\n📡 Loading data from Spring Boot API...")
 
-        print("\n[1/6] Loading comprehensive data...")
-        loader = ComprehensiveDataLoader()
-        df = loader.load_all_data()
-        print(f"✓ Loaded {len(df)} products")
-        print(f"  - Platform products: {len(df[df['product_source'] == 'Platform'])}")
-        print(f"  - Seller products: {len(df[df['product_source'] == 'Seller'])}")
-        print(f"  - Products with sales: {len(df[df['has_sales'] == 1])}")
-        print(f"  - Products with Amazon rank: {df['amazon_rank'].notna().sum()}")
+        try:
+            response = requests.get(
+                f"{Config.SPRING_BOOT_URL}/api/products",
+                params={"page": 0, "size": 10000},
+                timeout=30
+            )
 
-        print("\n[2/6] Engineering features...")
-        category_stats = loader.get_category_statistics(df)
-        self.feature_engineer = HybridFeatureEngineer(category_stats=category_stats)
-        df_engineered, metadata = self.feature_engineer.fit_transform(df)
-        print(f"✓ Created {len(metadata['feature_names'])} features")
+            if response.status_code != 200:
+                print(f"❌ API returned status {response.status_code}")
+                return None
 
-        print("\n[3/6] Training Bestseller Detection Model...")
-        self._train_bestseller_model(df_engineered)
+            data = response.json()
 
-        print("\n[4/6] Training Ranking Prediction Model...")
-        self._train_ranking_model(df_engineered)
+            if not data.get("success"):
+                print("❌ API returned error")
+                return None
 
-        print("\n[5/6] Training Price Optimization Model...")
-        self._train_price_optimization_model(df_engineered)
+            content = data.get("data", {}).get("content", [])
 
-        print("\n[6/6] Saving models and metadata...")
-        self._save_all_models()
+            if not content:
+                print("❌ No products found")
+                return None
 
-        print("\n" + "=" * 80)
-        print("TRAINING COMPLETE!")
-        print("=" * 80)
-        self._print_summary()
+            df = pd.DataFrame(content)
 
-        return self.metrics
+            # Ensure required columns exist
+            required_cols = ['price', 'rating', 'reviewsCount', 'ranking', 'categoryName']
+            for col in required_cols:
+                if col not in df.columns:
+                    print(f"⚠️ Missing column: {col}")
+                    return None
 
-    def _validate_no_leakage(self, features: list, target_name: str) -> bool:
-        """✅ NEW: Check for data leakage"""
-        suspicious = []
+            # Rename for consistency
+            df = df.rename(columns={'categoryName': 'category'})
 
-        if target_name == 'amazon_rank':
-            # Check for rank-derived features
-            rank_keywords = ['rank', 'is_top_', 'ranking']
-            suspicious = [f for f in features if any(kw in f.lower() for kw in rank_keywords)]
+            # Filter valid data
+            df = df[df['price'] > 0]
+            df = df[df['ranking'] > 0]
 
-        if suspicious:
-            print(f"  ⚠️  WARNING: Potential data leakage detected!")
-            print(f"  ⚠️  Suspicious features: {suspicious}")
-            return False
+            print(f"✅ Loaded {len(df)} valid products")
+            return df
 
-        return True
+        except Exception as e:
+            print(f"❌ Error loading data: {e}")
+            return None
 
-    def _train_bestseller_model(self, df: pd.DataFrame):
-        """✅ FIXED: Simpler model, no rank features"""
+    def prepare_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Prepare data with feature engineering."""
+        print("\n🔧 Engineering features...")
 
-        # ✅ FIXED: No rank-derived features
-        features = [
-            # Core features
-            'price_scaled', 'amazon_rating_scaled', 'amazon_reviews_scaled',
-            'sales_velocity_scaled', 'product_source_binary',
-            'category_encoded', 'days_since_listed_scaled', 'no_of_sellers_scaled',
+        # Encode categories
+        if 'category' not in self.label_encoders:
+            self.label_encoders['category'] = LabelEncoder()
+            df['category_encoded'] = self.label_encoders['category'].fit_transform(df['category'].fillna('Unknown'))
+        else:
+            # Handle unseen categories
+            df['category_encoded'] = df['category'].apply(
+                lambda x: self.label_encoders['category'].transform([x])[0]
+                if x in self.label_encoders['category'].classes_
+                else -1
+            )
 
-            # Review features
-            'combined_rating', 'reviews_normalized_scaled', 'review_quality_score',
-            'rating_reviews_interaction',
+        # Apply feature engineering
+        df = self.feature_engineer.fit_transform(df)
 
-            # Competitive features
-            'competitive_score', 'value_score', 'reviews_per_seller',
+        print(f"✅ Created {len(self.feature_engineer.get_feature_names())} features")
+        return df
 
-            # Sales features
-            'sales_per_day_normalized', 'demand_indicator', 'sales_momentum_scaled',
-            'total_units_sold',
+    def train_bestseller_model(self, df: pd.DataFrame) -> Dict:
+        """Train bestseller detection model with proper handling."""
+        print("\n" + "="*70)
+        print("🏆 TRAINING BESTSELLER DETECTION MODEL")
+        print("="*70)
 
-            # Temporal
-            'recency_score_scaled', 'product_maturity', 'is_mature_product', 'is_new_product'
+        # Define bestseller criteria (IMPORTANT: use ranking threshold, not the ranking itself as feature)
+        df['is_bestseller'] = (
+                (df['ranking'] <= Config.BESTSELLER_RANK_THRESHOLD) &
+                (df['reviewsCount'] >= Config.MIN_REVIEWS_FOR_BESTSELLER)
+        ).astype(int)
+
+        # CRITICAL: Remove features that would cause data leakage
+        feature_cols = [
+            'log_price', 'price_normalized', 'price_vs_category', 'price_tier',
+            'rating_normalized', 'rating_vs_category', 'is_highly_rated',
+            'log_reviews', 'has_reviews', 'reviews_per_seller',
+            'is_multi_seller',
+            'quality_popularity_score', 'value_score', 'competitive_advantage',
+            'category_encoded'
         ]
+        # NOTE: Deliberately exclude ranking-based features to prevent leakage
 
-        available_features = [f for f in features if f in df.columns]
-        X = df[available_features]
+        X = df[feature_cols].fillna(0)
         y = df['is_bestseller']
 
-        bestseller_ratio = y.mean()
-        print(f"  ℹ Bestseller ratio: {bestseller_ratio:.1%}")
+        print(f"  📊 Bestseller ratio: {y.mean():.1%}")
+        print(f"  📊 Total samples: {len(y)}")
 
-        if bestseller_ratio < 0.05 or bestseller_ratio > 0.95:
-            print(f"  ⚠️  WARNING: Extreme class imbalance detected!")
-
+        # Split data
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.3, random_state=42, stratify=y, shuffle=True
+            X, y, test_size=0.2, random_state=42, stratify=y
         )
 
-        # ✅ FIXED: Simpler model to prevent overfitting
+        # Handle class imbalance with SMOTE
+        if y_train.sum() >= 5:  # Need at least 5 positive samples for SMOTE
+            smote = SMOTE(random_state=42, k_neighbors=min(5, y_train.sum()-1))
+            X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+            print(f"  📊 After SMOTE: {len(y_train_resampled)} samples")
+        else:
+            X_train_resampled, y_train_resampled = X_train, y_train
+
+        # Scale features
+        X_train_scaled = self.scaler.fit_transform(X_train_resampled)
+        X_test_scaled = self.scaler.transform(X_test)
+
+        # Train model with hyperparameter tuning
         model = XGBClassifier(
-            n_estimators=50,      # ✅ REDUCED from 100
-            max_depth=3,          # ✅ REDUCED from 4
+            n_estimators=100,
+            max_depth=5,
             learning_rate=0.1,
+            min_child_weight=3,
             subsample=0.8,
             colsample_bytree=0.8,
-            min_child_weight=5,   # ✅ INCREASED from 3
-            gamma=0.2,            # ✅ INCREASED from 0.1
-            scale_pos_weight=max(1, (1 - bestseller_ratio) / bestseller_ratio),
+            reg_alpha=0.1,
+            reg_lambda=1,
             random_state=42,
-            eval_metric='logloss',
-            reg_alpha=1.0,        # ✅ INCREASED from 0.3
-            reg_lambda=2.0        # ✅ INCREASED from 1.0
+            use_label_encoder=False,
+            eval_metric='logloss'
         )
 
-        # ✅ Cross-validation to detect overfitting
+        model.fit(X_train_scaled, y_train_resampled)
+
+        # Cross-validation on original data (not resampled)
         cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-        cv_scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')
-        print(f"  ℹ Cross-validation: {cv_scores.mean():.3f} (+/- {cv_scores.std() * 2:.3f})")
+        cv_scores = cross_val_score(model, X_train_scaled[:len(X_train)], y_train, cv=cv, scoring='f1')
 
-        model.fit(X_train, y_train)
+        # Evaluate
+        y_pred = model.predict(X_test_scaled)
 
-        # ✅ Report both train and test
-        y_train_pred = model.predict(X_train)
-        y_test_pred = model.predict(X_test)
-
-        train_acc = accuracy_score(y_train, y_train_pred)
-        test_acc = accuracy_score(y_test, y_test_pred)
-        overfit_gap = train_acc - test_acc
-
-        print(f"  ✓ Train Accuracy: {train_acc:.2%}")
-        print(f"  ✓ Test Accuracy: {test_acc:.2%}")
-        print(f"  ✓ Overfit Gap: {overfit_gap:.2%} {'✅' if overfit_gap < 0.10 else '⚠️ OVERFITTING!'}")
-
-        self.models['bestseller_detection'] = {
-            'model': model,
-            'features': available_features,
-            'type': 'classification'
+        metrics = {
+            'accuracy': accuracy_score(y_test, y_pred),
+            'precision': precision_score(y_test, y_pred, zero_division=0),
+            'recall': recall_score(y_test, y_pred, zero_division=0),
+            'f1_score': f1_score(y_test, y_pred, zero_division=0),
+            'cv_mean': cv_scores.mean(),
+            'cv_std': cv_scores.std(),
+            'n_samples': len(y),
+            'n_bestsellers': int(y.sum()),
+            'feature_importance': dict(zip(feature_cols, model.feature_importances_.tolist()))
         }
 
-        self.metrics['bestseller_detection'] = {
-            'accuracy': float(test_acc),
-            'precision': float(precision_score(y_test, y_test_pred, zero_division=0)),
-            'recall': float(recall_score(y_test, y_test_pred, zero_division=0)),
-            'f1_score': float(f1_score(y_test, y_test_pred, zero_division=0)),
-            'train_accuracy': float(train_acc),
-            'cv_mean': float(cv_scores.mean()),
-            'cv_std': float(cv_scores.std()),
-            'overfit_gap': float(overfit_gap),
-            'training_samples': len(X_train),
-            'test_samples': len(X_test),
-            'feature_count': len(available_features),
-            'bestseller_ratio': float(bestseller_ratio),
-            'trained_at': datetime.now().isoformat()
-        }
+        print(f"\n  ✅ Cross-validation F1: {metrics['cv_mean']:.3f} (+/- {metrics['cv_std']:.3f})")
+        print(f"  ✅ Test Accuracy: {metrics['accuracy']:.1%}")
+        print(f"  ✅ Test Precision: {metrics['precision']:.1%}")
+        print(f"  ✅ Test Recall: {metrics['recall']:.1%}")
+        print(f"  ✅ Test F1-Score: {metrics['f1_score']:.1%}")
 
-        print(f"  ✓ Precision: {self.metrics['bestseller_detection']['precision']:.2%}")
-        print(f"  ✓ Recall: {self.metrics['bestseller_detection']['recall']:.2%}")
-        print(f"  ✓ F1-Score: {self.metrics['bestseller_detection']['f1_score']:.2%}")
+        self.models['bestseller'] = model
+        self.metrics['bestseller'] = metrics
 
-    def _train_bestseller_model(self, df: pd.DataFrame):
-        features = [
-            # Core only
-            'price_scaled', 'amazon_rating_scaled', 'amazon_reviews_scaled',
-            'sales_velocity_scaled', 'no_of_sellers_scaled',
-            'category_encoded', 'days_since_listed_scaled',
+        return metrics
 
-            # Basic interactions only
-            'review_quality_score', 'competitive_score',
-            'sales_per_day_normalized', 'product_maturity'
+    def train_ranking_model(self, df: pd.DataFrame) -> Dict:
+        """Train ranking prediction model."""
+        print("\n" + "="*70)
+        print("📈 TRAINING RANKING PREDICTION MODEL")
+        print("="*70)
+
+        # Use all features except the target
+        feature_cols = [
+            'log_price', 'price_normalized', 'price_vs_category', 'price_tier',
+            'rating_normalized', 'rating_vs_category', 'is_highly_rated',
+            'log_reviews', 'has_reviews', 'reviews_per_seller',
+            'is_multi_seller',
+            'quality_popularity_score', 'value_score', 'competitive_advantage', 'market_position',
+            'category_encoded'
         ]
 
-        available_features = [f for f in features if f in df.columns]
-        X = df[available_features]
-        y = df['is_bestseller']
+        X = df[feature_cols].fillna(0)
+        y = df['ranking']
 
-        bestseller_ratio = y.mean()
-        print(f"  ℹ Bestseller ratio: {bestseller_ratio:.1%}")
+        # Log transform target for better distribution
+        y_log = np.log1p(y)
 
+        print(f"  📊 Ranking range: {y.min():.0f} - {y.max():.0f}")
+        print(f"  📊 Total samples: {len(y)}")
+
+        # Split data
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.3, random_state=42, stratify=y, shuffle=True
+            X, y_log, test_size=0.2, random_state=42
         )
 
-        # ✅ ULTRA-SIMPLE MODEL
-        model = XGBClassifier(
-            n_estimators=20,           # ✅ DRASTICALLY REDUCED from 50
-            max_depth=2,               # ✅ DRASTICALLY REDUCED from 3
-            learning_rate=0.2,         # ✅ INCREASED (less fitting)
-            subsample=0.7,             # ✅ MORE dropout
-            colsample_bytree=0.7,      # ✅ MORE dropout
-            min_child_weight=10,       # ✅ DRASTICALLY INCREASED from 5
-            gamma=0.5,                 # ✅ DRASTICALLY INCREASED from 0.2
-            scale_pos_weight=max(1, (1 - bestseller_ratio) / bestseller_ratio),
-            random_state=42,
-            eval_metric='logloss',
-            reg_alpha=2.0,             # ✅ DOUBLED from 1.0
-            reg_lambda=4.0             # ✅ DOUBLED from 2.0
-        )
-
-        # Cross-validation
-        cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-        cv_scores = cross_val_score(model, X, y, cv=cv, scoring='accuracy')
-        print(f"  ℹ Cross-validation: {cv_scores.mean():.3f} (+/- {cv_scores.std() * 2:.3f})")
-
-        model.fit(X_train, y_train)
-
-        # Report both train and test
-        y_train_pred = model.predict(X_train)
-        y_test_pred = model.predict(X_test)
-
-        train_acc = accuracy_score(y_train, y_train_pred)
-        test_acc = accuracy_score(y_test, y_test_pred)
-        overfit_gap = train_acc - test_acc
-
-        print(f"  ✓ Train Accuracy: {train_acc:.2%}")
-        print(f"  ✓ Test Accuracy: {test_acc:.2%}")
-        print(f"  ✓ Overfit Gap: {overfit_gap:.2%} {'✅' if overfit_gap < 0.10 else '⚠️ OVERFITTING!'}")
-
-        self.models['bestseller_detection'] = {
-            'model': model,
-            'features': available_features,
-            'type': 'classification'
-        }
-
-        self.metrics['bestseller_detection'] = {
-            'accuracy': float(test_acc),
-            'precision': float(precision_score(y_test, y_test_pred, zero_division=0)),
-            'recall': float(recall_score(y_test, y_test_pred, zero_division=0)),
-            'f1_score': float(f1_score(y_test, y_test_pred, zero_division=0)),
-            'train_accuracy': float(train_acc),
-            'cv_mean': float(cv_scores.mean()),
-            'cv_std': float(cv_scores.std()),
-            'overfit_gap': float(overfit_gap),
-            'training_samples': len(X_train),
-            'test_samples': len(X_test),
-            'feature_count': len(available_features),
-            'bestseller_ratio': float(bestseller_ratio),
-            'trained_at': datetime.now().isoformat()
-        }
-
-        print(f"  ✓ Precision: {self.metrics['bestseller_detection']['precision']:.2%}")
-        print(f"  ✓ Recall: {self.metrics['bestseller_detection']['recall']:.2%}")
-        print(f"  ✓ F1-Score: {self.metrics['bestseller_detection']['f1_score']:.2%}")
-
-
-    def _train_ranking_model(self, df: pd.DataFrame):
-        df_train = df[df['amazon_rank'].notna() & (df['amazon_rank'] > 0) & (df['amazon_rank'] < 100000)].copy()
-
-        if len(df_train) < 30:
-            print(f"  ⚠️  Warning: Only {len(df_train)} products with Amazon rank")
-            df_train = df[df['combined_rank'].notna() & (df['combined_rank'] > 0)].copy()
-
-        # ✅ MINIMAL FEATURES - Only truly independent ones
-        features = [
-            # Core only
-            'price_scaled', 'amazon_rating_scaled', 'amazon_reviews_scaled',
-            'no_of_sellers_scaled', 'sales_velocity_scaled', 'category_encoded',
-
-            # Basic ratios
-            'price_vs_category_avg', 'review_quality_score',
-
-            # Sales only
-            'total_units_sold', 'sales_per_day_normalized',
-
-            # Temporal
-            'product_maturity', 'days_since_listed_scaled'
-        ]
-
-        available_features = [f for f in features if f in df_train.columns]
-
-        # Validate no leakage
-        suspicious = [f for f in available_features if 'rank' in f.lower() or 'top_' in f.lower()]
-        if suspicious:
-            print(f"  🚨 ERROR: Data leakage detected: {suspicious}")
-            return
-
-        X = df_train[available_features]
-        y = np.log1p(df_train['amazon_rank'])
-
-        test_size = 0.3 if len(X) >= 100 else 0.25
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=test_size, random_state=42, shuffle=True
-        )
-
-        # ✅ ULTRA-SIMPLE MODEL
-        model = XGBRegressor(
-            n_estimators=20,           # ✅ DRASTICALLY REDUCED from 50
-            max_depth=3,               # ✅ REDUCED from 5
+        # Train model
+        model = GradientBoostingRegressor(
+            n_estimators=150,
+            max_depth=6,
             learning_rate=0.1,
-            subsample=0.7,
-            colsample_bytree=0.7,
-            min_child_weight=10,       # ✅ DRASTICALLY INCREASED
-            gamma=0.5,                 # ✅ DRASTICALLY INCREASED
-            reg_alpha=2.0,             # ✅ DOUBLED
-            reg_lambda=4.0,            # ✅ DOUBLED
+            min_samples_split=10,
+            min_samples_leaf=5,
+            subsample=0.8,
             random_state=42
         )
+
+        model.fit(X_train, y_train)
 
         # Cross-validation
-        cv = KFold(n_splits=5, shuffle=True, random_state=42)
-        cv_scores = cross_val_score(model, X, y, cv=cv, scoring='r2')
-        print(f"  ℹ Cross-validation R²: {cv_scores.mean():.3f} (+/- {cv_scores.std() * 2:.3f})")
+        cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='r2')
 
-        model.fit(X_train, y_train)
+        # Evaluate
+        y_pred_log = model.predict(X_test)
+        y_pred = np.expm1(y_pred_log)  # Convert back from log
+        y_test_original = np.expm1(y_test)
 
-        # Report train vs test
-        y_train_pred_log = model.predict(X_train)
-        y_test_pred_log = model.predict(X_test)
-
-        train_r2 = r2_score(y_train, y_train_pred_log)
-        test_r2 = r2_score(y_test, y_test_pred_log)
-        overfit_gap = train_r2 - test_r2
-
-        print(f"  ✓ Train R²: {train_r2:.3f}")
-        print(f"  ✓ Test R²: {test_r2:.3f}")
-        print(f"  ✓ Overfit Gap: {overfit_gap:.3f} {'✅' if overfit_gap < 0.15 else '⚠️ OVERFITTING!'}")
-
-        # Convert back from log space
-        y_test_actual = np.expm1(y_test)
-        y_pred_actual = np.expm1(y_test_pred_log)
-        y_pred_actual = np.clip(y_pred_actual, 1, 999999)
-
-        self.models['ranking_prediction'] = {
-            'model': model,
-            'features': available_features,
-            'type': 'regression',
-            'target': 'amazon_rank',
-            'uses_log_transform': True
+        metrics = {
+            'r2_score': r2_score(y_test, y_pred_log),
+            'mae': mean_absolute_error(y_test_original, y_pred),
+            'rmse': np.sqrt(mean_squared_error(y_test_original, y_pred)),
+            'cv_mean': cv_scores.mean(),
+            'cv_std': cv_scores.std(),
+            'n_samples': len(y),
+            'within_50': (np.abs(y_test_original - y_pred) <= 50).mean(),
+            'within_100': (np.abs(y_test_original - y_pred) <= 100).mean(),
+            'feature_importance': dict(zip(feature_cols, model.feature_importances_.tolist()))
         }
 
-        mae = mean_absolute_error(y_test_actual, y_pred_actual)
-        within_10 = np.mean(np.abs(y_test_actual - y_pred_actual) <= 10)
-        within_50 = np.mean(np.abs(y_test_actual - y_pred_actual) <= 50)
-        within_100 = np.mean(np.abs(y_test_actual - y_pred_actual) <= 100)
+        # Calculate trend accuracy
+        y_test_arr = np.array(y_test_original)
+        y_pred_arr = np.array(y_pred)
+        median_rank = y.median()
+        actual_trend = y_test_arr < median_rank  # Below median = improving
+        pred_trend = y_pred_arr < median_rank
+        metrics['trend_accuracy'] = (actual_trend == pred_trend).mean()
 
-        # ✅ Better trend accuracy calculation
-        test_indices = y_test.index
-        df_test = df_train.loc[test_indices].copy()
-        df_test['current_rank'] = df_train.loc[test_indices, 'amazon_rank']
-        df_test['predicted_rank'] = y_pred_actual
+        print(f"\n  ✅ Cross-validation R²: {metrics['cv_mean']:.3f} (+/- {metrics['cv_std']:.3f})")
+        print(f"  ✅ Test R²: {metrics['r2_score']:.3f}")
+        print(f"  ✅ MAE: {metrics['mae']:.1f} positions")
+        print(f"  ✅ Within 50 positions: {metrics['within_50']:.1%}")
+        print(f"  ✅ Within 100 positions: {metrics['within_100']:.1%}")
+        print(f"  ✅ Trend accuracy: {metrics['trend_accuracy']:.1%}")
 
-        # Compare with median rank as baseline
-        median_rank = df_test['current_rank'].median()
-        df_test['actual_better_than_median'] = (df_test['current_rank'] < median_rank).astype(int)
-        df_test['predicted_better_than_median'] = (df_test['predicted_rank'] < median_rank).astype(int)
-        trend_accuracy = (df_test['actual_better_than_median'] == df_test['predicted_better_than_median']).mean()
+        self.models['ranking'] = model
+        self.metrics['ranking'] = metrics
 
-        self.metrics['ranking_prediction'] = {
-            'r2_score': float(test_r2),
-            'train_r2': float(train_r2),
-            'cv_r2_mean': float(cv_scores.mean()),
-            'cv_r2_std': float(cv_scores.std()),
-            'overfit_gap': float(overfit_gap),
-            'rmse': float(np.sqrt(mean_squared_error(y_test_actual, y_pred_actual))),
-            'mae': float(mae),
-            'within_10_positions': float(within_10),
-            'within_50_positions': float(within_50),
-            'within_100_positions': float(within_100),
-            'trend_accuracy': float(trend_accuracy),
-            'training_samples': len(X_train),
-            'test_samples': len(X_test),
-            'feature_count': len(available_features),
-            'target': 'amazon_rank',
-            'trained_at': datetime.now().isoformat()
-        }
+        return metrics
 
-        print(f"  ✓ MAE: {mae:.2f} positions")
-        print(f"  ✓ Within 50 positions: {within_50:.1%}")
-        print(f"  ✓ Within 100 positions: {within_100:.1%}")
-        print(f"  ✓ Trend accuracy: {trend_accuracy:.1%}")
-        print(f"  ℹ Training on: {len(X_train)} products")
+    def train_price_model(self, df: pd.DataFrame) -> Dict:
+        """Train price optimization model with business constraints."""
+        print("\n" + "="*70)
+        print("💰 TRAINING PRICE OPTIMIZATION MODEL")
+        print("="*70)
 
-
-    def _train_price_optimization_model(self, df: pd.DataFrame):
-        """✅ ULTRA-FIXED: Rule-based for now, ML when we have more data"""
-
-        df_train = df[
-            (df['total_units_sold'] >= 5) &
-            (df['order_count'] >= 3) &
-            (df['days_since_listed'] >= 30)
-            ].copy()
-
-        if len(df_train) < 50:
-            print(f"  ⚠️  WARNING: Only {len(df_train)} products with sufficient sales")
-            print(f"  ⚠️  Price model will use RULE-BASED approach")
-            df_train = df[df['total_units_sold'] > 0].copy()
-
-        # ✅ Use category median as target (simple and safe)
-        for category in df_train['category_encoded'].unique():
-            cat_mask = df_train['category_encoded'] == category
-            cat_data = df_train[cat_mask]
-
-            if len(cat_data) < 5:
-                continue
-
-            # Simply target category median
-            category_median_price = cat_data['price'].median()
-
-            for idx in cat_data.index:
-                current_price = df_train.loc[idx, 'price']
-                # Conservative: only move 30% toward median
-                df_train.loc[idx, 'optimal_price_target'] = (current_price * 0.7 + category_median_price * 0.3)
-
-        df_train['optimal_price_target'] = df_train['optimal_price_target'].clip(
-            lower=df_train['price'] * 0.90,
-            upper=df_train['price'] * 1.10
-        )
-
-        # ✅ MINIMAL features
-        features = [
-            'amazon_rating_scaled', 'amazon_reviews_scaled',
-            'no_of_sellers_scaled', 'category_encoded',
-            'sales_velocity_scaled', 'product_maturity',
-            'review_quality_score', 'competitive_score'
+        # Use features that don't include price
+        feature_cols = [
+            'rating_normalized', 'rating_vs_category', 'is_highly_rated',
+            'log_reviews', 'has_reviews',
+            'is_multi_seller',
+            'log_ranking', 'ranking_normalized', 'is_top_100', 'is_top_500',
+            'category_encoded'
         ]
 
-        available_features = [f for f in features if f in df_train.columns]
-        X = df_train[available_features]
-        y = df_train['optimal_price_target']
+        X = df[feature_cols].fillna(0)
+        y = df['price']
 
-        test_size = 0.3 if len(X) >= 100 else 0.25
+        # Filter out extreme prices
+        q1, q3 = y.quantile([0.05, 0.95])
+        mask = (y >= q1) & (y <= q3)
+        X_filtered = X[mask]
+        y_filtered = y[mask]
+
+        print(f"  📊 Price range: ${y_filtered.min():.2f} - ${y_filtered.max():.2f}")
+        print(f"  📊 Total samples (after filtering): {len(y_filtered)}")
+
+        # Log transform target
+        y_log = np.log1p(y_filtered)
+
+        # Split data
         X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=test_size, random_state=42, shuffle=True
+            X_filtered, y_log, test_size=0.2, random_state=42
         )
 
-        # ✅ ULTRA-SIMPLE MODEL
+        # Train model
         model = XGBRegressor(
-            n_estimators=20,
-            max_depth=2,
-            learning_rate=0.2,
-            subsample=0.7,
-            colsample_bytree=0.7,
-            min_child_weight=10,
-            gamma=0.5,
-            reg_alpha=2.0,
-            reg_lambda=4.0,
+            n_estimators=100,
+            max_depth=5,
+            learning_rate=0.1,
+            min_child_weight=5,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            reg_alpha=0.1,
+            reg_lambda=1,
             random_state=42
         )
 
-        cv = KFold(n_splits=5, shuffle=True, random_state=42)
-        cv_scores = cross_val_score(model, X, y, cv=cv, scoring='r2')
-        print(f"  ℹ Cross-validation R²: {cv_scores.mean():.3f} (+/- {cv_scores.std() * 2:.3f})")
-
         model.fit(X_train, y_train)
 
-        y_train_pred = model.predict(X_train)
-        y_test_pred = model.predict(X_test)
+        # Cross-validation
+        cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='r2')
 
-        train_r2 = r2_score(y_train, y_train_pred)
-        test_r2 = r2_score(y_test, y_test_pred)
-        overfit_gap = train_r2 - test_r2
+        # Evaluate
+        y_pred_log = model.predict(X_test)
+        y_pred = np.expm1(y_pred_log)
+        y_test_original = np.expm1(y_test)
 
-        print(f"  ✓ Train R²: {train_r2:.3f}")
-        print(f"  ✓ Test R²: {test_r2:.3f}")
-        print(f"  ✓ Overfit Gap: {overfit_gap:.3f} {'✅' if overfit_gap < 0.15 else '⚠️ OVERFITTING!'}")
+        # Calculate MAPE (avoiding division by zero)
+        mape = np.mean(np.abs((y_test_original - y_pred) / y_test_original.clip(lower=1))) * 100
 
-        self.models['price_optimization'] = {
-            'model': model,
-            'features': available_features,
-            'type': 'regression',
-            'min_samples_required': 50,
-            'training_samples': len(X_train)
+        metrics = {
+            'r2_score': r2_score(y_test, y_pred_log),
+            'mae': mean_absolute_error(y_test_original, y_pred),
+            'rmse': np.sqrt(mean_squared_error(y_test_original, y_pred)),
+            'mape': mape,
+            'cv_mean': cv_scores.mean(),
+            'cv_std': cv_scores.std(),
+            'n_samples': len(y_filtered),
+            'feature_importance': dict(zip(feature_cols, model.feature_importances_.tolist()))
         }
 
-        mae = mean_absolute_error(y_test, y_test_pred)
-        mask = y_test > 0
-        mape = np.mean(np.abs((y_test[mask] - y_test_pred[mask]) / y_test[mask])) * 100
+        print(f"\n  ✅ Cross-validation R²: {metrics['cv_mean']:.3f} (+/- {metrics['cv_std']:.3f})")
+        print(f"  ✅ Test R²: {metrics['r2_score']:.3f}")
+        print(f"  ✅ MAE: ${metrics['mae']:.2f}")
+        print(f"  ✅ MAPE: {metrics['mape']:.1f}%")
 
-        self.metrics['price_optimization'] = {
-            'r2_score': float(test_r2),
-            'train_r2': float(train_r2),
-            'cv_r2_mean': float(cv_scores.mean()),
-            'cv_r2_std': float(cv_scores.std()),
-            'overfit_gap': float(overfit_gap),
-            'rmse': float(np.sqrt(mean_squared_error(y_test, y_test_pred))),
-            'mae': float(mae),
-            'mape': float(mape),
-            'revenue_improvement_estimate': 0.0,  # Not reliable with this approach
-            'training_samples': len(X_train),
-            'test_samples': len(X_test),
-            'feature_count': len(available_features),
-            'is_reliable': len(X_train) >= 50,
-            'trained_at': datetime.now().isoformat()
+        self.models['price'] = model
+        self.metrics['price'] = metrics
+
+        return metrics
+
+    def save_models(self):
+        """Save all models and artifacts."""
+        print("\n" + "="*70)
+        print("💾 SAVING MODELS")
+        print("="*70)
+
+        # Save models
+        for name, model in self.models.items():
+            path = Config.get_model_path(f"{name}_model_v2.pkl")
+            joblib.dump(model, path)
+            print(f"  ✅ Saved {name} model")
+
+        # Save scaler
+        joblib.dump(self.scaler, Config.get_model_path(Config.SCALER_FILE))
+        print(f"  ✅ Saved scaler")
+
+        # Save label encoders
+        joblib.dump(self.label_encoders, Config.get_model_path(Config.LABEL_ENCODERS))
+        print(f"  ✅ Saved label encoders")
+
+        # Save feature engineer
+        joblib.dump(self.feature_engineer, Config.get_model_path("feature_engineer_v2.pkl"))
+        print(f"  ✅ Saved feature engineer")
+
+        # Save metrics
+        self.metrics['metadata'] = {
+            'trained_at': datetime.now().isoformat(),
+            'version': '2.0.0-improved',
+            'feature_names': self.feature_engineer.get_feature_names(),
         }
 
-        print(f"  ✓ MAE: ${mae:.2f}")
-        print(f"  ✓ MAPE: {mape:.2f}%")
-        print(f"  {'✅' if len(X_train) >= 50 else '⚠️'} Training samples: {len(X_train)}")
+        with open(Config.get_model_path(Config.METRICS_FILE), 'w') as f:
+            json.dump(self.metrics, f, indent=2, default=str)
+        print(f"  ✅ Saved metrics")
 
-    def _save_all_models(self):
-        for model_name, model_data in self.models.items():
-            model_dir = os.path.join(self.models_dir, model_name)
-            os.makedirs(model_dir, exist_ok=True)
+    def train_all(self):
+        """Run the complete training pipeline."""
+        print("""
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    🚀 IMPROVED ML TRAINING PIPELINE                            ║
+║                  Plateforme MouadVision - Mini Projet JEE 2025                ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+        """)
 
-            with open(os.path.join(model_dir, 'model.pkl'), 'wb') as f:
-                pickle.dump(model_data['model'], f)
+        # Load data
+        df = self.load_data_from_api()
+        if df is None or len(df) < Config.MIN_SAMPLES:
+            print(f"\n❌ Insufficient data. Need at least {Config.MIN_SAMPLES} products.")
+            return False
 
-            with open(os.path.join(model_dir, 'features.json'), 'w') as f:
-                json.dump(model_data['features'], f, indent=2)
+        # Prepare data
+        df = self.prepare_data(df)
 
-        with open(os.path.join(self.models_dir, 'metrics.json'), 'w') as f:
-            json.dump(self.metrics, f, indent=2)
+        # Train models
+        self.train_bestseller_model(df)
+        self.train_ranking_model(df)
+        self.train_price_model(df)
 
-        feature_engineer_path = os.path.join(self.models_dir, 'feature_engineer.pkl')
-        self.feature_engineer.save(feature_engineer_path)
+        # Save models
+        self.save_models()
 
-        print(f"  ✓ Saved 3 models to {self.models_dir}")
-        print(f"  ✓ Saved feature engineer and metrics")
+        # Print summary
+        print("\n" + "="*70)
+        print("📊 TRAINING SUMMARY")
+        print("="*70)
+        print(f"""
+┌─────────────────────────────────────────────────────────────────────┐
+│                    MODEL PERFORMANCE SUMMARY                        │
+├─────────────────────────────────────────────────────────────────────┤
+│ 1. BESTSELLER DETECTION                                             │
+│    Cross-validation F1: {self.metrics['bestseller']['cv_mean']:.3f} (+/- {self.metrics['bestseller']['cv_std']:.3f})           │
+│    Test F1 Score:       {self.metrics['bestseller']['f1_score']:.3f}                                  │
+│    Precision:           {self.metrics['bestseller']['precision']:.3f}                                  │
+│    Recall:              {self.metrics['bestseller']['recall']:.3f}                                  │
+├─────────────────────────────────────────────────────────────────────┤
+│ 2. RANKING PREDICTION                                               │
+│    Cross-validation R²: {self.metrics['ranking']['cv_mean']:.3f} (+/- {self.metrics['ranking']['cv_std']:.3f})           │
+│    Test R²:             {self.metrics['ranking']['r2_score']:.3f}                                  │
+│    MAE:                 {self.metrics['ranking']['mae']:.1f} positions                         │
+│    Trend Accuracy:      {self.metrics['ranking']['trend_accuracy']:.1%}                              │
+├─────────────────────────────────────────────────────────────────────┤
+│ 3. PRICE OPTIMIZATION                                               │
+│    Cross-validation R²: {self.metrics['price']['cv_mean']:.3f} (+/- {self.metrics['price']['cv_std']:.3f})           │
+│    Test R²:             {self.metrics['price']['r2_score']:.3f}                                  │
+│    MAE:                 ${self.metrics['price']['mae']:.2f}                                │
+│    MAPE:                {self.metrics['price']['mape']:.1f}%                                 │
+└─────────────────────────────────────────────────────────────────────┘
+        """)
 
-    def _print_summary(self):
-        print("\nMODEL PERFORMANCE SUMMARY:")
-        print("-" * 80)
+        print("\n✅ Training complete! Models saved to:", Config.MODELS_DIR)
+        return True
 
-        bs = self.metrics['bestseller_detection']
-        print(f"\n1. BESTSELLER DETECTION (XGBoost Classifier)")
-        print(f"   Test Accuracy:  {bs['accuracy']:.2%}")
-        print(f"   Train Accuracy: {bs['train_accuracy']:.2%}")
-        print(f"   Overfit Gap:    {bs['overfit_gap']:.2%} {'✅' if bs['overfit_gap'] < 0.10 else '⚠️'}")
-        print(f"   Precision:      {bs['precision']:.2%}")
-        print(f"   Recall:         {bs['recall']:.2%}")
-        print(f"   F1-Score:       {bs['f1_score']:.2%}")
 
-        rk = self.metrics['ranking_prediction']
-        print(f"\n2. RANKING PREDICTION (XGBoost Regressor)")
-        print(f"   Test R²:        {rk['r2_score']:.3f}")
-        print(f"   Train R²:       {rk['train_r2']:.3f}")
-        print(f"   Overfit Gap:    {rk['overfit_gap']:.3f} {'✅' if rk['overfit_gap'] < 0.15 else '⚠️'}")
-        print(f"   MAE:            {rk['mae']:.2f} positions")
-        print(f"   Trend Accuracy: {rk['trend_accuracy']:.1%}")
+def main():
+    trainer = ImprovedMLTrainer()
+    success = trainer.train_all()
 
-        pr = self.metrics['price_optimization']
-        print(f"\n3. PRICE OPTIMIZATION (XGBoost Regressor)")
-        print(f"   Test R²:        {pr['r2_score']:.3f}")
-        print(f"   Train R²:       {pr['train_r2']:.3f}")
-        print(f"   Overfit Gap:    {pr['overfit_gap']:.3f} {'✅' if pr['overfit_gap'] < 0.15 else '⚠️'}")
-        print(f"   MAE:            ${pr['mae']:.2f}")
-        print(f"   MAPE:           {pr['mape']:.2f}%")
+    if not success:
+        print("\n❌ Training failed. Check the logs above for details.")
+        exit(1)
 
-        print("\n" + "-" * 80)
-        print("✅ Models ready - NO OVERFITTING detected!" if all([
-            bs['overfit_gap'] < 0.10,
-            rk['overfit_gap'] < 0.15,
-            pr['overfit_gap'] < 0.15
-        ]) else "⚠️ Check overfit gaps above!")
-        print("=" * 80)
 
 if __name__ == '__main__':
-    trainer = ImprovedModelTrainer()
-    metrics = trainer.train_all_models()
+    main()
