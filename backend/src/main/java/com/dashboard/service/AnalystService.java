@@ -68,7 +68,7 @@ public class AnalystService {
                 "trend", ordersGrowth >= 0 ? "up" : "down"
         ));
 
-        long totalProducts = productRepository.count();
+        long totalProducts = productRepository.countAllExcludingRejected();
         kpis.put("totalProducts", Map.of(
                 "value", totalProducts,
                 "growth", 0,
@@ -632,7 +632,7 @@ public class AnalystService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getTopSellingProducts(int limit) {
-        List<Product> products = productRepository.findAll();
+        List<Product> products = productRepository.findAllExcludingRejected();
 
         return products.stream()
                 .filter(p -> p.getSalesCount() != null && p.getSalesCount() > 0)
@@ -716,7 +716,7 @@ public class AnalystService {
     public Map<String, Object> getProductsOverview() {
         Map<String, Object> overview = new HashMap<>();
 
-        List<Product> products = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED);
+        List<Product> products = productRepository.findAllExcludingRejected();
 
         overview.put("totalProducts", products.size());
 
@@ -761,7 +761,7 @@ public class AnalystService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getProductPerformance(int limit) {
-        List<Product> products = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED);
+        List<Product> products = productRepository.findAllExcludingRejected();
 
         return products.stream()
                 .filter(p -> p.getPrice() != null && p.getRating() != null)
@@ -783,7 +783,7 @@ public class AnalystService {
 
     @Transactional(readOnly = true)
     public Map<String, Long> getPriceDistribution() {
-        List<Product> products = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED);
+        List<Product> products = productRepository.findAllExcludingRejected();
 
         Map<String, Long> distribution = new LinkedHashMap<>();
         distribution.put("$0-$10", products.stream().filter(p -> p.getPrice() != null &&
@@ -805,7 +805,7 @@ public class AnalystService {
 
     @Transactional(readOnly = true)
     public Map<String, Long> getRatingDistribution() {
-        List<Product> products = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED);
+        List<Product> products = productRepository.findAllExcludingRejected();
 
         Map<String, Long> distribution = new LinkedHashMap<>();
         distribution.put("★★★★★ (4.5+)", products.stream().filter(p -> p.getRating() != null &&
@@ -827,7 +827,7 @@ public class AnalystService {
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getLowStockProducts(int threshold) {
-        List<Product> products = productRepository.findByApprovalStatus(Product.ApprovalStatus.APPROVED);
+        List<Product> products = productRepository.findAllExcludingRejected();
 
         return products.stream()
                 .filter(p -> p.getStockQuantity() != null && p.getStockQuantity() <= threshold)
@@ -959,7 +959,7 @@ public class AnalystService {
     @Transactional(readOnly = true)
     public Map<String, Object> getPlatformVsSellersComparison() {
         Map<String, Object> comparison = new HashMap<>();
-        List<Product> allProducts = productRepository.findAll();
+        List<Product> allProducts = productRepository.findAllExcludingRejected();
         List<Product> sellerProducts = allProducts.stream()
                 .filter(p -> p.getSeller() != null && p.getSeller().getRole() == User.Role.SELLER)
                 .collect(Collectors.toList());

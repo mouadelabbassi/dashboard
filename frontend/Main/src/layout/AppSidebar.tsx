@@ -88,7 +88,7 @@ const navItems: NavItem[] = [
         path: "/admin/sellers",
     },
     {
-        icon: <OrdersIcon  />,  // You can use a shopping cart or box icon
+        icon: <OrdersIcon  />,
         name: "Orders",
         path: "/admin/orders",
     },
@@ -98,10 +98,16 @@ const navItems: NavItem[] = [
         path: "/admin/stock",
     },
     {
+        name: 'Analyst Management',
+        path: '/admin/analysts',
+        icon: <UsersIcon />,
+    },
+    {
         icon: <PredictiveIcon />,
         name: "Analyse Prédictive",
         path: "/admin/predictions",
     },
+
 
 
 ];

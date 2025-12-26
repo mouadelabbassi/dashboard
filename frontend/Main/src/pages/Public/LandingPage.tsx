@@ -40,9 +40,9 @@ const LandingPage: React.FC = () => {
             <div className="fixed inset-0 z-0 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#0d1025] to-[#0a0a0f]" />
 
-                <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse" />
-                <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] bg-blue-500/15 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '1s' }} />
-                <div className="absolute bottom-[-10%] left-[30%] w-[700px] h-[700px] bg-blue-700/10 rounded-full blur-[180px] animate-pulse" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-black-600/20 rounded-full blur-[120px] animate-pulse" />
+                <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] bg-black-500/15 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '1s' }} />
+                <div className="absolute bottom-[-10%] left-[30%] w-[700px] h-[700px] bg-black-700/10 rounded-full blur-[180px] animate-pulse" style={{ animationDelay: '2s' }} />
                 <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-radial from-blue-500/5 to-transparent rounded-full blur-[100px]" />
                 <div
                     className="absolute inset-0 opacity-[0.02]"
@@ -87,7 +87,7 @@ const LandingPage: React.FC = () => {
                             {isAuthenticated ? (
                                 <button
                                     onClick={handleGetStarted}
-                                    className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all"
+                                    className="px-6 py-2.5 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl transition-all"
                                 >
                                     Dashboard →
                                 </button>
@@ -98,7 +98,7 @@ const LandingPage: React.FC = () => {
                                     </Link>
                                     <Link
                                         to="/signup"
-                                        className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all"
+                                        className="px-6 py-2.5 bbg-gray-700 hover:bg-gray-600  text-white font-semibold rounded-xl transition-all"
                                     >
                                         Get Started
                                     </Link>
@@ -110,8 +110,7 @@ const LandingPage: React.FC = () => {
             </nav>
             <section className="relative z-10 min-h-screen flex items-center justify-center pt-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg: px-8 text-center">
-                    {/* Live Badge */}
-                    <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-500/10 border border-blue-500/20 rounded-full mb-10 backdrop-blur-sm">
+                    <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-black border border-black rounded-full mb-10 backdrop-blur-sm">
                         <span className="relative flex h-2.5 w-2.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400"></span>
@@ -122,7 +121,7 @@ const LandingPage: React.FC = () => {
                     <h1 className="text-6xl md:text-7xl lg:text-8xl font-black mb-8 leading-[1.1] tracking-tight">
                         <span className="text-white">Discover</span>
                         <br />
-                        <span className="bg-gradient-to-r from-blue-400 via-blue-300 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+                        <span className="bg-gradient-to-r from-blue-400 via-blue-300 to-blue-400 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">
                             MouadVision Store
                         </span>
                     </h1>
@@ -134,7 +133,7 @@ const LandingPage: React.FC = () => {
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
                         <Link
                             to="/explore"
-                            className="group px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-lg rounded-2xl hover:shadow-2xl hover:shadow-blue-500/40 transition-all transform hover:scale-105 flex items-center gap-3 border border-blue-400/30"
+                            className="group px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-bold text-lg rounded-2xl hover:shadow-2xl hover:shadow-gray transition-all transform hover:scale-105 flex items-center gap-3 border border-black"
                         >
                             Explore Products
                             <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

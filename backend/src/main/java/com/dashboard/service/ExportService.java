@@ -27,18 +27,16 @@ public class ExportService {
     public byte[] exportProductsToCsv() throws IOException {
         log.info("Exporting products to CSV");
 
-        List<Product> products = productRepository.findAll();
+        List<Product> products = productRepository.findAllExcludingRejected();
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              OutputStreamWriter osw = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
              CSVWriter writer = new CSVWriter(osw)) {
 
-            // Write header
             String[] header = {"ASIN", "Category", "Product Link", "No of Sellers", "Ranking",
                     "Rating", "Reviews Count", "Price", "Product Name", "Description", "Image URL"};
             writer.writeNext(header);
 
-            // Write data
             for (Product product : products) {
                 String[] data = {
                         product.getAsin(),
@@ -73,7 +71,6 @@ public class ExportService {
 
             Sheet sheet = workbook.createSheet("Products");
 
-            // Create header style
             CellStyle headerStyle = workbook.createCellStyle();
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
@@ -81,7 +78,6 @@ public class ExportService {
             headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
             headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
-            // Create header row
             Row headerRow = sheet.createRow(0);
             String[] headers = {"ASIN", "Category", "Product Name", "Price", "Rating",
                     "Reviews", "Ranking", "Sellers", "Bestseller"};
@@ -92,7 +88,6 @@ public class ExportService {
                 cell.setCellStyle(headerStyle);
             }
 
-            // Fill data
             int rowNum = 1;
             for (Product product : products) {
                 Row row = sheet.createRow(rowNum++);
@@ -108,7 +103,6 @@ public class ExportService {
                 row.createCell(8).setCellValue(product.getIsBestseller() != null && product.getIsBestseller() ? "Yes" : "No");
             }
 
-            // Auto-size columns
             for (int i = 0; i < headers.length; i++) {
                 sheet.autoSizeColumn(i);
             }
@@ -128,7 +122,6 @@ public class ExportService {
              OutputStreamWriter osw = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
              CSVWriter writer = new CSVWriter(osw)) {
 
-            // Write header
             String[] header = {"Sale ID", "Product ASIN", "Product Name", "User Email",
                     "Quantity", "Unit Price", "Total Amount", "Sale Date", "Status"};
             writer.writeNext(header);

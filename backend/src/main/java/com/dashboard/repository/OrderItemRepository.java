@@ -16,13 +16,27 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
     Page<OrderItem> findBySellerOrderByOrderCreatedAtDesc(User seller, Pageable pageable);
 
-    // ✅ REQUIRED: Find unprocessed revenue items for a seller
     @Query("SELECT oi FROM OrderItem oi WHERE oi. seller = :seller AND (oi.sellerRevenueCalculated = false OR oi.sellerRevenueCalculated IS NULL) AND oi.order. status = 'CONFIRMED'")
     List<OrderItem> findUnprocessedRevenueItems(@Param("seller") User seller);
 
-    // ✅ Count items by seller
     Long countBySeller(User seller);
 
-    // ✅ Find items by order ID
     List<OrderItem> findByOrderId(Long orderId);
+
+    @Query("SELECT sum(oi.quantity) FROM OrderItem oi "+
+            "JOIN oi.order o "+
+            "WHERE o.status = 'CONFIRMED'")
+    Long countTotalSalesFromConfirmedOrders();
+
+    @Query("SELECT sum(oi.quantity) FROM OrderItem oi " +
+            "JOIN oi.order o " +
+            "WHERE o.status = 'CONFIRMED' " +
+            "AND oi.seller IS NULL")
+    Long countPlatformSalesFromConfirmedOrders();
+
+    @Query("SELECT sum(oi.quantity) FROM OrderItem oi " +
+            "JOIN oi.order o " +
+            "WHERE o.status = 'CONFIRMED' " +
+            "AND oi.seller IS NOT NULL")
+    Long countSellerSalesFromConfirmedOrders();
 }

@@ -5,63 +5,32 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 36">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/AnalystManagementController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/AnalystRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/AnalystUpdateRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/AnalystResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AnalystManagementService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/Main/src/components/admin/CreateAnalystModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/Main/src/components/admin/EditAnalystModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/Main/src/pages/Admin/AnalystManagement.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/frontend/Main/src/service/analystManagementService.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/DashboardApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/DashboardApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/MLAnalyticsController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictionController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictionMetricsController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/PredictionRequestDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/PredictionResponseDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/PredictionStatsDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/BestsellerHistory.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/DailyProductMetric.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Prediction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/PredictionAccuracyLog.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/PriceChangeHistory.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/ProductRankingHistory.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/BestsellerHistoryRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/DailyProductMetricRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/PredictionAccuracyLogRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/PredictionRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/PriceChangeHistoryRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/ProductRankingHistoryRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/AdminDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/AdminDashboardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/OrderItemRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/OrderItemRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/ProductRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/FlaskMLClientService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/MLTrackingService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PredictionService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/ProductService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/StockManagementService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/StockManagementService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AdminProductApprovalService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AdminProductApprovalService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AnalystService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AnalystService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/DashboardService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/DashboardService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/ExportService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/ExportService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/.env" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/app.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/config.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/data_loaders/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/data_loaders/comprehensive_loader.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/diagnose_data.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/feature_engineering/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/feature_engineering/hybrid_features.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/ml.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/models/bestseller_model_v2.pkl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/models/feature_engineer_v2.pkl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/models/label_encoders_v2.pkl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/models/price_model_v2.pkl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/models/ranking_model_v2.pkl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/models/scaler_v2.pkl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/models/training_metrics_v2.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/start_service.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/test_improvements.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/test_system.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/train_models.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/trainers/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/trainers/train_all_models.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/utils/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/utils/db_config.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/utils/logger.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/utils/performance.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/dist/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/src/components/auth/SignUpForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/components/auth/SignUpForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/src/layout/AnalystLayout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/layout/AnalystLayout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/src/layout/AppSidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/layout/AppSidebar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/Public/AboutPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/pages/Public/AboutPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/Public/LandingPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/pages/Public/LandingPage.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,6 +43,8 @@
         <option value="Python Script" />
         <option value="Interface" />
         <option value="Class" />
+        <option value="TypeScript JSX File" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
@@ -188,7 +159,7 @@
       <workItem from="1766491988250" duration="15378000" />
       <workItem from="1766579305115" duration="14218000" />
       <workItem from="1766701311313" duration="5226000" />
-      <workItem from="1766750003663" duration="609000" />
+      <workItem from="1766750003663" duration="8288000" />
     </task>
     <task id="LOCAL-00001" summary="commit 28">
       <option name="closed" value="true" />
@@ -270,7 +241,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766703070277</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="commit 36">
+      <option name="closed" value="true" />
+      <created>1766750711176</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1766750711176</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

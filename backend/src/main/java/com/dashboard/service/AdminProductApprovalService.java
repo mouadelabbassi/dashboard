@@ -35,6 +35,8 @@ public class AdminProductApprovalService {
     private final SellerRevenueRepository revenueRepository;
     private final OrderRepository orderRepository;
     private final PlatformRevenueRepository platformRevenueRepository;
+    private final OrderItemRepository orderItemRepository;
+
 
     private User getCurrentAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -48,7 +50,6 @@ public class AdminProductApprovalService {
         return user;
     }
 
-    // ========== PENDING PRODUCT REQUESTS ==========
 
     @Transactional(readOnly = true)
     public Page<PendingProductResponse> getPendingProductRequests(Pageable pageable) {
@@ -77,10 +78,8 @@ public class AdminProductApprovalService {
             throw new BadRequestException("This request has already been processed");
         }
 
-        // Generate unique ASIN
         String asin = generateUniqueAsin();
 
-        // Create the actual product
         Product product = Product.builder()
                 .asin(asin)
                 .productName(request.getProductName())
@@ -111,7 +110,6 @@ public class AdminProductApprovalService {
         request.setAdminNotes(approvalRequest.getAdminNotes());
         productRequestRepository.save(request);
 
-        // Notify the seller
         notificationService.notifySellerProductApproved(request.getSeller(), product);
 
         log.info("Admin {} approved product request {} - Created product with ASIN: {}",
@@ -135,7 +133,6 @@ public class AdminProductApprovalService {
             throw new BadRequestException("Rejection reason is required");
         }
 
-        // Update the request
         request.setStatus(SellerProductRequest.RequestStatus.REJECTED);
         request.setReviewedBy(admin);
         request.setReviewedAt(LocalDateTime.now());
@@ -149,7 +146,6 @@ public class AdminProductApprovalService {
                 .productName(request.getProductName())
                 .build();
 
-        // Notify the seller
         notificationService.notifySellerProductRejected(request.getSeller(), dummyProduct, approvalRequest.getRejectionReason());
 
         log.info("Admin {} rejected product request {}: {}",
@@ -158,7 +154,6 @@ public class AdminProductApprovalService {
         return convertToRequestResponse(request);
     }
 
-    // ========== ADMIN DASHBOARD WITH REAL REVENUE ==========
 
     @Transactional(readOnly = true)
     public AdminDashboardResponse getAdminDashboard() {
@@ -171,17 +166,19 @@ public class AdminProductApprovalService {
         BigDecimal commissionRevenue = platformRevenueRepository.calculateCommissionRevenue();
         BigDecimal totalPlatformFees = platformRevenueRepository.calculateTotalPlatformFees();
 
-        // Product stats
+
         Long totalProducts = productRepository.countApprovedProducts();
         Long pendingApprovals = productRequestRepository.countPendingRequests();
 
-        // User stats
         Long totalSellers = userRepository.countByRole(User.Role.SELLER);
         Long totalBuyers = userRepository.countByRole(User.Role.BUYER);
 
-        // Revenue stats - ONLY from actual purchases (confirmed orders)
 
-        // Orders completed today
+
+        Long totalSales = orderItemRepository.countTotalSalesFromConfirmedOrders();
+        Long platformSales = orderItemRepository.countPlatformSalesFromConfirmedOrders();
+        Long sellerSales = orderItemRepository.countSellerSalesFromConfirmedOrders();
+
         BigDecimal todayRevenue = orderRepository.calculateTodayRevenue();
         Long todayOrders = orderRepository.countTodayOrders();
 

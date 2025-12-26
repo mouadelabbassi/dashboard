@@ -104,11 +104,10 @@ const AnalystLayout: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex">
-            {/* Sidebar */}
             <aside
                 className={`fixed lg:static inset-y-0 left-0 z-50 ${
                     sidebarOpen ?  'w-64' : 'w-20'
-                } bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 flex flex-col`}
+                } bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 flex flex-col h-screen`}
             >
                 {/* Logo */}
                 <div className="h-16 flex items-center justify-center border-b border-gray-200 dark:border-gray-800 px-4">
@@ -170,45 +169,23 @@ const AnalystLayout: React.FC = () => {
                     </div>
                 </nav>
 
-                <div className="mt-auto p-4 border-t border-gray-200 dark:border-gray-800">
-                    {sidebarOpen ? (
-                        <>
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold">
-                                    {user?.fullName?.charAt(0) || 'A'}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                        {user?.fullName || 'Analyst'}
-                                    </p>
-                                    <p className="text-xs text-gray-500 truncate">{user?.email}</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={handleLogout}
-                                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                            >
-                                <LogoutIcon />
-                                <span>Logout</span>
-                            </button>
-                        </>
-                    ) : (
-                        /* Compact logout button when sidebar is collapsed */
-                        <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center justify-center p-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                            title="Logout"
-                        >
-                            <LogoutIcon />
-                        </button>
-                    )}
-                </div>
             </aside>
 
             <div className="flex-1 flex flex-col min-h-screen">
                 <header className="h-auto min-h-[4rem] bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-40">
                     <div className="flex items-center justify-between px-6 py-3 gap-4">
                         <div className="flex items-center gap-4">
+                            {user?.role === 'ADMIN' && (
+                                <Link
+                                    to="/admin"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-500/20 transition-colors text-sm font-medium"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                    Back to Admin
+                                </Link>
+                            )}
                             <div className="hidden sm:block">
                                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
                                     Analytics Dashboard
@@ -235,6 +212,18 @@ const AnalystLayout: React.FC = () => {
                             >
                                 {isDark ? <SunIcon /> : <MoonIcon />}
                             </button>
+
+                            {/* User Profile & Logout */}
+                            <div className="flex items-center gap-3 ml-2 pl-3 border-l border-gray-200 dark:border-gray-800">
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                    title="Logout"
+                                >
+                                    <LogoutIcon />
+                                    <span className="hidden sm:inline">Logout</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 

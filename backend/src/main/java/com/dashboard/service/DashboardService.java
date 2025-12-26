@@ -27,19 +27,12 @@ public class DashboardService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final SellerRevenueRepository sellerRevenueRepository;
-    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
 
-    /**
-     * Get ALL products (both store and seller products)
-     * This ensures consistency across all dashboard components
-     */
     private List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
-    /**
-     * Get only approved products for public-facing stats
-     */
     private List<Product> getApprovedProducts() {
         return productRepository.findAll().stream()
                 .filter(p -> p.getApprovalStatus() == Product.ApprovalStatus.APPROVED)
@@ -50,12 +43,10 @@ public class DashboardService {
     public DashboardStatsResponse getDashboardStats() {
         log.debug("Fetching dashboard stats");
 
-        // Use ALL products for consistency
         List<Product> allProducts = getAllProducts();
         long totalProducts = allProducts.size();
         Long totalCategories = categoryRepository.count();
 
-        // Calculate averages from all products
         BigDecimal avgPrice = allProducts.stream()
                 .filter(p -> p.getPrice() != null)
                 .map(Product::getPrice)
@@ -74,7 +65,7 @@ public class DashboardService {
                 .sum();
 
         BigDecimal totalRevenue = sellerRevenueRepository.calculateTotalPlatformRevenue();
-        Long totalSales = orderRepository.countConfirmedOrders();
+        Long totalSales = orderItemRepository.countTotalSalesFromConfirmedOrders();
 
         BigDecimal totalInventoryValue = allProducts.stream()
                 .filter(p -> p.getPrice() != null)
@@ -140,7 +131,6 @@ public class DashboardService {
         List<Product> allProducts = getAllProducts();
         Map<String, Long> distribution = new LinkedHashMap<>();
 
-        // Group products by category
         Map<String, Long> categoryCount = allProducts.stream()
                 .filter(p -> p.getCategory() != null)
                 .collect(Collectors.groupingBy(
@@ -148,7 +138,6 @@ public class DashboardService {
                         Collectors.counting()
                 ));
 
-        // Sort by count descending
         categoryCount.entrySet().stream()
                 .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
                 .forEach(e -> distribution.put(e.getKey(), e.getValue()));

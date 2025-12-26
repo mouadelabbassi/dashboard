@@ -1,25 +1,16 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
-// Context Providers
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
-
-// Layouts
 import AppLayout from './layout/AppLayout';
 import BuyerLayout from './layout/BuyerLayout';
 import SellerLayout from './layout/SellerLayout';
-
-// Auth Pages
 import SignIn from './pages/AuthPages/SignIn';
 import SignUp from './pages/AuthPages/SignUp';
 import ForgotPassword from './pages/AuthPages/ForgotPassword';
 import AdminOrdersPage from './pages/Admin/AdminOrdersPage';
-
-// 🆕 Public Pages
 import LandingPage from './pages/Public/LandingPage';
 import PublicShopPage from './pages/Public/PublicShopPage';
 import AboutPage from './pages/Public/AboutPage';
-
 import AnalystLayout from './layout/AnalystLayout';
 import AnalystDashboard from './pages/Analyst/AnalystDashboard';
 import SalesAnalytics from './pages/Analyst/SalesAnalytics';
@@ -29,26 +20,18 @@ import CategoryAnalysis from './pages/Analyst/CategoryAnalysis';
 import Reports from './pages/Analyst/Reports';
 import SellerStockManagement from './pages/Seller/SellerStockManagement';
 import AdminStockManagement from './pages/Admin/AdminStockManagement';
-
 import PredictiveDashboard from './pages/Analyst/PredictiveDashboard';
-
-
-// Admin Pages
 import Home from './pages/Dashboard/Home';
 import ProductsPage from './pages/Dashboard/ProductsPage';
 import ProductApprovals from './pages/Admin/ProductApprovals';
 import NotificationsPage from './pages/NotificationsPage';
 import UserProfiles from './pages/UserProfiles';
-
-// Seller Pages
 import SellerDashboard from './pages/Seller/SellerDashboard';
 import SellerProducts from './pages/Seller/SellerProducts';
 import SellerProductForm from './pages/Seller/SellerProductForm';
 import SellerOrders from './pages/Seller/SellerOrders';
 import SellerReviews from './pages/Seller/SellerReviews';
 import SellerProfile from './pages/Seller/SellerProfile';
-
-// Buyer Pages
 import ShopPage from './pages/Buyer/ShopPage';
 import ProductDetailPage from './pages/Buyer/ProductDetailPage';
 import CartPage from './pages/Buyer/CartPage';
@@ -56,11 +39,9 @@ import CheckoutPage from './pages/Buyer/CheckoutPage';
 import OrderHistoryPage from './pages/Buyer/OrderHistoryPage';
 import BuyerProfilePage from './pages/Buyer/BuyerProfilePage';
 import MyReviewsPage from './pages/Buyer/MyReviewsPage';
-
 import SellerManagement from './pages/Admin/SellerManagement';
-
-// Other Pages
 import NotFound from './pages/OtherPage/NotFound';
+import AnalystManagement from "./pages/Admin/AnalystManagement.tsx";
 
 // Auth Guard
 interface PrivateRouteProps {
@@ -99,7 +80,6 @@ function App() {
             <CartProvider>
                 <Router>
                     <Routes>
-                        {/* 🆕 PUBLIC ROUTES - No Login Required */}
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/explore" element={<PublicShopPage />} />
                         <Route path="/about" element={<AboutPage />} />
@@ -109,7 +89,6 @@ function App() {
                         <Route path="/signup" element={<SignUp />} />
                         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-                        {/* Analyst Routes */}
                         <Route
                             path="/analyst"
                             element={
@@ -129,7 +108,6 @@ function App() {
 
                         </Route>
 
-                        {/* Admin Routes */}
                         <Route
                             path="/admin"
                             element={
@@ -147,9 +125,10 @@ function App() {
                             <Route path="profile" element={<UserProfiles />} />
                             <Route path="sellers" element={<SellerManagement />} />
                             <Route path="predictions" element={<PredictiveDashboard />} />
+                            <Route path="/admin/analysts" element={<AnalystManagement />} />
+
                         </Route>
 
-                        {/* Seller Routes */}
                         <Route
                             path="/seller"
                             element={
@@ -176,7 +155,6 @@ function App() {
                             <Route path="shop/my-reviews" element={<MyReviewsPage />} />
                         </Route>
 
-                        {/* Buyer Routes */}
                         <Route
                             path="/shop"
                             element={
@@ -195,7 +173,6 @@ function App() {
                             <Route path="notifications" element={<NotificationsPage />} />
                         </Route>
 
-                        {/* 404 */}
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </Router>

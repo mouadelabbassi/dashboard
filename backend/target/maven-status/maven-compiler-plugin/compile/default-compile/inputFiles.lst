@@ -17,6 +17,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controlle
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ReviewRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ApiResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\SellerStock.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\AnalystRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\SellerController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\PendingProductResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\CreateOrderRequest.java
@@ -24,6 +25,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\U
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\SellerOrderResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\OrderResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\StockManagementService.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AnalystManagementController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\security\JwtTokenProvider.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ProductApprovalRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\ProductReview.java
@@ -34,6 +36,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\respo
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\NotificationRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\Notification.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\exception\BadRequestException.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\AnalystResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\OrderItemRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\ReviewController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\PlatformRevenue.java
@@ -41,6 +44,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\reque
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\SellerRevenueService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\SellerStockService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ProductDetailResponse.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\AnalystManagementService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\PlatformRevenueRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AdminStockController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\AdminProductApprovalService.java
@@ -97,6 +101,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\respo
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\AsyncConfig.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\CategoryController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ReviewResponse.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\AnalystUpdateRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\DashboardResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\SellerProfileResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\ExportService.java

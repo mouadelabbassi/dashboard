@@ -32,14 +32,12 @@ public class AdminDashboardController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> getDashboard() {
         Map<String, Object> dashboard = new HashMap<>();
 
-        // Count totals
-        long totalProducts = productRepository.count();
+        Long totalProducts = productRepository.countAllExcludingRejected();
         long totalOrders = orderRepository.count();
         long totalBuyers = userRepository.countByRole(User.Role.BUYER);
         long totalSellers = userRepository.countByRole(User.Role.SELLER);
         long pendingApprovals = productRepository.countByApprovalStatus(Product.ApprovalStatus.PENDING);
 
-        // Calculate revenue from delivered orders
         double totalRevenue = 0;
         try {
             List<Order> deliveredOrders = orderRepository.findByStatus(Order.OrderStatus.DELIVERED);
@@ -47,14 +45,11 @@ public class AdminDashboardController {
                     .mapToDouble(o -> o.getTotalAmount() != null ? o.getTotalAmount().doubleValue() : 0)
                     .sum();
         } catch (Exception e) {
-            // Fallback if status doesn't exist
             totalRevenue = 0;
         }
 
-        // Calculate avg order value
         double avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-        // Orders by status
         Map<String, Long> ordersByStatus = new HashMap<>();
         try {
             for (Order.OrderStatus status : Order.OrderStatus.values()) {
@@ -62,7 +57,6 @@ public class AdminDashboardController {
                 ordersByStatus.put(status.name(), count);
             }
         } catch (Exception e) {
-            // Fallback
             ordersByStatus.put("PENDING", 0L);
             ordersByStatus.put("DELIVERED", 0L);
         }

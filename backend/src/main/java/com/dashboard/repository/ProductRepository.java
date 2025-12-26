@@ -108,18 +108,6 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
             Pageable pageable
     );
 
-    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' ORDER BY p.createdAt DESC")
-    Page<Product> findAllApprovedProducts(Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.seller IS NULL AND p.approvalStatus = 'APPROVED'")
-    Page<Product> findMouadVisionProducts(Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.seller IS NOT NULL AND p.approvalStatus = 'APPROVED'")
-    Page<Product> findThirdPartySellerProducts(Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.seller.id = :sellerId AND p.approvalStatus = 'APPROVED'")
-    Page<Product> findApprovedProductsBySellerId(@Param("sellerId") Long sellerId, Pageable pageable);
-
     boolean existsByAsin(String asin);
 
     @Query("SELECT SUM(p.stockQuantity) FROM Product p")
@@ -180,4 +168,13 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
             @Param("minRating") BigDecimal minRating,
             Pageable pageable
     );
+
+    @Query("SELECT p FROM Product p WHERE p.approvalStatus != 'REJECTED' OR p.approvalStatus IS NULL")
+    List<Product> findAllExcludingRejected();
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.approvalStatus != 'REJECTED' OR p.approvalStatus IS NULL")
+    Long countAllExcludingRejected();
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.approvalStatus = 'APPROVED' OR p.approvalStatus IS NULL")
+    Long countApprovedIncludingNull();
 }

@@ -44,10 +44,6 @@ export default function SignUpForm() {
             value: "SELLER",
             label: "Seller",
         },
-        {
-            value: "ANALYST",
-            label: "Analyst",
-        }
     ];
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
