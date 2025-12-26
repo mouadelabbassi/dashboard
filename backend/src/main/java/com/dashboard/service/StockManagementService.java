@@ -62,7 +62,6 @@ public class StockManagementService {
 
         request = stockRequestRepository.save(request);
 
-        // ✅ Notify all admins
         notificationService.notifyAdminsStockUpdateRequest(seller, product, quantity);
 
         log.info("Seller {} requested stock update for product {} (+{} units)",
@@ -92,7 +91,6 @@ public class StockManagementService {
         request.setAdminNotes(adminNotes);
         stockRequestRepository.save(request);
 
-        // ✅ Notify seller
         notificationService.notifySellerStockApproved(request.getSeller(), product, request.getRequestedQuantity());
 
         log.info("Admin {} approved stock request {} (+{} units for {})",
@@ -115,8 +113,6 @@ public class StockManagementService {
         request.setReviewedAt(LocalDateTime.now());
         request.setAdminNotes(adminNotes);
         stockRequestRepository.save(request);
-
-        // ✅ Notify seller
         notificationService.notifySellerStockRejected(request.getSeller(), request.getProduct(), rejectionReason);
 
         log.info("Admin {} rejected stock request {}: {}",

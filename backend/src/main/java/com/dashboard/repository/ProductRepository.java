@@ -18,14 +18,12 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String>, JpaSpecificationExecutor<Product> {
 
-    // ✅ CRITICAL FIX: Eager fetch seller and category to prevent LazyInitializationException
     @Query("SELECT DISTINCT p FROM Product p " +
             "LEFT JOIN FETCH p.seller " +
             "LEFT JOIN FETCH p.category " +
             "WHERE p.asin = :asin")
     Optional<Product> findByAsinWithRelations(@Param("asin") String asin);
 
-    // ✅ NEW: Fetch all products with relationships for batch processing
     @Query("SELECT DISTINCT p FROM Product p " +
             "LEFT JOIN FETCH p.seller " +
             "LEFT JOIN FETCH p.category")

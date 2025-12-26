@@ -9,16 +9,11 @@ import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 @EnableJpaAuditing
-@EnableScheduling
 public class DashboardApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(DashboardApplication.class, args);
         System.out.println(" Backend Started ");
-    }
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
     }
 
 }

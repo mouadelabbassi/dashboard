@@ -1,7 +1,6 @@
 package com.dashboard.service;
 
 import com.dashboard.dto.request.ProductRequest;
-import com.dashboard.dto.request.ProductUpdateRequestDTO;
 import com.dashboard.dto.response.ProductResponse;
 import com.dashboard.entity.Category;
 import com.dashboard.entity.Product;
@@ -29,9 +28,6 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
-
-    @Autowired
-    private MLTrackingService mlTrackingService;
 
     @Transactional(readOnly = true)
     public Page<ProductResponse> getAllProducts(Pageable pageable) {
