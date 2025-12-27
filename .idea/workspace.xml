@@ -4,10 +4,40 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 37">
+    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 38">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictiveDashboardController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/ApplyRecommendationRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/BestsellerPredictionResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/PriceIntelligenceResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/RankingTrendResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/BestsellerPrediction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/PredictionNotification.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/RankingTrendPrediction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/BestsellerPredictionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/PredictionNotificationRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/RankingTrendPredictionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/BestsellerPredictionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/MLServiceClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PriceIntelligenceService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/RankingTrendPredictionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/SellerNotificationService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/app.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/predictors/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/predictors/bestseller_predictor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/predictors/ranking_trend_predictor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/training/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/training/train_bestseller_model.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/training/train_ranking_trend_model.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/untitled.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/utils/data_loader.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/utils/database.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml/utils/model_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dashboard.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dashboard.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/node_modules/.tmp/tsconfig.app.tsbuildinfo" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/node_modules/.tmp/tsconfig.app.tsbuildinfo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/layout/AppSidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/layout/AppSidebar.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -17,11 +47,11 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
-        <option value="Interface" />
-        <option value="Class" />
         <option value="TypeScript JSX File" />
         <option value="TypeScript File" />
+        <option value="Python Script" />
+        <option value="Class" />
+        <option value="Interface" />
       </list>
     </option>
   </component>
@@ -83,6 +113,12 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\mouad\Downloads\dashboard\ml" />
+      <recent name="C:\Users\mouad\Downloads\dashboard\untitled" />
+    </key>
+  </component>
   <component name="RunManager" selected="Spring Boot.DashboardApplication">
     <configuration name="test_system.sh" type="ShConfigurationType" temporary="true">
       <option name="SCRIPT_TEXT" value="" />
@@ -136,7 +172,9 @@
       <workItem from="1766491988250" duration="15378000" />
       <workItem from="1766579305115" duration="14218000" />
       <workItem from="1766701311313" duration="5226000" />
-      <workItem from="1766750003663" duration="10618000" />
+      <workItem from="1766750003663" duration="10951000" />
+      <workItem from="1766769382089" duration="5170000" />
+      <workItem from="1766841663027" duration="617000" />
     </task>
     <task id="LOCAL-00001" summary="commit 28">
       <option name="closed" value="true" />
@@ -234,7 +272,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766759846692</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="commit 38">
+      <option name="closed" value="true" />
+      <created>1766763358374</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1766763358374</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -262,6 +308,18 @@
     <MESSAGE value="commit 35" />
     <MESSAGE value="commit 36" />
     <MESSAGE value="commit 37" />
-    <option name="LAST_COMMIT_MESSAGE" value="commit 37" />
+    <MESSAGE value="commit 38" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit 38" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/frontend/Main/src/layout/AppSidebar.tsx</url>
+          <line>115</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
