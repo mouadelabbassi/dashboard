@@ -1,0 +1,22 @@
+{
+  "model_type": "GradientBoosting",
+  "feature_names": [
+    "price",
+    "rating",
+    "reviews_count",
+    "sales_count",
+    "price_to_category_avg_ratio",
+    "reviews_to_category_avg_ratio",
+    "rating_normalized",
+    "reviews_count_log",
+    "sales_count_log",
+    "has_discount",
+    "discount_percentage"
+  ],
+  "metrics": {
+    "mae": 0.8167625145955678,
+    "r2_score": 0.9208550517825796
+  },
+  "trained_at": "2025-12-27T19:06:04.322951",
+  "logic": "Performance-based ranking prediction with momentum analysis"
+}

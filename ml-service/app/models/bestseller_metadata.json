@@ -1,0 +1,27 @@
+{
+  "model_type": "XGBoost",
+  "feature_names": [
+    "price",
+    "rating",
+    "reviews_count",
+    "sales_count",
+    "discount_percentage",
+    "days_since_listed",
+    "stock_quantity",
+    "price_to_category_avg_ratio",
+    "reviews_to_category_avg_ratio",
+    "rating_normalized",
+    "reviews_count_log",
+    "sales_count_log",
+    "has_discount",
+    "is_low_stock"
+  ],
+  "metrics": {
+    "accuracy": 0.9629629629629629,
+    "precision": 0.625,
+    "recall": 0.8333333333333334,
+    "f1_score": 0.7142857142857143,
+    "auc_roc": 0.9950980392156863
+  },
+  "trained_at": "2025-12-27T19:06:03.985614"
+}
