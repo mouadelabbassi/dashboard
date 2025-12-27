@@ -26,7 +26,7 @@ import joblib
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config import MODEL_CONFIG, MODEL_PATHS, TRAINING_CONFIG
-from utils.data_loader import DataLoader
+from utils.enhanced_data_loader import DataLoader
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

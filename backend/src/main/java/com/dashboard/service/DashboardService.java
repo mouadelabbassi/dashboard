@@ -149,7 +149,6 @@ public class DashboardService {
     public Map<String, Long> getPriceDistribution() {
         log.debug("Fetching price distribution");
 
-        // Use same product list as other methods
         List<Product> products = getAllProducts();
         Map<String, Long> distribution = new LinkedHashMap<>();
 
@@ -174,7 +173,6 @@ public class DashboardService {
     public Map<String, Long> getRatingDistribution() {
         log.debug("Fetching rating distribution");
 
-        // Use same product list
         List<Product> products = getAllProducts();
         Map<String, Long> distribution = new LinkedHashMap<>();
 
@@ -184,14 +182,13 @@ public class DashboardService {
         long twoToThree = products.stream().filter(p -> p.getRating() != null && p.getRating().compareTo(new BigDecimal("2.0")) >= 0 && p.getRating().compareTo(new BigDecimal("3.0")) < 0).count();
         long belowTwo = products.stream().filter(p -> p.getRating() != null && p.getRating().compareTo(new BigDecimal("2.0")) < 0).count();
 
-        // Count products with no rating
         long noRating = products.stream().filter(p -> p.getRating() == null).count();
 
         distribution.put("★★★★★ (4.5+)", fiveStars);
         distribution.put("★★★★☆ (4.0-4.5)", fourToFive);
         distribution.put("★★★☆☆ (3.0-4.0)", threeToFour);
         distribution.put("★★☆☆☆ (2.0-3.0)", twoToThree);
-        distribution.put("★☆☆☆☆ (<2.0)", belowTwo + noRating); // Include no rating in lowest category
+        distribution.put("★☆☆☆☆ (<2.0)", belowTwo + noRating);
 
         return distribution;
     }
@@ -203,7 +200,6 @@ public class DashboardService {
         List<Product> allProducts = getAllProducts();
         List<Map<String, Object>> result = new ArrayList<>();
 
-        // Group products by category
         Map<Category, List<Product>> productsByCategory = allProducts.stream()
                 .filter(p -> p.getCategory() != null)
                 .collect(Collectors.groupingBy(Product::getCategory));
@@ -212,14 +208,11 @@ public class DashboardService {
             Category category = entry.getKey();
             List<Product> products = entry.getValue();
 
-            // Calculate estimated revenue based on sales_count or reviews as fallback
             BigDecimal totalRevenue = products.stream()
                     .filter(p -> p.getPrice() != null)
                     .map(p -> {
                         int salesCount = p.getSalesCount() != null ?  p.getSalesCount() : 0;
                         int reviewsCount = p.getReviewsCount() != null ? p.getReviewsCount() : 0;
-
-                        // Use actual sales if available, otherwise estimate from reviews
                         int estimatedSales = salesCount > 0 ? salesCount : Math.max(reviewsCount / 10, 1);
                         return p.getPrice().multiply(new BigDecimal(estimatedSales));
                     })
@@ -268,7 +261,6 @@ public class DashboardService {
 
         List<Product> allProducts = getAllProducts();
 
-        // Rank by calculated score instead of just ranking field
         return getProductsRankedByScore(allProducts).stream()
                 .limit(limit)
                 .map(this::convertToProductResponse)
@@ -281,15 +273,13 @@ public class DashboardService {
 
         List<Product> allProducts = getAllProducts();
 
-        // Rank by calculated score
         List<Product> rankedProducts = getProductsRankedByScore(allProducts);
 
-        // Assign dynamic ranking based on score position
         List<ProductResponse> result = new ArrayList<>();
         for (int i = 0; i < Math.min(limit, rankedProducts.size()); i++) {
             Product p = rankedProducts.get(i);
             ProductResponse response = convertToProductResponse(p);
-            response.setRanking(i + 1); // Dynamic ranking based on score
+            response.setRanking(i + 1);
             result.add(response);
         }
 
@@ -302,7 +292,6 @@ public class DashboardService {
 
         List<Product> allProducts = getAllProducts();
 
-        // Get top 100 products by score for the scatter plot
         List<Product> rankedProducts = getProductsRankedByScore(allProducts).stream()
                 .limit(100)
                 .collect(Collectors.toList());
@@ -314,7 +303,7 @@ public class DashboardService {
             point.put("asin", p.getAsin());
             point.put("name", p.getProductName().length() > 30 ? p.getProductName().substring(0, 30) + "..." : p.getProductName());
             point.put("reviews", p.getReviewsCount() != null ? p.getReviewsCount() : 0);
-            point.put("ranking", i + 1); // Dynamic ranking
+            point.put("ranking", i + 1);
             point.put("rating", p.getRating() != null ? p.getRating() : BigDecimal.ZERO);
             point.put("price", p.getPrice() != null ? p.getPrice() : BigDecimal.ZERO);
             point.put("category", p.getCategory() != null ? p.getCategory().getName() : "Unknown");
@@ -349,7 +338,6 @@ public class DashboardService {
                 .filter(p -> p.getRating() != null && p.getRating().compareTo(new BigDecimal("4.0")) >= 0)
                 .count();
 
-        // Count products with sales
         long productsWithSales = allProducts.stream()
                 .filter(p -> p.getSalesCount() != null && p.getSalesCount() > 0)
                 .count();

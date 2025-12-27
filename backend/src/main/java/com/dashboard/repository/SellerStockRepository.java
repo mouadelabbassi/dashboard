@@ -21,16 +21,10 @@ public interface SellerStockRepository extends JpaRepository<SellerStock, Long> 
 
     Optional<SellerStock> findBySellerAndOriginalProductAsin(User seller, String originalProductAsin);
 
-    Page<SellerStock> findBySellerAndStatusOrderByPurchasedAtDesc(
-            User seller, SellerStock.StockStatus status, Pageable pageable);
-
     List<SellerStock> findBySellerAndAvailableQuantityGreaterThanOrderByPurchasedAtDesc(
             User seller, Integer minQuantity);
 
     Optional<SellerStock> findByIdAndSeller(Long id, User seller);
-
-    Optional<SellerStock> findBySellerAndOriginalProductAsinAndOrderId(
-            User seller, String originalProductAsin, Long orderId);
 
     @Query("SELECT COUNT(s) FROM SellerStock s WHERE s.seller = :seller")
     Long countBySeller(@Param("seller") User seller);

@@ -20,12 +20,4 @@ public interface RankingTrendPredictionRepository extends JpaRepository<RankingT
 
     List<RankingTrendPrediction> findByPredictedTrendOrderByConfidenceScoreDesc(
             RankingTrendPrediction.PredictedTrend trend);
-
-    List<RankingTrendPrediction> findByProductIdIn(List<String> productIds);
-
-    @Query("SELECT rtp FROM RankingTrendPrediction rtp JOIN rtp.product p " +
-            "WHERE p.seller.id = :sellerId ORDER BY rtp.predictionDate DESC")
-    List<RankingTrendPrediction> findBySellerIdOrderByPredictionDateDesc(@Param("sellerId") Long sellerId);
-
-    long countByPredictedTrend(RankingTrendPrediction.PredictedTrend trend);
 }

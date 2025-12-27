@@ -68,7 +68,6 @@ public class RankingTrendPrediction {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", referencedColumnName = "asin", insertable = false, updatable = false)
     private Product product;
@@ -95,7 +94,6 @@ public class RankingTrendPrediction {
         }
     }
 
-    // Helper methods
     public boolean isDeclining() {
         return predictedTrend == PredictedTrend.DECLINING;
     }

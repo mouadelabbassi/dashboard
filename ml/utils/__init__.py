@@ -3,7 +3,7 @@ Utilities Package for MouadVision ML Service
 """
 
 from utils.database import DatabaseManager, db, get_products_for_training
-from utils.data_loader import DataLoader, load_and_prepare_data
+from utils.enhanced_data_loader import DataLoader, load_and_prepare_data
 from utils.model_utils import (
     ModelMetrics,
     metrics_calculator,

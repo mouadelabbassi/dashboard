@@ -25,8 +25,7 @@ public class ProductRequest {
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
     private BigDecimal price;
 
-    // These fields are read-only (set by customer activity, not admin)
-    // They can be set during import but not through regular create/update
+
     @DecimalMin(value = "1.0", message = "Rating must be at least 1.0")
     @DecimalMax(value = "5.0", message = "Rating must not exceed 5.0")
     private BigDecimal rating;

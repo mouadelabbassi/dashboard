@@ -43,12 +43,10 @@ public class AuthService {
             role = User.Role.BUYER;
         }
 
-        // Prevent direct admin registration
         if (role == User.Role.ADMIN) {
             throw new BadRequestException("Cannot register as admin");
         }
 
-        // Build user with store name for sellers
         User.UserBuilder userBuilder = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -57,7 +55,6 @@ public class AuthService {
                 .securityQuestion(request.getSecurityQuestion())
                 .securityAnswer(passwordEncoder.encode(request.getSecurityAnswer().toLowerCase()));
 
-        // Add store name for sellers
         if (role == User.Role.SELLER && request.getStoreName() != null && !request.getStoreName().trim().isEmpty()) {
             userBuilder.storeName(request.getStoreName().trim());
             userBuilder.isVerifiedSeller(false);

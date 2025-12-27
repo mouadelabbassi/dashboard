@@ -30,7 +30,7 @@ public class OrderItem {
     @Column(name = "product_name")
     private String productName;
 
-    @Column(name = "product_image", length = 2000)  // INCREASED SIZE
+    @Column(name = "product_image", length = 2000)
     private String productImage;
 
     @Column(nullable = false)
@@ -52,7 +52,7 @@ public class OrderItem {
     @Column(name = "seller_revenue_calculated")
     private Boolean sellerRevenueCalculated = false;
 
-    // Flag to identify if this is a platform product (MouadVision) or seller product
+
     @Column(name = "is_platform_product")
     private Boolean isPlatformProduct = false;
 }

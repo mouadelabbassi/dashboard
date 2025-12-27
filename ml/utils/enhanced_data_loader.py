@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import logging
-from typing import Tuple, Optional
+from typing import Tuple
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 import joblib
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class DataLoader:
-   def __init__(self):
+    def __init__(self):
         self.scaler = None
         self.label_encoder = None
         self.category_encoder = None
@@ -232,19 +232,16 @@ class DataLoader:
             score += np.log1p(df['reviews_count']) * 1  # Reviews contribution
 
         if 'price_to_category_avg_ratio' in df.columns:
-            # Being slightly below average price is good
             score -= (df['price_to_category_avg_ratio'] - 1).abs() * 5
 
-        # Convert score to categorical
         y = pd.cut(score,
                    bins=[-np.inf, score.quantile(0.33), score.quantile(0.67), np.inf],
                    labels=['DECLINING', 'STABLE', 'IMPROVING'])
 
-        # Encode labels
+
         self.label_encoder = LabelEncoder()
         y_encoded = pd.Series(self.label_encoder.fit_transform(y), index=y.index)
 
-        # Save label encoder
         joblib.dump(self.label_encoder, MODEL_PATHS['label_encoder'])
 
         X = X.fillna(0)
@@ -255,21 +252,13 @@ class DataLoader:
         return X, y_encoded
 
     def prepare_single_product(self, product_data: dict) -> pd.DataFrame:
-        """
-        Prepare a single product for prediction.
-        Used during inference.
-        """
-        # Create DataFrame from single product
         df = pd.DataFrame([product_data])
 
-        # Apply same cleaning and feature engineering
         df = self._clean_data(df)
         df = self._engineer_features(df)
-
         return df
 
     def get_feature_names(self, model_type: str) -> list:
-        """Get the feature names used for a model type"""
         if model_type == 'bestseller':
             return BESTSELLER_FEATURES
         elif model_type == 'ranking_trend':
@@ -279,16 +268,7 @@ class DataLoader:
 
 
 def load_and_prepare_data(model_type: str = 'bestseller') -> Tuple[pd.DataFrame, pd.Series]:
-    """
-    Convenience function to load and prepare training data.
 
-    Args:
-        model_type: 'bestseller' or 'ranking_trend'
-
-    Returns:
-        X: Features DataFrame
-        y: Target Series
-    """
     loader = DataLoader()
     df = loader.load_training_data()
 

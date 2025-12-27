@@ -16,14 +16,6 @@ import java.util.List;
 @Repository
 public interface SellerRevenueRepository extends JpaRepository<SellerRevenue, Long> {
 
-    Page<SellerRevenue> findBySellerOrderByRevenueDateDesc(User seller, Pageable pageable);
-
-    List<SellerRevenue> findBySellerAndRevenueDateBetween(
-            User seller,
-            LocalDate startDate,
-            LocalDate endDate
-    );
-
     @Query("SELECT COALESCE(SUM(sr.netAmount), 0) FROM SellerRevenue sr WHERE sr.seller = :seller")
     BigDecimal calculateTotalRevenueBySeller(@Param("seller") User seller);
 
@@ -52,9 +44,6 @@ public interface SellerRevenueRepository extends JpaRepository<SellerRevenue, Lo
 
     @Query("SELECT COALESCE(SUM(sr.grossAmount), 0) FROM SellerRevenue sr")
     BigDecimal calculateTotalPlatformRevenue();
-
-    @Query("SELECT COALESCE(SUM(sr.platformFee), 0) FROM SellerRevenue sr")
-    BigDecimal calculateTotalPlatformFees();
 
     @Query("SELECT sr.seller. id, sr.seller. fullName, sr.seller.storeName, " +
             "COALESCE(SUM(sr.grossAmount), 0), " +

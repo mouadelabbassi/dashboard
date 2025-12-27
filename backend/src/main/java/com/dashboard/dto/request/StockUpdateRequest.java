@@ -17,5 +17,5 @@ public class StockUpdateRequest {
     @Min(value = 1, message = "Quantity must be at least 1")
     private Integer quantity;
 
-    private String reason; // Optional: why the seller is restocking
+    private String reason;
 }

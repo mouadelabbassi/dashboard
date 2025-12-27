@@ -23,7 +23,6 @@ public class BestsellerPredictionResponse {
     private String categoryName;
     private String imageUrl;
 
-    // Current product metrics
     private BigDecimal currentPrice;
     private BigDecimal currentRating;
     private Integer currentReviewsCount;
@@ -31,18 +30,15 @@ public class BestsellerPredictionResponse {
     private Integer currentRanking;
     private Boolean isCurrentlyBestseller;
 
-    // Prediction results
     private BigDecimal predictedProbability;
     private Boolean isPotentialBestseller;
     private String confidenceLevel;
     private String potentialLevel;
     private String recommendation;
 
-    // Timestamps
     private LocalDateTime predictionDate;
     private LocalDateTime lastUpdated;
 
-    // Seller info (for admin/analyst views)
     private Long sellerId;
     private String sellerName;
     private Boolean isPlatformProduct;
@@ -63,7 +59,6 @@ public class BestsellerPredictionResponse {
                 .predictionDate(prediction.getPredictionDate())
                 .lastUpdated(prediction.getUpdatedAt());
 
-        // Add product info if available
         if (prediction.getProduct() != null) {
             var product = prediction.getProduct();
             builder.productName(product.getProductName())

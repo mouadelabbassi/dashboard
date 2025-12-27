@@ -20,28 +20,9 @@ public interface SellerProductRequestRepository extends JpaRepository<SellerProd
             SellerProductRequest.RequestStatus status,
             Pageable pageable
     );
-
-    List<SellerProductRequest> findBySellerAndStatusOrderByCreatedAtDesc(
-            User seller,
-            SellerProductRequest.RequestStatus status
-    );
-
-    Long countByStatus(SellerProductRequest.RequestStatus status);
-
-    Long countBySeller(User seller);
-
     Long countBySellerAndStatus(User seller, SellerProductRequest.RequestStatus status);
-
-    @Query("SELECT spr FROM SellerProductRequest spr WHERE spr.status = 'PENDING' ORDER BY spr.createdAt ASC")
-    List<SellerProductRequest> findPendingRequests(Pageable pageable);
 
     @Query("SELECT COUNT(spr) FROM SellerProductRequest spr WHERE spr.status = 'PENDING'")
     Long countPendingRequests();
 
-    @Query("SELECT spr FROM SellerProductRequest spr WHERE spr.seller.id = :sellerId AND spr.status = :status")
-    Page<SellerProductRequest> findBySellerIdAndStatus(
-            @Param("sellerId") Long sellerId,
-            @Param("status") SellerProductRequest.RequestStatus status,
-            Pageable pageable
-    );
 }

@@ -101,12 +101,10 @@ public class AnalystManagementService {
 
         log.info("Admin {} creating new analyst with email: {}", admin.getEmail(), request.getEmail());
 
-        // Check if email already exists
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new BadRequestException("Email already registered");
         }
 
-        // Create analyst user
         User analyst = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -126,9 +124,6 @@ public class AnalystManagementService {
         return convertToResponse(analyst);
     }
 
-    /**
-     * Update analyst
-     */
     @Transactional
     public AnalystResponse updateAnalyst(Long analystId, AnalystUpdateRequest request) {
         verifyAdmin();
@@ -143,9 +138,7 @@ public class AnalystManagementService {
             throw new BadRequestException("User is not an analyst");
         }
 
-        // Update fields if provided
         if (request.getEmail() != null && !request.getEmail().equals(analyst.getEmail())) {
-            // Check if new email is already taken
             if (userRepository.findByEmail(request.getEmail()).isPresent()) {
                 throw new BadRequestException("Email already in use");
             }
@@ -184,9 +177,6 @@ public class AnalystManagementService {
         return convertToResponse(analyst);
     }
 
-    /**
-     * Delete analyst
-     */
     @Transactional
     public void deleteAnalyst(Long analystId) {
         verifyAdmin();
@@ -206,9 +196,6 @@ public class AnalystManagementService {
         log.info("Analyst deleted successfully: {}", analyst.getEmail());
     }
 
-    /**
-     * Toggle analyst active status
-     */
     @Transactional
     public AnalystResponse toggleAnalystStatus(Long analystId) {
         verifyAdmin();
@@ -232,9 +219,6 @@ public class AnalystManagementService {
         return convertToResponse(analyst);
     }
 
-    /**
-     * Get analyst statistics
-     */
     @Transactional(readOnly = true)
     public AnalystResponse getAnalystStatistics(Long analystId) {
         verifyAdmin();
@@ -246,14 +230,9 @@ public class AnalystManagementService {
             throw new BadRequestException("User is not an analyst");
         }
 
-        // TODO: Calculate actual statistics from analyst activities
-        // For now, return basic info
         return convertToResponse(analyst);
     }
 
-    /**
-     * Convert User entity to AnalystResponse DTO
-     */
     private AnalystResponse convertToResponse(User analyst) {
         return AnalystResponse.builder()
                 .id(analyst.getId())
@@ -265,7 +244,6 @@ public class AnalystManagementService {
                 .isActive(analyst.getIsActive())
                 .createdAt(analyst.getCreatedAt())
                 .updatedAt(analyst.getUpdatedAt())
-                // TODO: Add actual statistics
                 .totalReportsGenerated(0)
                 .totalExportsCreated(0)
                 .lastActivityAt(analyst.getUpdatedAt())

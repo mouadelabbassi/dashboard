@@ -41,11 +41,9 @@ public class SellerProductRequest {
     @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity;
 
-    // ✅ FIXED: Changed from length=500 to TEXT to support long URLs (base64, etc.)
     @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
-    // ✅ FIXED: Changed from length=2000 to TEXT
     @Column(name = "additional_images", columnDefinition = "TEXT")
     private String additionalImages;
 

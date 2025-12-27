@@ -31,8 +31,6 @@ public class SellerController {
     private final SellerService sellerService;
     private StockManagementService stockManagementService;
 
-    // ========== DASHBOARD ==========
-
     @GetMapping("/dashboard")
     @Operation(summary = "Get seller dashboard", description = "Returns seller's dashboard with revenue and product stats")
     public ResponseEntity<ApiResponse<SellerDashboardResponse>> getDashboard() {
@@ -40,7 +38,6 @@ public class SellerController {
         return ResponseEntity. ok(ApiResponse. success("Dashboard retrieved successfully", dashboard));
     }
 
-    // ========== PROFILE ==========
 
     @GetMapping("/profile")
     @Operation(summary = "Get seller profile", description = "Returns current seller's profile")
@@ -57,7 +54,6 @@ public class SellerController {
         return ResponseEntity. ok(ApiResponse. success("Profile updated successfully", profile));
     }
 
-    // ========== PRODUCT SUBMISSION ==========
 
     @PostMapping("/products/submit")
     @Operation(summary = "Submit product for approval", description = "Submits a new product for admin approval")
@@ -83,7 +79,6 @@ public class SellerController {
         return ResponseEntity. ok(ApiResponse. success("Product request retrieved", request));
     }
 
-    // ========== MY PRODUCTS ==========
 
     @GetMapping("/products")
     @Operation(summary = "Get my products", description = "Returns all products owned by the seller")
@@ -126,7 +121,6 @@ public class SellerController {
         return ResponseEntity. ok(ApiResponse. success("Product updated", product));
     }
 
-    // ========== ORDERS (Sales) ==========
 
     @GetMapping("/orders")
     @Operation(summary = "Get my sold orders", description = "Returns orders containing seller's products")
@@ -136,7 +130,6 @@ public class SellerController {
         return ResponseEntity. ok(ApiResponse. success("Orders retrieved", orders));
     }
 
-    // ========== REVIEWS ==========
 
     @GetMapping("/reviews")
     @Operation(summary = "Get my product reviews", description = "Returns all reviews for seller's products")

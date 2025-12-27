@@ -65,7 +65,7 @@ public class BestsellerPrediction {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relationships
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", referencedColumnName = "asin", insertable = false, updatable = false)
     private Product product;
@@ -87,7 +87,7 @@ public class BestsellerPrediction {
         }
     }
 
-    // Helper methods
+
     public boolean isPotentialBestseller() {
         return predictedProbability != null &&
                 predictedProbability.compareTo(new BigDecimal("0.70")) >= 0;

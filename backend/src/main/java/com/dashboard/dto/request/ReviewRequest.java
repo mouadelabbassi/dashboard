@@ -21,5 +21,5 @@ public class ReviewRequest {
 
     private String comment;
 
-    private Boolean isLiked; // true = like, false = dislike, null = neutral
+    private Boolean isLiked;
 }

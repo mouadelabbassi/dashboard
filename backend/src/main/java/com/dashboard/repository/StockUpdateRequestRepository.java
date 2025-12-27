@@ -22,6 +22,4 @@ public interface StockUpdateRequestRepository extends JpaRepository<StockUpdateR
     @Query("SELECT COUNT(s) FROM StockUpdateRequest s WHERE s.status = 'PENDING'")
     Long countPendingRequests();
 
-    @Query("SELECT COUNT(s) FROM StockUpdateRequest s WHERE s.seller = :seller AND s.status = :status")
-    Long countBySellerAndStatus(@Param("seller") User seller, @Param("status") StockUpdateRequest.RequestStatus status);
 }

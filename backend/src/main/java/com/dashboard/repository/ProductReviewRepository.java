@@ -34,7 +34,6 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
     @Query("SELECT r.rating, COUNT(r) FROM ProductReview r WHERE r.product.asin = :asin GROUP BY r.rating")
     List<Object[]> getRatingDistribution(@Param("asin") String asin);
 
-    // Seller-specific queries
     @Query("SELECT r FROM ProductReview r WHERE r.product.asin IN :asins ORDER BY r.createdAt DESC")
     Page<ProductReview> findByProductAsinInOrderByCreatedAtDesc(@Param("asins") List<String> asins, Pageable pageable);
 

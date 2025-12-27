@@ -18,7 +18,6 @@ public class SellerDashboardResponse {
     private String storeName;
     private Boolean isVerifiedSeller;
 
-    // Product stats
     private Long totalProducts;
     private Long approvedProducts;
     private Long pendingProducts;
@@ -26,17 +25,14 @@ public class SellerDashboardResponse {
     private Long totalSalesCount;
     private Long totalUnitsSold;
 
-    // Revenue stats (from purchases only)
     private BigDecimal totalRevenue;
     private BigDecimal monthlyRevenue;
     private BigDecimal weeklyRevenue;
     private BigDecimal todayRevenue;
 
-    // Charts data
     private List<DailyRevenuePoint> revenueTrend;
     private List<TopProductRevenue> topProducts;
 
-    // INNER CLASSES - must NOT be public
     @Data
     @AllArgsConstructor
     @NoArgsConstructor

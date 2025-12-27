@@ -34,8 +34,8 @@ public class ProductResponse {
     private String sellerName;
     private Long sellerId;
 
-    private String sellerStoreName;     // Store name (for sellers)
-    private Boolean isMouadVisionProduct; // TRUE if seller_id is NULL
+    private String sellerStoreName;
+    private Boolean isMouadVisionProduct;
 
     private Boolean isBestseller;
     private LocalDateTime createdAt;
@@ -43,11 +43,4 @@ public class ProductResponse {
 
     private Boolean inStock;
 
-    public static ProductResponse fromEntity(Product product) {
-        return ProductResponse.builder()
-                // ... existing mappings ...
-                .stockQuantity(product.getStockQuantity())
-                .inStock(product.isInStock())
-                .build();
-    }
 }

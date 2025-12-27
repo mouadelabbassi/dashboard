@@ -25,11 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-/**
- * Service for managing bestseller predictions.
- * Integrates with Flask ML service for predictions.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,9 +36,6 @@ public class BestsellerPredictionService {
     private final MLServiceClient mlServiceClient;
     private final SellerNotificationService notificationService;
 
-    /**
-     * Get all bestseller predictions with pagination.
-     */
     @Transactional(readOnly = true)
     public Page<BestsellerPredictionResponse> getAllPredictions(Pageable pageable) {
         log.debug("Fetching all bestseller predictions");
@@ -51,9 +43,6 @@ public class BestsellerPredictionService {
                 .map(BestsellerPredictionResponse::fromEntity);
     }
 
-    /**
-     * Get predictions filtered by minimum confidence threshold.
-     */
     @Transactional(readOnly = true)
     public List<BestsellerPredictionResponse> getPredictionsByConfidence(BigDecimal threshold) {
         log.debug("Fetching predictions with probability >= {}", threshold);
@@ -62,18 +51,11 @@ public class BestsellerPredictionService {
                 .map(BestsellerPredictionResponse::fromEntity)
                 .collect(Collectors.toList());
     }
-
-    /**
-     * Get potential bestsellers (probability >= 0.70).
-     */
     @Transactional(readOnly = true)
     public List<BestsellerPredictionResponse> getPotentialBestsellers() {
         return getPredictionsByConfidence(new BigDecimal("0.70"));
     }
 
-    /**
-     * Get prediction for a specific product.
-     */
     @Transactional(readOnly = true)
     public BestsellerPredictionResponse getPredictionByProductId(String productId) {
         log.debug("Fetching prediction for product: {}", productId);
@@ -83,19 +65,13 @@ public class BestsellerPredictionService {
 
         return BestsellerPredictionResponse.fromEntity(prediction);
     }
-
-    /**
-     * Get predictions for a specific seller's products.
-     */
     @Transactional(readOnly = true)
     public List<BestsellerPredictionResponse> getSellerPredictions(Long sellerId) {
         log.debug("Fetching predictions for seller: {}", sellerId);
 
-        // Verify seller exists
         userRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Seller", "id", sellerId));
 
-        // Get seller's products
         List<String> productIds = productRepository.findBySellerId(sellerId)
                 .stream()
                 .map(Product::getAsin)
@@ -111,14 +87,10 @@ public class BestsellerPredictionService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Refresh predictions by calling Flask ML service.
-     */
     @Transactional
     public Map<String, Object> refreshPredictions() {
         log.info("Refreshing bestseller predictions from ML service...");
 
-        // Get all products that need prediction
         List<Product> products = productRepository.findAllExcludingRejected();
 
         if (products.isEmpty()) {
@@ -130,15 +102,12 @@ public class BestsellerPredictionService {
 
         for (Product product : products) {
             try {
-                // Call ML service
                 Map<String, Object> prediction = mlServiceClient.predictBestseller(product);
 
                 if (prediction != null && !prediction.containsKey("error")) {
-                    // Save prediction
                     savePrediction(product, prediction);
                     successCount++;
 
-                    // Check if we should notify seller
                     checkAndNotifySeller(product, prediction);
                 } else {
                     failureCount++;
@@ -161,16 +130,12 @@ public class BestsellerPredictionService {
         );
     }
 
-    /**
-     * Save a prediction from ML service response.
-     */
     @Transactional
     public BestsellerPrediction savePrediction(Product product, Map<String, Object> mlResponse) {
         BigDecimal probability = new BigDecimal(String.valueOf(mlResponse.getOrDefault("bestseller_probability", 0.0)));
         String potentialLevel = String.valueOf(mlResponse.getOrDefault("potential_level", "FAIBLE"));
         String recommendation = String.valueOf(mlResponse.getOrDefault("recommendation", ""));
 
-        // Determine confidence level
         BestsellerPrediction.ConfidenceLevel confidenceLevel;
         double prob = probability.doubleValue();
         if (prob >= 0.85) {
@@ -196,18 +161,15 @@ public class BestsellerPredictionService {
         return predictionRepository.save(prediction);
     }
 
-    /**
-     * Check if seller should be notified about a high-potential product.
-     */
     private void checkAndNotifySeller(Product product, Map<String, Object> prediction) {
         if (product.getSeller() == null) {
-            return; // Platform product, no seller to notify
+            return;
         }
 
         double probability = Double.parseDouble(String.valueOf(prediction.getOrDefault("bestseller_probability", 0.0)));
 
         if (probability >= 0.85) {
-            // High potential bestseller - notify seller
+
             notificationService.sendBestsellerAlert(
                     product.getSeller().getId(),
                     product.getAsin(),
@@ -216,9 +178,6 @@ public class BestsellerPredictionService {
         }
     }
 
-    /**
-     * Apply a recommendation (e.g., feature the product).
-     */
     @Transactional
     public Map<String, Object> applyRecommendation(ApplyRecommendationRequest request) {
         log.info("Applying recommendation for product: {}", request.getProductId());
@@ -226,7 +185,6 @@ public class BestsellerPredictionService {
         Product product = productRepository.findByAsin(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "asin", request.getProductId()));
 
-        // Verify current user owns the product or is admin
         User currentUser = getCurrentUser();
         if (product.getSeller() != null &&
                 !product.getSeller().getId().equals(currentUser.getId()) &&
@@ -240,7 +198,6 @@ public class BestsellerPredictionService {
         result.put("appliedAt", LocalDateTime.now());
         result.put("appliedBy", currentUser.getEmail());
 
-        // Apply the recommendation based on type
         switch (request.getRecommendationType()) {
             case BESTSELLER_FEATURE:
                 product.setIsBestseller(true);
@@ -248,7 +205,6 @@ public class BestsellerPredictionService {
                 result.put("action", "Product marked as featured/bestseller");
                 break;
             case PRICE_CHANGE:
-                // Log the recommendation but don't change price automatically
                 result.put("action", "Price change recommendation logged");
                 result.put("note", "Manual price change required by seller");
                 break;
@@ -263,25 +219,19 @@ public class BestsellerPredictionService {
         return result;
     }
 
-    /**
-     * Get accuracy metrics for the bestseller model.
-     */
     @Transactional(readOnly = true)
     public Map<String, Object> getAccuracyMetrics() {
         log.debug("Fetching accuracy metrics");
 
         Map<String, Object> metrics = new HashMap<>();
 
-        // Total predictions
         long totalPredictions = predictionRepository.count();
         metrics.put("totalPredictions", totalPredictions);
 
-        // Predictions with tracked outcomes
         long trackedPredictions = predictionRepository.countByActualOutcomeIsNotNull();
         metrics.put("trackedPredictions", trackedPredictions);
 
         if (trackedPredictions > 0) {
-            // Calculate accuracy from tracked predictions
             long correctPredictions = predictionRepository.countCorrectPredictions();
             double accuracy = (double) correctPredictions / trackedPredictions;
 
@@ -291,13 +241,9 @@ public class BestsellerPredictionService {
             metrics.put("accuracy", null);
             metrics.put("note", "No predictions have been validated yet");
         }
-
-        // High confidence predictions
         long highConfidencePredictions = predictionRepository.countByConfidenceLevel(
                 BestsellerPrediction.ConfidenceLevel.HIGH);
         metrics.put("highConfidencePredictions", highConfidencePredictions);
-
-        // Potential bestsellers
         long potentialBestsellers = predictionRepository.countByPredictedProbabilityGreaterThanEqual(
                 new BigDecimal("0.70"));
         metrics.put("potentialBestsellers", potentialBestsellers);

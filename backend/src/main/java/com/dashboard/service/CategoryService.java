@@ -114,13 +114,12 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", id));
 
-        // This is a simplified version - you can enhance with actual aggregated data
         return CategoryStatsResponse.builder()
                 .categoryName(category.getName())
                 .productCount((long) category.getProductCount())
-                .totalRevenue(BigDecimal.ZERO) // Can be calculated from sales
-                .avgPrice(BigDecimal.ZERO) // Can be calculated from products
-                .avgRating(BigDecimal.ZERO) // Can be calculated from products
+                .totalRevenue(BigDecimal.ZERO)
+                .avgPrice(BigDecimal.ZERO)
+                .avgRating(BigDecimal.ZERO)
                 .build();
     }
 

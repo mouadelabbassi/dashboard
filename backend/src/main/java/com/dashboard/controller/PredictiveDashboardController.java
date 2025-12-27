@@ -63,7 +63,6 @@ public class PredictiveDashboardController {
         return ResponseEntity.ok(ApiResponse.success("Model metrics retrieved", metrics));
     }
 
-    // ==================== BESTSELLER PREDICTIONS ====================
 
     @GetMapping("/bestsellers")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
@@ -125,7 +124,6 @@ public class PredictiveDashboardController {
         return ResponseEntity.ok(ApiResponse.success("Recommendation applied", result));
     }
 
-    // ==================== RANKING TREND PREDICTIONS ====================
 
     @GetMapping("/ranking-trends")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
@@ -165,7 +163,6 @@ public class PredictiveDashboardController {
         return ResponseEntity.ok(ApiResponse.success("Ranking predictions refreshed", result));
     }
 
-    // ==================== PRICE INTELLIGENCE (STATISTICAL) ====================
 
     @GetMapping("/price-intelligence")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
@@ -197,7 +194,6 @@ public class PredictiveDashboardController {
         return ResponseEntity.ok(ApiResponse.success("Category price stats retrieved", stats));
     }
 
-    // ==================== COMBINED PREDICTIONS ====================
 
     @GetMapping("/all")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
@@ -270,7 +266,6 @@ public class PredictiveDashboardController {
         return ResponseEntity.ok(ApiResponse.success("All models training initiated", result));
     }
 
-    // ==================== GENERATE PREDICTIONS ====================
 
     @PostMapping("/generate/{productId}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
@@ -278,7 +273,6 @@ public class PredictiveDashboardController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> generatePrediction(
             @PathVariable String productId) {
         log.info("Generating prediction for product: {}", productId);
-        // This would call the ML service for a single product prediction
         return ResponseEntity.ok(ApiResponse.success("Prediction generated", Map.of("productId", productId)));
     }
 

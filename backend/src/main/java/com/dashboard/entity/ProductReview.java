@@ -34,13 +34,13 @@ public class ProductReview {
     private User user;
 
     @Column(nullable = false)
-    private Integer rating; // 1-5 stars
+    private Integer rating;
 
     @Column(columnDefinition = "TEXT")
     private String comment;
 
     @Column(name = "is_liked")
-    private Boolean isLiked; // true = like, false = dislike, null = neutral
+    private Boolean isLiked;
 
     @Column(name = "helpful_count")
     @Builder.Default

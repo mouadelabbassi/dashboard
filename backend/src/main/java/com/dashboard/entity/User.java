@@ -39,7 +39,6 @@ public class User {
     @Column(length = 500)
     private String bio;
 
-    // NEW: Profile image
     @Column(name = "profile_image", length = 500)
     private String profileImage;
 
@@ -59,7 +58,6 @@ public class User {
     @Builder. Default
     private Boolean isActive = true;
 
-    // NEW: Seller-specific fields
     @Column(name = "store_name", length = 255)
     private String storeName;
 
@@ -91,7 +89,7 @@ public class User {
 
     public enum Role {
         BUYER("Regular Buyer"),
-        SELLER("Product Seller"),  // NEW
+        SELLER("Product Seller"),
         ANALYST("Data Analyst"),
         ADMIN("Administrator");
 

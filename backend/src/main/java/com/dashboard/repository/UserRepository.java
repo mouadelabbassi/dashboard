@@ -22,32 +22,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Page<User> findByRole(User.Role role, Pageable pageable);
 
-    List<User> findByRoleOrderByCreatedAtDesc(User. Role role, Pageable pageable);
-
     List<User> findByRoleAndIsActiveTrue(User.Role role);
 
     List<User> findAllByRole(User.Role role);
 
     Long countByRole(User.Role role);
 
-
-    Long countByRoleAndIsActiveTrue(User.Role role);
-
     List<User> findByRole(User.Role role);
 
     Page<User> findByRoleAndIsVerifiedSeller(User.Role role, Boolean isVerifiedSeller, Pageable pageable);
-
-    @Query("SELECT u FROM User u WHERE u.role = 'SELLER' AND u.isVerifiedSeller = true ORDER BY u.createdAt DESC")
-    List<User> findVerifiedSellers(Pageable pageable);
-
-    @Query("SELECT u FROM User u WHERE u.role = 'SELLER' ORDER BY u.createdAt DESC")
-    Page<User> findAllSellers(Pageable pageable);
-
-    @Query("SELECT COUNT(u) FROM User u WHERE u.role = 'SELLER'")
-    Long countSellers();
-
-    @Query("SELECT COUNT(u) FROM User u WHERE u.role = 'BUYER'")
-    Long countBuyers();
 
     @Query("SELECT u FROM User u WHERE LOWER(u.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))")
     Page<User> searchUsers(@Param("query") String query, Pageable pageable);

@@ -34,7 +34,7 @@ public class PlatformRevenue {
 
     @ManyToOne(fetch = FetchType. LAZY)
     @JoinColumn(name = "seller_id")
-    private User seller;  // NULL for direct MouadVision sales
+    private User seller;
 
     @Column(name = "revenue_date", nullable = false)
     private LocalDate revenueDate;
@@ -60,7 +60,7 @@ public class PlatformRevenue {
     private LocalDateTime createdAt;
 
     public enum RevenueType {
-        DIRECT_SALE,    // 100% from MouadVision products
-        COMMISSION      // 10% commission from seller products
+        DIRECT_SALE,
+        COMMISSION
     }
 }

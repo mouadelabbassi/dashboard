@@ -18,18 +18,6 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String>, JpaSpecificationExecutor<Product> {
 
-    @Query("SELECT DISTINCT p FROM Product p " +
-            "LEFT JOIN FETCH p.seller " +
-            "LEFT JOIN FETCH p.category " +
-            "WHERE p.asin = :asin")
-    Optional<Product> findByAsinWithRelations(@Param("asin") String asin);
-
-    @Query("SELECT DISTINCT p FROM Product p " +
-            "LEFT JOIN FETCH p.seller " +
-            "LEFT JOIN FETCH p.category")
-    List<Product> findAllWithRelations();
-
-    // Keep existing methods
     Optional<Product> findByAsin(String asin);
 
     Long countBySellerIsNull();
@@ -83,12 +71,6 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     @Query("SELECT COUNT(p) FROM Product p WHERE p.approvalStatus = 'APPROVED'")
     Long countApprovedProducts();
 
-    @Query("SELECT AVG(p.price) FROM Product p WHERE p.approvalStatus = 'APPROVED'")
-    BigDecimal calculateAveragePrice();
-
-    @Query("SELECT AVG(p.rating) FROM Product p WHERE p.approvalStatus = 'APPROVED'")
-    BigDecimal calculateAverageRating();
-
     Page<Product> findBySellerOrderByCreatedAtDesc(User seller, Pageable pageable);
 
     Page<Product> findBySellerAndApprovalStatusOrderByCreatedAtDesc(
@@ -103,11 +85,6 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     @Query("SELECT COALESCE(SUM(p.salesCount), 0) FROM Product p WHERE p.seller = :seller")
     Long countTotalSalesBySeller(@Param("seller") User seller);
 
-    Page<Product> findByApprovalStatusOrderBySubmittedAtAsc(
-            Product.ApprovalStatus status,
-            Pageable pageable
-    );
-
     boolean existsByAsin(String asin);
 
     @Query("SELECT SUM(p.stockQuantity) FROM Product p")
@@ -119,62 +96,10 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     @Query("SELECT p FROM Product p WHERE p.stockQuantity = :quantity")
     Page<Product> findByStockQuantityEqualsPageable(@Param("quantity") Integer quantity, Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE p.approvalStatus = :status")
-    Page<Product> findByApprovalStatusString(@Param("status") String status, Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND " +
-            "(LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(p.asin) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<Product> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
-
-    @Query("SELECT DISTINCT p.productName FROM Product p WHERE " +
-            "LOWER(p.productName) LIKE LOWER(CONCAT(:prefix, '%')) AND p.approvalStatus = 'APPROVED'")
-    List<String> findProductNameSuggestions(@Param("prefix") String prefix, Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.isBestseller = true AND p.approvalStatus = 'APPROVED'")
-    Page<Product> findBestsellers(Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND p.price BETWEEN :minPrice AND :maxPrice")
-    Page<Product> findByPriceRange(@Param("minPrice") BigDecimal minPrice, @Param("maxPrice") BigDecimal maxPrice, Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND p.rating >= :minRating")
-    Page<Product> findByMinRating(@Param("minRating") BigDecimal minRating, Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND p.stockQuantity <= :threshold")
-    Page<Product> findLowStockProducts(@Param("threshold") int threshold, Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' ORDER BY p.rating DESC")
-    Page<Product> findTopRated(Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' ORDER BY p.reviewsCount DESC")
-    Page<Product> findMostReviewed(Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND p.category = :category AND " +
-            "(LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<Product> searchInCategory(@Param("category") Category category, @Param("keyword") String keyword, Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' AND p.category = :category")
-    Page<Product> findByCategoryAndApproved(@Param("category") Category category, Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE p.approvalStatus = 'APPROVED' " +
-            "AND (:keyword IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-            "AND (:minPrice IS NULL OR p.price >= :minPrice) " +
-            "AND (:maxPrice IS NULL OR p.price <= :maxPrice) " +
-            "AND (:minRating IS NULL OR p.rating >= :minRating)")
-    Page<Product> advancedSearch(
-            @Param("keyword") String keyword,
-            @Param("minPrice") BigDecimal minPrice,
-            @Param("maxPrice") BigDecimal maxPrice,
-            @Param("minRating") BigDecimal minRating,
-            Pageable pageable
-    );
-
     @Query("SELECT p FROM Product p WHERE p.approvalStatus != 'REJECTED' OR p.approvalStatus IS NULL")
     List<Product> findAllExcludingRejected();
 
     @Query("SELECT COUNT(p) FROM Product p WHERE p.approvalStatus != 'REJECTED' OR p.approvalStatus IS NULL")
     Long countAllExcludingRejected();
 
-    @Query("SELECT COUNT(p) FROM Product p WHERE p.approvalStatus = 'APPROVED' OR p.approvalStatus IS NULL")
-    Long countApprovedIncludingNull();
 }

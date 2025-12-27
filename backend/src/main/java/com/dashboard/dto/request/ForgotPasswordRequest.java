@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// Check if user exists and get security question
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,7 +18,6 @@ public class ForgotPasswordRequest {
     private String email;
 }
 
-// Verify security answer and reset password
 @Data
 @Builder
 @NoArgsConstructor

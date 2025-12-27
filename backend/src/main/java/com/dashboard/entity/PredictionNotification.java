@@ -62,7 +62,6 @@ public class PredictionNotification {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", referencedColumnName = "asin", insertable = false, updatable = false)
     private Product product;
@@ -90,7 +89,7 @@ public class PredictionNotification {
         }
     }
 
-    // Helper methods
+
     public void markAsRead() {
         this.isRead = true;
         this.readAt = LocalDateTime.now();

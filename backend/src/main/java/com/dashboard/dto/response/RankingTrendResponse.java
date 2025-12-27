@@ -25,13 +25,11 @@ public class RankingTrendResponse {
     private String categoryName;
     private String imageUrl;
 
-    // Current metrics
     private Integer currentRank;
     private BigDecimal currentPrice;
     private BigDecimal currentRating;
     private Integer currentSalesCount;
 
-    // Prediction results
     private String trendDirection;
     private String trendDescription;
     private BigDecimal confidenceScore;
@@ -40,14 +38,11 @@ public class RankingTrendResponse {
     private Integer predictedRank;
     private String recommendation;
 
-    // Experimental flag
     private Boolean isExperimental;
     private String experimentalNote;
 
-    // Timestamps
     private LocalDateTime predictionDate;
 
-    // Seller info
     private Long sellerId;
     private String sellerName;
 
@@ -70,7 +65,6 @@ public class RankingTrendResponse {
                 .experimentalNote("Ce modèle utilise des étiquettes synthétiques. Interpréter avec prudence.")
                 .predictionDate(prediction.getPredictionDate());
 
-        // Determine confidence level
         if (prediction.getConfidenceScore() != null) {
             double conf = prediction.getConfidenceScore().doubleValue();
             if (conf >= 0.80) {
@@ -82,7 +76,6 @@ public class RankingTrendResponse {
             }
         }
 
-        // Add product info if available
         if (prediction.getProduct() != null) {
             var product = prediction.getProduct();
             builder.productName(product.getProductName())

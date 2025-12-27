@@ -28,21 +28,16 @@ public class ProductDetailResponse {
     private Long categoryId;
     private Boolean isBestseller;
 
-    // User interaction
     private Boolean userHasReviewed;
     private ReviewResponse userReview;
 
-    // Engagement stats
     private Long likesCount;
     private Long dislikesCount;
 
-    // Rating distribution (5 stars, 4 stars, etc.)
     private Map<Integer, Long> ratingDistribution;
 
-    // Recent reviews
     private List<ReviewResponse> recentReviews;
 
-    // NEW: Seller info
     private String sellerName;
     private Long sellerId;
     private Boolean isMouadVisionProduct;

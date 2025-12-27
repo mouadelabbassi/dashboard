@@ -102,7 +102,6 @@ public class AdminProductApprovalService {
 
         product = productRepository.save(product);
 
-        // Update the request
         request.setStatus(SellerProductRequest.RequestStatus.APPROVED);
         request.setReviewedBy(admin);
         request.setReviewedAt(LocalDateTime.now());
@@ -140,7 +139,6 @@ public class AdminProductApprovalService {
         request.setAdminNotes(approvalRequest.getAdminNotes());
         productRequestRepository.save(request);
 
-        // Create a dummy product for notification (not saved)
         Product dummyProduct = Product.builder()
                 .asin("REJECTED")
                 .productName(request.getProductName())
@@ -194,8 +192,6 @@ public class AdminProductApprovalService {
                 .build();
     }
 
-    // ========== ALL PRODUCT REQUESTS (for history) ==========
-
     @Transactional(readOnly = true)
     public Page<SellerProductRequestResponse> getAllProductRequests(Pageable pageable) {
         getCurrentAdmin();
@@ -210,8 +206,6 @@ public class AdminProductApprovalService {
         return productRequestRepository.findByStatusOrderByCreatedAtDesc(status, pageable)
                 .map(this::convertToRequestResponse);
     }
-
-    // ========== HELPERS ==========
 
     private String generateUniqueAsin() {
         String asin;

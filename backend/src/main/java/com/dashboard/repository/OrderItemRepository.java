@@ -19,9 +19,6 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     @Query("SELECT oi FROM OrderItem oi WHERE oi. seller = :seller AND (oi.sellerRevenueCalculated = false OR oi.sellerRevenueCalculated IS NULL) AND oi.order. status = 'CONFIRMED'")
     List<OrderItem> findUnprocessedRevenueItems(@Param("seller") User seller);
 
-    Long countBySeller(User seller);
-
-    List<OrderItem> findByOrderId(Long orderId);
 
     @Query("SELECT sum(oi.quantity) FROM OrderItem oi "+
             "JOIN oi.order o "+

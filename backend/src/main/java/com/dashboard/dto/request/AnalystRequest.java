@@ -32,9 +32,9 @@ public class AnalystRequest {
 
     private String bio;
 
-    private String department; // e.g., "Sales Analytics", "Product Analytics", "Market Research"
+    private String department;
 
-    private String specialization; // e.g., "Data Visualization", "Predictive Modeling", "Business Intelligence"
+    private String specialization;
 
-    private Boolean isActive; // Default: true
+    private Boolean isActive;
 }

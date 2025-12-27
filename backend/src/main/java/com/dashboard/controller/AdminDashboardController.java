@@ -134,7 +134,6 @@ public class AdminDashboardController {
                 return map;
             }).collect(Collectors.toList());
         } catch (Exception e) {
-            // Return empty list on error
         }
 
         return ResponseEntity.ok(ApiResponse.success("Top products", result));
@@ -157,14 +156,12 @@ public class AdminDashboardController {
                         map.put("storeName", s.getStoreName() != null ? s.getStoreName() : s.getFullName());
                         map.put("email", s.getEmail());
 
-                        // Count products for this seller
                         long productCount = 0;
                         double totalRevenue = 0;
 
                         try {
                             productCount = productRepository.countBySellerId(s.getId());
 
-                            // Calculate revenue from seller's products
                             List<Product> sellerProducts = productRepository.findBySellerId(s.getId());
                             totalRevenue = sellerProducts.stream()
                                     .mapToDouble(p -> {

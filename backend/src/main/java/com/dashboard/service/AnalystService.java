@@ -92,7 +92,6 @@ public class AnalystService {
                 "trend", "stable"
         ));
 
-        // Total Buyers
         long totalBuyers = userRepository.countByRole(User.Role.BUYER);
         kpis.put("totalBuyers", Map.of(
                 "value", totalBuyers,
@@ -134,53 +133,42 @@ public class AnalystService {
     @Transactional(readOnly = true)
     public Map<String, Object> getPlatformRevenueOverview() {
         Map<String, Object> overview = new HashMap<>();
-
-        // Total Platform Revenue
         BigDecimal totalRevenue = calculateTotalRevenue();
         overview.put("totalRevenue", totalRevenue);
 
-        // Platform Direct Sales Revenue
         BigDecimal platformDirectRevenue = platformRevenueRepository.findAll().stream()
                 .filter(pr -> pr.getRevenueType() == PlatformRevenue.RevenueType.DIRECT_SALE)
                 .map(pr -> pr.getGrossAmount() != null ? pr.getGrossAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         overview.put("directSalesRevenue", platformDirectRevenue);
 
-        // Commission Revenue from Sellers
         BigDecimal commissionRevenue = sellerRevenueRepository.findAll().stream()
                 .map(sr -> sr.getPlatformFee() != null ? sr.getPlatformFee() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         overview.put("commissionRevenue", commissionRevenue);
 
-        // Seller Generated Revenue
         BigDecimal sellerRevenue = sellerRevenueRepository.findAll().stream()
                 .map(sr -> sr.getGrossAmount() != null ? sr.getGrossAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         overview.put("sellerRevenue", sellerRevenue);
 
-        // Total Orders
         long totalOrders = orderRepository.count();
         overview.put("totalOrders", totalOrders);
 
-        // Completed Orders
         long completedOrders = orderRepository.findAll().stream()
                 .filter(o -> o.getStatus() == Order.OrderStatus.DELIVERED)
                 .count();
         overview.put("completedOrders", completedOrders);
 
-        // Average Order Value
         overview.put("avgOrderValue", calculateAverageOrderValue());
 
-        // Growth Metrics
         BigDecimal previousMonthRevenue = calculatePreviousPeriodRevenue(30);
         double revenueGrowth = calculateGrowthPercentage(previousMonthRevenue, totalRevenue);
         overview.put("revenueGrowth", revenueGrowth);
 
-        // This Month Revenue
         BigDecimal thisMonthRevenue = getRevenueForPeriod(LocalDate.now().withDayOfMonth(1), LocalDate.now());
         overview.put("thisMonthRevenue", thisMonthRevenue);
 
-        // Last Month Revenue
         LocalDate lastMonthStart = LocalDate.now().minusMonths(1).withDayOfMonth(1);
         LocalDate lastMonthEnd = LocalDate.now().withDayOfMonth(1).minusDays(1);
         BigDecimal lastMonthRevenue = getRevenueForPeriod(lastMonthStart, lastMonthEnd);
@@ -206,13 +194,11 @@ public class AnalystService {
             seller.put("productsSold", row[4] != null ? ((Long) row[4]).intValue() : 0);
             seller.put("totalOrders", row[5] != null ? ((Long) row[5]).intValue() : 0);
 
-            // Calculate average order value for this seller
             double avgOrderValue = seller.get("totalOrders") != null && (int) seller.get("totalOrders") > 0
                     ? (double) seller.get("totalRevenue") / (int) seller.get("totalOrders")
                     : 0.0;
             seller.put("avgOrderValue", avgOrderValue);
 
-            // Get seller's product count
             Long sellerId = row[0] != null ? ((Number) row[0]).longValue() : null;
             if (sellerId != null) {
                 User sellerUser = userRepository.findById(sellerId).orElse(null);
@@ -227,7 +213,6 @@ public class AnalystService {
             result.add(seller);
         }
 
-        // If we don't have enough sellers from revenue, supplement with sellers who have products
         if (result.size() < 3) {
             List<User> allSellers = userRepository.findAllByRole(User.Role.SELLER);
             for (User s : allSellers) {
@@ -285,7 +270,6 @@ public class AnalystService {
                 totalSold += salesCount;
             }
 
-            // Calculate average price
             BigDecimal avgPrice = productCount > 0
                     ? products.stream()
                     .filter(p -> p.getPrice() != null)
@@ -294,7 +278,6 @@ public class AnalystService {
                     .divide(BigDecimal.valueOf(productCount), 2, RoundingMode.HALF_UP)
                     :  BigDecimal.ZERO;
 
-            // Calculate average rating
             double avgRating = products.stream()
                     .filter(p -> p.getRating() != null)
                     .mapToDouble(p -> p.getRating().doubleValue())
@@ -313,7 +296,6 @@ public class AnalystService {
             categoryRevenues.add(categoryData);
         }
 
-        // Sort by revenue descending and return top 3
         return categoryRevenues.stream()
                 .sorted((a, b) -> ((BigDecimal) b.get("revenue")).compareTo((BigDecimal) a.get("revenue")))
                 .limit(3)
@@ -330,7 +312,7 @@ public class AnalystService {
                 .limit(limit)
                 .map(p -> {
                     Map<String, Object> data = new HashMap<>();
-                    data.put("rank", 0); // Will be set later
+                    data.put("rank", 0);
                     data.put("asin", p.getAsin());
                     data.put("productName", p.getProductName());
                     data.put("price", p.getPrice());
@@ -344,7 +326,6 @@ public class AnalystService {
                     return data;
                 })
                 .peek(data -> {
-                    // Set rank
                     int index = products.stream()
                             .filter(p -> p.getSalesCount() != null && p.getSalesCount() > 0)
                             .sorted((a, b) -> b.getSalesCount().compareTo(a.getSalesCount()))
@@ -421,27 +402,22 @@ public class AnalystService {
     public Map<String, Object> getSalesPerformanceMetrics() {
         Map<String, Object> metrics = new HashMap<>();
 
-        // Today's stats
         LocalDate today = LocalDate.now();
         BigDecimal todayRevenue = getRevenueForPeriod(today, today);
         metrics.put("todayRevenue", todayRevenue);
 
-        // This week stats
         LocalDate weekStart = today.minusDays(today.getDayOfWeek().getValue() - 1);
         BigDecimal weekRevenue = getRevenueForPeriod(weekStart, today);
         metrics.put("weekRevenue", weekRevenue);
 
-        // This month stats
         LocalDate monthStart = today.withDayOfMonth(1);
         BigDecimal monthRevenue = getRevenueForPeriod(monthStart, today);
         metrics.put("monthRevenue", monthRevenue);
 
-        // Year to date
         LocalDate yearStart = today.withDayOfYear(1);
         BigDecimal yearRevenue = getRevenueForPeriod(yearStart, today);
         metrics.put("yearRevenue", yearRevenue);
 
-        // Best selling day this month
         Map<LocalDate, BigDecimal> dailyRevenue = new HashMap<>();
         for (LocalDate date = monthStart; ! date.isAfter(today); date = date.plusDays(1)) {
             dailyRevenue.put(date, getRevenueForPeriod(date, date));
@@ -454,7 +430,6 @@ public class AnalystService {
             metrics.put("bestSellingDayRevenue", bestDay.getValue());
         }
 
-        // Conversion rate (orders / total users * 100)
         long totalBuyers = userRepository.countByRole(User.Role.BUYER);
         long totalOrders = orderRepository.count();
         double conversionRate = totalBuyers > 0 ?  (double) totalOrders / totalBuyers * 100 :  0;
@@ -510,7 +485,6 @@ public class AnalystService {
     }
 
     private String generateColorForCategory(String categoryName) {
-        // Generate consistent colors based on category name
         String[] colors = {
                 "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6",
                 "#EC4899", "#06B6D4", "#84CC16", "#F97316", "#6366F1"
@@ -518,8 +492,6 @@ public class AnalystService {
         int hash = Math.abs(categoryName.hashCode());
         return colors[hash % colors.length];
     }
-
-    // ==================== SALES ANALYTICS ====================
 
     @Transactional(readOnly = true)
     public Map<String, Object> getSalesOverview(LocalDate startDate, LocalDate endDate) {
@@ -710,8 +682,6 @@ public class AnalystService {
         return peakTimes;
     }
 
-    // ==================== PRODUCT ANALYTICS ====================
-
     @Transactional(readOnly = true)
     public Map<String, Object> getProductsOverview() {
         Map<String, Object> overview = new HashMap<>();
@@ -870,8 +840,6 @@ public class AnalystService {
             return map;
         }).collect(Collectors.toList());
     }
-
-    // ==================== SELLER ANALYTICS ====================
 
     @Transactional(readOnly = true)
     public Map<String, Object> getSellersOverview() {
@@ -1203,8 +1171,6 @@ public class AnalystService {
                 .collect(Collectors.toList());
     }
 
-    // ==================== REPORTS ====================
-
     @Transactional(readOnly = true)
     public Map<String, Object> getReportSummary(LocalDate startDate, LocalDate endDate) {
         Map<String, Object> summary = new HashMap<>();
@@ -1266,8 +1232,6 @@ public class AnalystService {
     public List<Map<String, Object>> exportSellersData() {
         return getSellersRanking(100);
     }
-
-    // ==================== HELPER METHODS ====================
 
     private BigDecimal calculateTotalRevenue() {
         List<Order> orders = orderRepository.findAll().stream()

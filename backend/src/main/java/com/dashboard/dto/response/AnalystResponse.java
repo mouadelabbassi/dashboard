@@ -26,7 +26,7 @@ public class AnalystResponse {
     private LocalDateTime updatedAt;
     private LocalDateTime lastLoginAt;
 
-    // Statistics
+
     private Integer totalReportsGenerated;
     private Integer totalExportsCreated;
     private LocalDateTime lastActivityAt;

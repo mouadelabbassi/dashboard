@@ -36,7 +36,7 @@ public class SellerStockResponse {
 
     public static SellerStockResponse fromEntity(SellerStock stock) {
         BigDecimal suggestedPrice = stock.getPurchasePrice()
-                .multiply(BigDecimal.valueOf(1.25)); // 25% markup suggestion
+                .multiply(BigDecimal.valueOf(1.25));
 
         return SellerStockResponse.builder()
                 .id(stock.getId())

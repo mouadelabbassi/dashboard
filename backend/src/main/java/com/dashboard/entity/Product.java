@@ -97,7 +97,6 @@ public class Product {
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
-    // NEW: Who approved it
     @Column(name = "approved_by")
     private Long approvedBy;
 
@@ -125,7 +124,7 @@ public class Product {
     @Transient
     public Integer getDaysSinceListed() {
         if (this.createdAt == null) {
-            return 30; // default
+            return 30;
         }
         return (int) java.time.temporal.ChronoUnit.DAYS.between(
                 this.createdAt,
@@ -148,7 +147,7 @@ public class Product {
         return stockQuantity != null && stockQuantity >= requestedQuantity;
     }
 
-    // ✅ NEW: Reduce stock when purchased
+
     public void reduceStock(int quantity) {
         if (this.stockQuantity == null) {
             this.stockQuantity = 0;
@@ -156,7 +155,7 @@ public class Product {
         this.stockQuantity = Math.max(0, this.stockQuantity - quantity);
     }
 
-    // ✅ NEW: Increase stock when restocked
+
     public void addStock(int quantity) {
         if (this.stockQuantity == null) {
             this.stockQuantity = 0;
@@ -165,7 +164,6 @@ public class Product {
     }
 
 
-    // NEW: Decrement stock
     public void decrementStock(int quantity) {
         if (this.stockQuantity == null) {
             this.stockQuantity = 0;
@@ -178,7 +176,6 @@ public class Product {
                     ? this.seller.getStoreName()
                     : this.seller.getFullName();
         } else {
-            // MouadVision product (platform-owned)
             return "MouadVision Store";
         }
     }
@@ -188,13 +185,6 @@ public class Product {
         return this.seller == null;
     }
 
-    public boolean isSellerProduct() {
-        return this.seller != null;
-    }
-
-    public String getSellerDisplayName() {
-        return getSellerName();
-    }
 
     @PrePersist
     @PreUpdate
@@ -204,7 +194,6 @@ public class Product {
         this.isBestseller = highRanking || highSales;
     }
 
-    // NEW: Approval status enum
     public enum ApprovalStatus {
         PENDING("En attente d'approbation"),
         APPROVED("Approuvé"),

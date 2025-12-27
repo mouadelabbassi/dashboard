@@ -18,7 +18,7 @@ public class AnalystUpdateRequest {
     private String email;
 
     @Size(min = 6, message = "Password must be at least 6 characters")
-    private String password; // Optional: only if changing password
+    private String password;
 
     @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters")
     private String fullName;
@@ -34,5 +34,5 @@ public class AnalystUpdateRequest {
 
     private Boolean isActive;
 
-    private String profileImage; // URL or base64
+    private String profileImage;
 }

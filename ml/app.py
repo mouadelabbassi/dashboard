@@ -375,7 +375,7 @@ def train_bestseller():
     global _bestseller_predictor
     try:
         logger.info("Starting bestseller model training...")
-        from training.train_bestseller_model import train_model
+        from training.train_bestseller_v2 import train_model
         result = train_model()
 
         # Reload predictor
@@ -427,7 +427,7 @@ def train_all():
     try:
         # Train bestseller
         logger.info("Training bestseller model...")
-        from training.train_bestseller_model import train_model as train_bs
+        from training.train_bestseller_v2 import train_model as train_bs
         results['bestseller'] = train_bs()
     except Exception as e:
         results['bestseller'] = {'error': str(e)}

@@ -7,9 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Request DTO for applying a prediction recommendation.
- */
 @Data
 @Builder
 @NoArgsConstructor
@@ -22,15 +19,15 @@ public class ApplyRecommendationRequest {
     @NotNull(message = "Recommendation type is required")
     private RecommendationType recommendationType;
 
-    private String action;  // e.g., "FEATURE_PRODUCT", "CHANGE_PRICE", "BOOST_MARKETING"
+    private String action;
 
-    private String originalValue;  // Original value before change
+    private String originalValue;
 
-    private String newValue;  // New value after applying recommendation
+    private String newValue;
 
-    private String notes;  // Optional notes from the user
+    private String notes;
 
-    private Double confidenceScore;  // The confidence of the recommendation being applied
+    private Double confidenceScore;
 
     public enum RecommendationType {
         BESTSELLER_FEATURE("Feature product based on bestseller prediction"),

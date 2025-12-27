@@ -25,8 +25,6 @@ public class AnalystController {
 
     private final AnalystService analystService;
 
-    // ==================== DASHBOARD ====================
-
     @GetMapping("/dashboard")
     @Operation(summary = "Get dashboard data", description = "Returns comprehensive dashboard data")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getDashboard() {
@@ -41,7 +39,6 @@ public class AnalystController {
         return ResponseEntity.ok(ApiResponse.success("KPIs retrieved", kpis));
     }
 
-    // ==================== ADVANCED REPORT DATA ====================
 
     @GetMapping("/reports/advanced")
     @Operation(summary = "Get advanced report data", description = "Returns comprehensive data for advanced PDF reports including top sellers, categories, and revenue analytics")
@@ -115,7 +112,6 @@ public class AnalystController {
         return ResponseEntity.ok(ApiResponse.success("Weekly sales trend retrieved", trend));
     }
 
-    // ==================== SALES ANALYTICS ====================
 
     @GetMapping("/sales/overview")
     @Operation(summary = "Get sales overview", description = "Returns sales overview for a date range")
@@ -164,7 +160,6 @@ public class AnalystController {
         return ResponseEntity.ok(ApiResponse.success("Peak sales times retrieved", peakTimes));
     }
 
-    // ==================== PRODUCT ANALYTICS ====================
 
     @GetMapping("/products/overview")
     @Operation(summary = "Get products overview", description = "Returns products analytics overview")
@@ -210,7 +205,6 @@ public class AnalystController {
         return ResponseEntity.ok(ApiResponse.success("Bestseller trends retrieved", trends));
     }
 
-    // ==================== SELLER ANALYTICS ====================
 
     @GetMapping("/sellers/overview")
     @Operation(summary = "Get sellers overview", description = "Returns sellers analytics overview")
@@ -248,7 +242,6 @@ public class AnalystController {
         return ResponseEntity.ok(ApiResponse.success("Seller details retrieved", details));
     }
 
-    // ==================== CATEGORY ANALYTICS ====================
 
     @GetMapping("/categories/overview")
     @Operation(summary = "Get categories overview", description = "Returns category analytics summary")
@@ -278,7 +271,7 @@ public class AnalystController {
         return ResponseEntity.ok(ApiResponse.success("Revenue contribution retrieved", contribution));
     }
 
-    // ==================== REPORTS ====================
+
 
     @GetMapping("/reports/summary")
     @Operation(summary = "Get report summary", description = "Returns summary data for reports")

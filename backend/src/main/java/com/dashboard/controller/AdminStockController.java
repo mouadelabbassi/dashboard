@@ -44,11 +44,9 @@ public class AdminStockController {
         long totalProducts = productRepository.count();
         dashboard.put("totalProducts", totalProducts);
 
-        // MouadVision products only
         long mouadVisionProducts = productRepository.countBySellerIsNull();
         dashboard.put("mouadVisionProducts", mouadVisionProducts);
 
-        // Seller products
         long sellerProducts = totalProducts - mouadVisionProducts;
         dashboard.put("sellerProducts", sellerProducts);
 
@@ -75,7 +73,7 @@ public class AdminStockController {
             @RequestParam(defaultValue = "asin") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(required = false) String filter,
-            @RequestParam(required = false) String owner) {  // NEW: filter by owner
+            @RequestParam(required = false) String owner) {
 
         Sort sort = sortDir.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
@@ -84,7 +82,6 @@ public class AdminStockController {
 
         Page<Product> products;
 
-        // Filter by owner first
         if ("mouadvision".equalsIgnoreCase(owner)) {
             products = getFilteredMouadVisionProducts(filter, pageable);
         } else if ("sellers".equalsIgnoreCase(owner)) {
@@ -134,7 +131,6 @@ public class AdminStockController {
         }
     }
 
-    // UPDATE STOCK - ONLY FOR MOUADVISION PRODUCTS
     @PutMapping("/products/{asin}")
     @Operation(summary = "Update product stock (MouadVision only)", description = "Updates stock for MouadVision products only")
     public ResponseEntity<ApiResponse<Map<String, Object>>> updateProductStock(
@@ -144,7 +140,6 @@ public class AdminStockController {
         Product product = productRepository.findByAsin(asin)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "asin", asin));
 
-        // CHECK: Only allow updating MouadVision products
         if (product.getSeller() != null) {
             throw new BadRequestException("Cannot update stock for seller products. Please notify the seller instead.");
         }
@@ -175,7 +170,6 @@ public class AdminStockController {
         Product product = productRepository.findByAsin(asin)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "asin", asin));
 
-        // CHECK: Only allow for MouadVision products
         if (product.getSeller() != null) {
             throw new BadRequestException("Cannot update stock for seller products. Please notify the seller instead.");
         }
@@ -194,7 +188,6 @@ public class AdminStockController {
         return ResponseEntity.ok(ApiResponse.success("Stock added successfully", result));
     }
 
-    // NOTIFY SELLER ABOUT LOW STOCK
     @PostMapping("/products/{asin}/notify-seller")
     @Operation(summary = "Notify seller about stock", description = "Sends notification to seller about low/out of stock")
     public ResponseEntity<ApiResponse<String>> notifySellerAboutStock(
@@ -222,11 +215,9 @@ public class AdminStockController {
                 "Seller has been notified about the stock level"));
     }
 
-    // BULK NOTIFY SELLERS ABOUT LOW STOCK
     @PostMapping("/notify-low-stock-sellers")
     @Operation(summary = "Notify all sellers with low stock", description = "Sends notifications to all sellers with low stock products")
     public ResponseEntity<ApiResponse<Map<String, Object>>> notifyAllLowStockSellers() {
-        // Change 10 to a higher threshold (e.g., 15 or 20)
         List<Product> lowStockProducts = productRepository.findBySellerIsNotNullAndStockQuantityLessThan(15);
 
         log.info("Found {} low stock products from sellers", lowStockProducts.size());
@@ -292,7 +283,7 @@ public class AdminStockController {
         map.put("sellerEmail", product.getSeller() != null ?  product.getSeller().getEmail() : null);
         map.put("isMouadVisionProduct", product.getSeller() == null);
         map.put("salesCount", product.getSalesCount());
-        map.put("canAdminEdit", product.getSeller() == null);  // NEW: Can admin edit this product? 
+        map.put("canAdminEdit", product.getSeller() == null);
 
         int qty = product.getStockQuantity() != null ? product.getStockQuantity() : 0;
         String stockStatus;
@@ -308,7 +299,6 @@ public class AdminStockController {
         return map;
     }
 
-    // Request classes
     public static class StockUpdateAdminRequest {
         private Integer quantity;
         private String reason;
