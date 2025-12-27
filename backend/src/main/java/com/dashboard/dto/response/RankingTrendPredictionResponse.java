@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BestsellerPredictionResponse {
+public class RankingTrendPredictionResponse {
 
     @JsonProperty("product_id")
     private String productId;
@@ -20,19 +20,25 @@ public class BestsellerPredictionResponse {
     @JsonProperty("product_name")
     private String productName;
 
-    @JsonProperty("bestseller_probability")
-    private Double bestsellerProbability;
+    @JsonProperty("current_rank")
+    private Integer currentRank;
 
-    @JsonProperty("is_potential_bestseller")
-    private Boolean isPotentialBestseller;
+    @JsonProperty("predicted_trend")
+    private String predictedTrend;
 
-    @JsonProperty("confidence_level")
-    private String confidenceLevel;
+    @JsonProperty("confidence_score")
+    private Double confidenceScore;
 
-    @JsonProperty("potential_level")
-    private String potentialLevel;
+    @JsonProperty("estimated_change")
+    private Integer estimatedChange;
+
+    @JsonProperty("predicted_rank")
+    private Integer predictedRank;
 
     private String recommendation;
+
+    @JsonProperty("is_experimental")
+    private Boolean isExperimental;
 
     @JsonProperty("predicted_at")
     private LocalDateTime predictedAt;

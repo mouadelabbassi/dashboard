@@ -20,7 +20,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -58,10 +58,11 @@ cors:
   allow-credentials: true
   max-age: 3600
 
-flask:
-  ml:
-    url: http://localhost:5001
-# CSV Import Configuration
+ml:
+  service:
+    url=http://localhost:5001
+    timeout=30
+
 csv:
   import:
     file-path: classpath:amazon_dataset_ready.csv

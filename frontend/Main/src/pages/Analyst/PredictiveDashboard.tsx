@@ -4,10 +4,8 @@ import {
     getPredictionStats,
     getPotentialBestsellers,
     checkPredictionServiceHealth,
-    getModelMetrics,
     ProductPrediction,
     PredictionStats,
-    ModelMetrics,
     HealthStatus,
     getPredictionCount,
     generatePredictionsSync,
@@ -63,13 +61,6 @@ const BoxIcon = () => (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
     </svg>
 );
-
-const CheckCircleIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-);
-
 const XCircleIcon = () => (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -145,7 +136,7 @@ const StatCard:React.FC<StatCardProps> = ({ title, value, subtitle, icon, trend,
     );
 };
 
-// Progress Bar Component
+
 const ProgressBar:React.FC<{ value:number; color:string; label?: string }> = ({ value, color, label }) => (
     <div className="w-full">
         {label && <div className="flex justify-between text-sm mb-1">
@@ -160,50 +151,6 @@ const ProgressBar:React.FC<{ value:number; color:string; label?: string }> = ({ 
         </div>
     </div>
 );
-
-// Circular Progress Component
-const CircularProgress: React.FC<{ value:number; size?: number; strokeWidth?:number; color: string }> = ({
-                                                                                                                  value,
-                                                                                                                  size = 120,
-                                                                                                                  strokeWidth = 10,
-                                                                                                                  color
-                                                                                                              }) => {
-    const radius = (size - strokeWidth) / 2;
-    const circumference = radius * 2 * Math.PI;
-    const offset = circumference - (value / 100) * circumference;
-
-    return (
-        <div className="relative inline-flex items-center justify-center">
-            <svg width={size} height={size} className="transform -rotate-90">
-                <circle
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={radius}
-                    stroke="currentColor"
-                    strokeWidth={strokeWidth}
-                    fill="none"
-                    className="text-gray-200 dark:text-gray-700"
-                />
-                <circle
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={radius}
-                    stroke="currentColor"
-                    strokeWidth={strokeWidth}
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={offset}
-                    className={`${color} transition-all duration-700 ease-out`}
-                />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">{value. toFixed(0)}%</span>
-            </div>
-        </div>
-    );
-};
-
 // Badge Component
 const Badge:React.FC<{ children:React.ReactNode; variant:'success' | 'warning' | 'danger' | 'info' | 'neutral' }> = ({ children, variant }) => {
     const variants = {
@@ -227,7 +174,6 @@ const PredictiveDashboard: React.FC = () => {
     const [stats, setStats] = useState<PredictionStats | null>(null);
     const [bestsellers, setBestsellers] = useState<ProductPrediction[]>([]);
     const [healthStatus, setHealthStatus] = useState<HealthStatus | null>(null);
-    const [modelMetrics, setModelMetrics] = useState<ModelMetrics | null>(null);
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -242,12 +188,11 @@ const PredictiveDashboard: React.FC = () => {
     } | null>(null);
     const [refreshing, setRefreshing] = useState(false);
 
-    // Chargement des données
     const loadDashboardData = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const [predictionsData, statsData, bestsellersData, health, countData] = await Promise.all([
+            const [predictionsData, statsData, bestsellersData, health] = await Promise.all([
                 getAllPredictions().catch(() => []),
                 getPredictionStats().catch(() => null),
                 getPotentialBestsellers().catch(() => []),
@@ -258,13 +203,6 @@ const PredictiveDashboard: React.FC = () => {
             setStats(statsData);
             setBestsellers(bestsellersData);
             setHealthStatus(health);
-            if (health?.mlServiceAvailable) {
-                const metrics = await getModelMetrics().catch(() => null);
-                setModelMetrics(metrics);
-                if (countData.needsGeneration && countData.productCount > 0) {
-                    setShowInitialGenModal(true);
-                }
-            }
         } catch (err: any) {
             console.error('Erreur:', err);
             setError(err.response?.data?.message || 'Erreur lors du chargement des données');
@@ -372,7 +310,7 @@ const PredictiveDashboard: React.FC = () => {
                         <ChartIcon />
                     </div>
                 </div>
-                <p className="mt-4 text-gray-600 dark:text-gray-400 font-medium">Chargement des analyses prédictives...</p>
+                <p className="mt-4 text-gray-600 dark:text-gray-400 font-medium">Loading predictive analysis...</p>
             </div>
         );
     }
@@ -391,17 +329,7 @@ const PredictiveDashboard: React.FC = () => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    {/* Status Badge */}
-                    <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                        healthStatus?.mlServiceAvailable
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            :'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                    }`}>
-                        {healthStatus?.mlServiceAvailable ?  <CheckCircleIcon /> :<XCircleIcon />}
-                        Service ML: {healthStatus?.mlServiceAvailable ? 'Actif' :'Inactif'}
-                    </div>
 
-                    {/* Refresh Button */}
                     <button
                         onClick={handleRefresh}
                         disabled={refreshing}
@@ -410,7 +338,6 @@ const PredictiveDashboard: React.FC = () => {
                         <RefreshIcon />
                     </button>
 
-                    {/* Generate Button */}
                     <button
                         onClick={handleGenerateAll}
                         disabled={generating || !healthStatus?.mlServiceAvailable}
@@ -434,7 +361,7 @@ const PredictiveDashboard: React.FC = () => {
                     </button>
                 </div>
             </div>
-            {/* Initial Generation Modal */}
+
             {showInitialGenModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
@@ -685,25 +612,25 @@ const PredictiveDashboard: React.FC = () => {
                     {activeTab === 'rankings' && (
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                Prédictions de Classement Futur
+                                Future Ranking Predictions
                             </h3>
                             {filteredPredictions.length === 0 ? (
                                 <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                                     <BoxIcon />
-                                    <p className="mt-2">Aucune prédiction disponible</p>
+                                    <p className="mt-2">No Active Prediction</p>
                                 </div>
                             ) :(
                                 <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
                                     <table className="w-full">
                                         <thead className="bg-gray-50 dark:bg-gray-700/50">
                                         <tr>
-                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Produit</th>
-                                            <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Catégorie</th>
+                                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Product</th>
+                                            <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Category</th>
                                             <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Actuel</th>
-                                            <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Prédit</th>
+                                            <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">predict</th>
                                             <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Variation</th>
                                             <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Tendance</th>
-                                            <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Confiance</th>
+                                            <th className="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Confidence</th>
                                         </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -759,7 +686,6 @@ const PredictiveDashboard: React.FC = () => {
                         </div>
                     )}
 
-                    {/* BESTSELLERS TAB */}
                     {activeTab === 'bestsellers' && (
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -768,7 +694,7 @@ const PredictiveDashboard: React.FC = () => {
                             {bestsellers.length === 0 ?  (
                                 <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                                     <StarIcon />
-                                    <p className="mt-2">Aucun bestseller potentiel identifié</p>
+                                    <p className="mt-2">No potential bestsellers identified</p>
                                 </div>
                             ) :(
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -787,7 +713,7 @@ const PredictiveDashboard: React.FC = () => {
 
                                             <div className="mb-4">
                                                 <div className="flex justify-between text-sm mb-2">
-                                                    <span className="text-gray-600 dark:text-gray-400">Probabilité</span>
+                                                    <span className="text-gray-600 dark:text-gray-400">Probability </span>
                                                     <span className="font-bold text-gray-900 dark:text-white">
                             {formatProbability(pred.bestsellerPrediction?.bestsellerProbability || 0)}
                           </span>
@@ -810,7 +736,7 @@ const PredictiveDashboard: React.FC = () => {
                                             )}
 
                                             <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
-                                                Généré le {formatGeneratedAt(pred.generatedAt)}
+                                                Generated At {formatGeneratedAt(pred.generatedAt)}
                                             </div>
                                         </div>
                                     ))}
@@ -819,16 +745,15 @@ const PredictiveDashboard: React.FC = () => {
                         </div>
                     )}
 
-                    {/* PRICES TAB */}
                     {activeTab === 'prices' && (
                         <div>
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                Recommandations de Prix Optimal
+                                Optimal Price Recommendation
                             </h3>
                             {filteredPredictions.filter(p => p.pricePrediction?. priceAction !== 'MAINTENIR').length === 0 ? (
                                 <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                                     <DollarIcon />
-                                    <p className="mt-2">Aucune recommandation de prix significative</p>
+                                    <p className="mt-2">No significant price recommendations</p>
                                 </div>
                             ) :(
                                 <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
@@ -886,119 +811,6 @@ const PredictiveDashboard: React.FC = () => {
                         </div>
                     )}
 
-                    {/* MODELS TAB */}
-                    {activeTab === 'models' && (
-                        <div className="space-y-6">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Informations sur les Modèles ML
-                            </h3>
-
-                            {! modelMetrics ?  (
-                                <div className="text-center py-12">
-                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 mb-4">
-                                        <CpuIcon />
-                                    </div>
-                                    <p className="text-gray-500 dark:text-gray-400">Les métriques des modèles ne sont pas disponibles</p>
-                                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Assurez-vous que le service ML est actif et que les modèles sont entraînés</p>
-                                </div>
-                            ) :(
-                                <>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        {/* Ranking Model */}
-                                        <div className="p-6 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800">
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="p-2 rounded-lg bg-blue-500 text-white">
-                                                    <TrendUpIcon />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-semibold text-blue-900 dark:text-blue-100">Modèle de Classement</h4>
-                                                    <p className="text-xs text-blue-700 dark:text-blue-300">Random Forest Regressor</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-center my-4">
-                                                <CircularProgress
-                                                    value={(modelMetrics.ranking?.r2_score || 0) * 100}
-                                                    color="text-blue-500"
-                                                />
-                                            </div>
-                                            <div className="space-y-2 text-sm">
-                                                <div className="flex justify-between">
-                                                    <span className="text-blue-700 dark:text-blue-300">R² Score</span>
-                                                    <span className="font-bold text-blue-900 dark:text-blue-100">{((modelMetrics.ranking?.r2_score || 0) * 100).toFixed(1)}%</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-blue-700 dark:text-blue-300">RMSE</span>
-                                                    <span className="font-bold text-blue-900 dark:text-blue-100">{modelMetrics.ranking?.rmse?. toFixed(2)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Bestseller Model */}
-                                        <div className="p-6 rounded-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border border-green-200 dark:border-green-800">
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="p-2 rounded-lg bg-green-500 text-white">
-                                                    <StarIcon />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-semibold text-green-900 dark:text-green-100">Modèle Bestseller</h4>
-                                                    <p className="text-xs text-green-700 dark:text-green-300">Random Forest Classifier</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-center my-4">
-                                                <CircularProgress
-                                                    value={(modelMetrics.bestseller?.f1_score || 0) * 100}
-                                                    color="text-green-500"
-                                                />
-                                            </div>
-                                            <div className="space-y-2 text-sm">
-                                                <div className="flex justify-between">
-                                                    <span className="text-green-700 dark:text-green-300">F1 Score</span>
-                                                    <span className="font-bold text-green-900 dark:text-green-100">{((modelMetrics. bestseller?.f1_score || 0) * 100).toFixed(1)}%</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-green-700 dark:text-green-300">Precision</span>
-                                                    <span className="font-bold text-green-900 dark:text-green-100">{((modelMetrics.bestseller?.precision || 0) * 100).toFixed(1)}%</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-green-700 dark:text-green-300">Recall</span>
-                                                    <span className="font-bold text-green-900 dark:text-green-100">{((modelMetrics.bestseller?.recall || 0) * 100).toFixed(1)}%</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Price Model */}
-                                        <div className="p-6 rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border border-yellow-200 dark:border-yellow-800">
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="p-2 rounded-lg bg-yellow-500 text-white">
-                                                    <DollarIcon />
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-semibold text-yellow-900 dark:text-yellow-100">Modèle de Prix</h4>
-                                                    <p className="text-xs text-yellow-700 dark:text-yellow-300">Gradient Boosting Regressor</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-center my-4">
-                                                <CircularProgress
-                                                    value={(modelMetrics. price?.r2_score || 0) * 100}
-                                                    color="text-yellow-500"
-                                                />
-                                            </div>
-                                            <div className="space-y-2 text-sm">
-                                                <div className="flex justify-between">
-                                                    <span className="text-yellow-700 dark:text-yellow-300">R² Score</span>
-                                                    <span className="font-bold text-yellow-900 dark:text-yellow-100">{((modelMetrics.price?.r2_score || 0) * 100).toFixed(1)}%</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="text-yellow-700 dark:text-yellow-300">MAPE</span>
-                                                    <span className="font-bold text-yellow-900 dark:text-yellow-100">{modelMetrics.price?.mape?.toFixed(2)}%</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

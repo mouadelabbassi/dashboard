@@ -4,74 +4,66 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 39">
-      <change afterPath="$PROJECT_DIR$/ml/.env" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml/req.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml/training/train_bestseller_v2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml/utils/api_client.py" afterDir="false" />
+    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 40">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/config/MLServiceConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/PredictionRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/CompletePredictionResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PredictionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/api/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/api/health.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/api/predictions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/api/training.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/core/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/core/database.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/core/exceptions.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/core/schemas.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/bestseller_model.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/data_loader.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/feature_engineering.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/price_optimizer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/ranking_model.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/scripts/test_api.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/scripts/train_all_models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ml-service/test_ml_api.ps1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dashboard.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dashboard.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/AdminDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/AdminDashboardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/AdminStockController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/AdminStockController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/AnalystController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/AnalystController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictiveDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictiveDashboardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/SellerController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/SellerController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/AnalystRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/AnalystRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/AnalystUpdateRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/AnalystUpdateRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/ApplyRecommendationRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/ApplyRecommendationRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/CreateOrderRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/ForgotPasswordRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/ForgotPasswordRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/ProductRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/ProductRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/ProductUpdateRequestDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/ReviewRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/ReviewRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/StockUpdateRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/StockUpdateRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/AdvancedPredictionResponseDTO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/AnalystResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/AnalystResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictiveDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictionController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/BestsellerPredictionResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/BestsellerPredictionResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/PriceIntelligenceResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/PriceIntelligenceResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/ProductDetailResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/ProductDetailResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/ProductResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/ProductResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/RankingTrendResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/RankingTrendResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/SellerDashboardResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/SellerDashboardResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/SellerStockResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/SellerStockResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/BestsellerPrediction.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/BestsellerPrediction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Notification.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Notification.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/OrderItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/OrderItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/PlatformRevenue.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/PlatformRevenue.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/PredictionNotification.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/PredictionNotification.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/Product.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/ProductReview.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/ProductReview.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/RankingTrendPrediction.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/RankingTrendPrediction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/SellerProductRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/SellerProductRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/entity/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/BestsellerPredictionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/BestsellerPredictionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/OrderItemRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/OrderItemRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/OrderRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/OrderRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/PlatformRevenueRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/PlatformRevenueRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/PredictionNotificationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/PredictionNotificationRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/ProductRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/ProductReviewRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/ProductReviewRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/RankingTrendPredictionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/RankingTrendPredictionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/SellerProductRequestRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/SellerProductRequestRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/SellerRevenueRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/SellerRevenueRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/SellerStockRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/SellerStockRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/StockUpdateRequestRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/StockUpdateRequestRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/security/JwtTokenProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/security/JwtTokenProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AdminProductApprovalService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AdminProductApprovalService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AnalystManagementService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AnalystManagementService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AnalystService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AnalystService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/BestsellerPredictionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/BestsellerPredictionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/CategoryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/CategoryService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/DashboardService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/DashboardService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/RankingTrendResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/RankingTrendPredictionResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/BestsellerPredictionService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/MLServiceClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/MLServiceClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PriceIntelligenceService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/RankingTrendPredictionService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/application.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/ml/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/training/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/ml/training/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/training/train_bestseller_model.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/training/train_ranking_trend_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/ml/training/train_ranking_trend_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/ml/utils/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/utils/data_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/ml/utils/enhanced_data_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/Advancedpredictioncomponents.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/PredictiveDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/PredictiveDashboard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/.env" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/ml-service/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/app.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/config.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/predictors/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/predictors/bestseller_predictor.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/predictors/ranking_trend_predictor.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/req.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/training/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/training/train_bestseller_v2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/training/train_ranking_trend_model.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/untitled.iml" beforeDir="false" afterPath="$PROJECT_DIR$/ml-service/ml-service.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/utils/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/utils/api_client.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/utils/database.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/utils/enhanced_data_loader.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ml/utils/model_utils.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,9 +75,9 @@
       <list>
         <option value="TypeScript JSX File" />
         <option value="TypeScript File" />
-        <option value="Class" />
         <option value="Interface" />
         <option value="Python Script" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -209,7 +201,9 @@
       <workItem from="1766750003663" duration="10951000" />
       <workItem from="1766769382089" duration="5170000" />
       <workItem from="1766841663027" duration="2649000" />
-      <workItem from="1766845255990" duration="1073000" />
+      <workItem from="1766845255990" duration="1146000" />
+      <workItem from="1766846456892" duration="5560000" />
+      <workItem from="1766854930971" duration="4957000" />
     </task>
     <task id="LOCAL-00001" summary="commit 28">
       <option name="closed" value="true" />
@@ -323,7 +317,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766842350720</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="commit 40">
+      <option name="closed" value="true" />
+      <created>1766846391485</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1766846391486</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -353,7 +355,8 @@
     <MESSAGE value="commit 37" />
     <MESSAGE value="commit 38" />
     <MESSAGE value="commit 39" />
-    <option name="LAST_COMMIT_MESSAGE" value="commit 39" />
+    <MESSAGE value="commit 40" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit 40" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
