@@ -4,66 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 40">
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/config/MLServiceConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/request/PredictionRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/CompletePredictionResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PredictionService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/api/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/api/health.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/api/predictions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/api/training.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/core/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/core/database.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/core/exceptions.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/core/schemas.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/bestseller_model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/data_loader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/feature_engineering.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/price_optimizer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/app/ml/ranking_model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/scripts/test_api.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/scripts/train_all_models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ml-service/test_ml_api.ps1" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dashboard.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dashboard.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+    <list default="true" id="bb580453-9494-4dc6-b049-ec8eda5bd133" name="Changes" comment="commit 41">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictiveDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/controller/PredictionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/BestsellerPredictionResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/BestsellerPredictionResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/PriceIntelligenceResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/PriceIntelligenceResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/RankingTrendResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/dto/response/RankingTrendPredictionResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/BestsellerPredictionService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/MLServiceClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/MLServiceClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/PriceIntelligenceService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/dashboard/service/RankingTrendPredictionService.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/classes/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/Advancedpredictioncomponents.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/PredictiveDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/src/pages/Analyst/PredictiveDashboard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/.env" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/ml-service/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/app.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/config.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/predictors/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/predictors/bestseller_predictor.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/predictors/ranking_trend_predictor.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/req.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/training/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/training/train_bestseller_v2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/training/train_ranking_trend_model.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/untitled.iml" beforeDir="false" afterPath="$PROJECT_DIR$/ml-service/ml-service.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/utils/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/utils/api_client.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/utils/database.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/utils/enhanced_data_loader.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ml/utils/model_utils.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/PredictionService.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/com/dashboard/service/PredictionService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/Main/dist/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/Main/src/components/cart/CartIcon.tsx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -125,6 +71,7 @@
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/mouad/Downloads/dashboard&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -203,7 +150,10 @@
       <workItem from="1766841663027" duration="2649000" />
       <workItem from="1766845255990" duration="1146000" />
       <workItem from="1766846456892" duration="5560000" />
-      <workItem from="1766854930971" duration="4957000" />
+      <workItem from="1766854930971" duration="6143000" />
+      <workItem from="1766934431315" duration="634000" />
+      <workItem from="1767022352243" duration="5436000" />
+      <workItem from="1767105639315" duration="3822000" />
     </task>
     <task id="LOCAL-00001" summary="commit 28">
       <option name="closed" value="true" />
@@ -325,7 +275,15 @@
       <option name="project" value="LOCAL" />
       <updated>1766846391486</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="commit 41">
+      <option name="closed" value="true" />
+      <created>1766860127102</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1766860127102</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -356,7 +314,8 @@
     <MESSAGE value="commit 38" />
     <MESSAGE value="commit 39" />
     <MESSAGE value="commit 40" />
-    <option name="LAST_COMMIT_MESSAGE" value="commit 40" />
+    <MESSAGE value="commit 41" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit 41" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
