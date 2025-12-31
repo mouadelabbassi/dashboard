@@ -502,3 +502,67 @@ export default {
     needsAttention,
     getPredictionSummary
 };
+
+export const getLatestPredictions = async (): Promise<{
+    bestsellerPredictions: BestsellerPrediction[];
+    rankingPredictions: RankingTrendPrediction[];
+    priceIntelligence: PriceIntelligence[];
+    totalCount: number;
+    lastRefreshedAt: string | null;
+    isRefreshing: boolean;
+    fromCache: boolean;
+}> => {
+    const response = await axios.get(`${API_BASE_URL}/latest`, getAuthHeaders());
+    return response.data;
+};
+
+export const triggerBackgroundRefresh = async (): Promise<{ message: string; status: string }> => {
+    const response = await axios.post(`${API_BASE_URL}/refresh-async`, {}, getAuthHeaders());
+    return response.data;
+};
+export const getRefreshStatus = async (): Promise<{ isRefreshing: boolean; status: string }> => {
+    const response = await axios.get(`${API_BASE_URL}/refresh-status`, getAuthHeaders());
+    return response.data;
+};
+
+export interface BestsellerPrediction {
+    productId: string;
+    productName: string;
+    bestsellerProbability: number;
+    isPotentialBestseller: boolean;
+    confidenceLevel: string;
+    potentialLevel: string;
+    recommendation: string;
+    predictedAt: string;
+}
+
+export interface RankingTrendPrediction {
+    productId: string;
+    productName: string;
+    currentRank: number;
+    predictedTrend: string;
+    confidenceScore: number;
+    estimatedChange: number;
+    predictedRank: number;
+    recommendation: string;
+    isExperimental: boolean;
+    predictedAt: string;
+}
+
+export interface PriceIntelligence {
+    productId: string;
+    productName: string;
+    currentPrice: number;
+    recommendedPrice: number;
+    priceDifference: number;
+    priceChangePercentage: number;
+    priceAction: string;
+    positioning: string;
+    categoryAvgPrice: number;
+    categoryMinPrice: number;
+    categoryMaxPrice: number;
+    analysisMethod: string;
+    shouldNotifySeller: boolean;
+    analyzedAt: string;
+}
+

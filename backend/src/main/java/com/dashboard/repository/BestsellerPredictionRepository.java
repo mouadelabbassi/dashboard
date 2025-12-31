@@ -57,4 +57,20 @@ public interface BestsellerPredictionRepository extends JpaRepository<Bestseller
             "WHERE p.seller.id = :sellerId AND bp.confidenceLevel = 'HIGH' " +
             "AND bp.predictedProbability >= 0.85")
     List<BestsellerPrediction> findHighConfidenceForSeller(@Param("sellerId") Long sellerId);
+
+    @Query("SELECT bp FROM BestsellerPrediction bp WHERE bp.productId IN :productIds " +
+            "AND bp.predictionDate = (SELECT MAX(bp2.predictionDate) FROM BestsellerPrediction bp2 " +
+            "WHERE bp2.productId = bp.productId)")
+    List<BestsellerPrediction> findLatestPredictionsForProducts(@Param("productIds") List<String> productIds);
+
+    @Query(value = """
+        SELECT * FROM bestseller_predictions bp
+        WHERE bp.id IN (
+            SELECT MAX(id) FROM bestseller_predictions 
+            GROUP BY product_id
+        )
+        ORDER BY prediction_date DESC
+        LIMIT 1000
+        """, nativeQuery = true)
+    List<BestsellerPrediction> findAllLatestPredictions();
 }

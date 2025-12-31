@@ -1,7 +1,7 @@
 package com.dashboard.controller;
 
 import com.dashboard.dto.response.*;
-import com.dashboard.dto.request.*;
+import com.dashboard.service.PredictionCacheService;
 import com.dashboard.service.PredictionService;
 import com.dashboard.entity.Product;
 import com.dashboard.repository.ProductRepository;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,6 +30,7 @@ public class PredictionController {
 
     private final PredictionService predictionService;
     private final ProductRepository productRepository;
+    private final PredictionCacheService predictionCacheService;
 
     @GetMapping("/product/{asin}")
     @Operation(summary = "Get complete predictions for a product")
@@ -321,9 +323,46 @@ public class PredictionController {
                 .confidence(0.85)
                 .build();
     }
+    @GetMapping("/latest")
+    @Operation(summary = "Get latest predictions from cache (instant)")
+    public ResponseEntity<LatestPredictionsResponse> getLatestPredictions() {
+        log.info(" GET /api/predictions/latest - CACHE ENDPOINT");
+        LatestPredictionsResponse response = predictionCacheService.getLatestPredictions();
+        log.info("Returning {} cached predictions", response.getTotalCount());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh-async")
+    @Operation(summary = "Trigger background prediction refresh")
+    public ResponseEntity<Map<String, Object>> triggerBackgroundRefresh() {
+        log.info("POST /api/predictions/refresh-async");
+
+        if (predictionCacheService.isRefreshCurrentlyRunning()) {
+            return ResponseEntity.ok(Map.of(
+                    "message", "Refresh already in progress",
+                    "status", "RUNNING"
+            ));
+        }
+
+        predictionCacheService.refreshPredictionsInBackground();
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Background refresh started",
+                "status", "STARTED"
+        ));
+    }
+
+    @GetMapping("/refresh-status")
+    @Operation(summary = "Check if refresh is currently running")
+    public ResponseEntity<Map<String, Object>> getRefreshStatus() {
+        boolean isRefreshing = predictionCacheService.isRefreshCurrentlyRunning();
+        return ResponseEntity.ok(Map.of(
+                "isRefreshing", isRefreshing,
+                "status", isRefreshing ? "RUNNING" : "IDLE"
+        ));
+    }
 }
 
-// DTO Classes for Frontend
 @Data
 @Builder
 class ProductPredictionDTO {

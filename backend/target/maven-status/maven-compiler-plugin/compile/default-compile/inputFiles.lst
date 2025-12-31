@@ -7,6 +7,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\D
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\PredictionRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\RankingTrendPrediction.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\exception\ResourceNotFoundException.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\PriceIntelligenceEntity.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\SecurityConfig.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\AuthResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\OrderController.java
@@ -66,6 +67,7 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\respo
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\PredictionService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\AdminDashboardController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\OrderItem.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\scheduler\PredictionScheduler.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\SellerRevenueRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\CorsConfig.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\BestsellerPrediction.java
@@ -75,7 +77,10 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\O
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\security\JwtAuthenticationFilter.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\CompletePredictionResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\SellerReviewSummary.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\PredictionRefreshLog.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\AuthService.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\PredictionCacheService.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\PredictionRefreshLogRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\PredictionNotification.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\CategoryStatsResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\OrderRepository.java
@@ -121,3 +126,5 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\respo
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\ExportService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\CategoryRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\SellerProductRequestResponse.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\LatestPredictionsResponse.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\PriceIntelligenceEntityRepository.java

@@ -20,4 +20,21 @@ public interface RankingTrendPredictionRepository extends JpaRepository<RankingT
 
     List<RankingTrendPrediction> findByPredictedTrendOrderByConfidenceScoreDesc(
             RankingTrendPrediction.PredictedTrend trend);
+
+    @Query("SELECT rtp FROM RankingTrendPrediction rtp WHERE rtp.productId IN :productIds " +
+            "AND rtp.predictionDate = (SELECT MAX(rtp2.predictionDate) FROM RankingTrendPrediction rtp2 " +
+            "WHERE rtp2.productId = rtp.productId)")
+    List<RankingTrendPrediction> findLatestPredictionsForProducts(@Param("productIds") List<String> productIds);
+
+    @Query(value = """
+        SELECT * FROM ranking_trend_predictions rtp
+        WHERE rtp.id IN (
+            SELECT MAX(id) FROM ranking_trend_predictions 
+            GROUP BY product_id
+        )
+        ORDER BY prediction_date DESC
+        LIMIT 1000
+        """, nativeQuery = true)
+    List<RankingTrendPrediction> findAllLatestPredictions();
+
 }

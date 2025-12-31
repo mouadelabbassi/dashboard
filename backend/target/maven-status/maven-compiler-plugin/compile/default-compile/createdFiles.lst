@@ -39,8 +39,10 @@ com\dashboard\dto\response\SellerOrderResponse.class
 com\dashboard\entity\SellerProductRequest.class
 com\dashboard\dto\request\SellerRegisterRequest.class
 com\dashboard\dto\response\SellerProductRequestResponse$SellerProductRequestResponseBuilder.class
+com\dashboard\service\PredictionCacheService.class
 com\dashboard\entity\StockUpdateRequest$RequestStatus.class
 com\dashboard\dto\response\RankingTrendPredictionResponse.class
+com\dashboard\dto\response\LatestPredictionsResponse$LatestPredictionsResponseBuilder.class
 com\dashboard\dto\request\LoginRequest$LoginRequestBuilder.class
 com\dashboard\service\AnalystService.class
 com\dashboard\dto\request\AnalystUpdateRequest$AnalystUpdateRequestBuilder.class
@@ -59,6 +61,7 @@ com\dashboard\dto\request\ReviewRequest$ReviewRequestBuilder.class
 com\dashboard\entity\SellerStock.class
 com\dashboard\dto\response\ApiResponse.class
 com\dashboard\controller\OrderController.class
+com\dashboard\entity\PriceIntelligenceEntity.class
 com\dashboard\service\ReviewService.class
 com\dashboard\dto\response\AuthResponse.class
 com\dashboard\dto\request\ApplyRecommendationRequest.class
@@ -67,9 +70,11 @@ com\dashboard\dto\response\RankingTrendPredictionResponse$RankingTrendPrediction
 com\dashboard\config\AsyncConfig.class
 com\dashboard\entity\SellerProductRequest$RequestStatus.class
 com\dashboard\security\UserDetailsServiceImpl.class
+com\dashboard\entity\PredictionRefreshLog$RefreshStatus.class
 com\dashboard\dto\request\ResetPasswordRequest$ResetPasswordRequestBuilder.class
 com\dashboard\entity\OrderItem$OrderItemBuilder.class
 com\dashboard\entity\SellerProductRequest$SellerProductRequestBuilder.class
+com\dashboard\repository\PriceIntelligenceEntityRepository.class
 com\dashboard\dto\response\SellerOrderResponse$SellerOrderResponseBuilder.class
 com\dashboard\controller\AdminStockController$NotifySellerRequest.class
 com\dashboard\entity\PredictionNotification.class
@@ -96,6 +101,7 @@ com\dashboard\dto\request\ReviewRequest.class
 com\dashboard\dto\request\ProductRequest.class
 com\dashboard\dto\request\OrderRequest.class
 com\dashboard\dto\response\NotificationResponse$NotificationResponseBuilder.class
+com\dashboard\repository\PredictionRefreshLogRepository.class
 com\dashboard\dto\response\ReviewResponse$ReviewResponseBuilder.class
 com\dashboard\dto\request\LoginRequest.class
 com\dashboard\dto\request\ProductRequest$ProductRequestBuilder.class
@@ -121,6 +127,7 @@ com\dashboard\entity\Order$OrderStatus.class
 com\dashboard\entity\Product$ApprovalStatus.class
 com\dashboard\dto\response\SellerStockResponse$SellerStockResponseBuilder.class
 com\dashboard\dto\request\ApplyRecommendationRequest$RecommendationType.class
+com\dashboard\entity\PriceIntelligenceEntity$PriceIntelligenceEntityBuilder.class
 com\dashboard\repository\PlatformRevenueRepository.class
 com\dashboard\dto\response\SellerProductRequestResponse.class
 com\dashboard\entity\Notification.class
@@ -157,6 +164,7 @@ com\dashboard\controller\RankingPredictionDTO.class
 com\dashboard\repository\StockUpdateRequestRepository.class
 com\dashboard\entity\PredictionNotification$NotificationType.class
 com\dashboard\repository\ProductRepository.class
+com\dashboard\dto\response\LatestPredictionsResponse.class
 com\dashboard\controller\ExportController.class
 com\dashboard\dto\request\AnalystRequest.class
 com\dashboard\controller\SellerStockController.class
@@ -172,6 +180,7 @@ com\dashboard\controller\CategoryController.class
 com\dashboard\service\ExportService.class
 com\dashboard\exception\ResourceNotFoundException.class
 com\dashboard\repository\OrderRepository.class
+com\dashboard\entity\PredictionRefreshLog$PredictionRefreshLogBuilder.class
 com\dashboard\DashboardApplication.class
 com\dashboard\service\OrderService.class
 com\dashboard\dto\request\PredictionRequest.class
@@ -200,6 +209,7 @@ com\dashboard\dto\response\SellerProfileResponse$SellerProfileResponseBuilder.cl
 com\dashboard\controller\DashboardController.class
 com\dashboard\entity\OrderItem.class
 com\dashboard\dto\request\ResetPasswordRequest.class
+com\dashboard\entity\PredictionRefreshLog.class
 com\dashboard\dto\request\ApplyRecommendationRequest$ApplyRecommendationRequestBuilder.class
 com\dashboard\dto\response\CompletePredictionResponse$CompletePredictionResponseBuilder.class
 com\dashboard\entity\PredictionNotification$PredictionNotificationBuilder.class
