@@ -4,7 +4,13 @@ import com.dashboard.dto.response.*;
 import com.dashboard.service.PredictionCacheService;
 import com.dashboard.service.PredictionService;
 import com.dashboard.entity.Product;
+import com.dashboard.entity.BestsellerPrediction;
+import com.dashboard.entity.RankingTrendPrediction;
+import com.dashboard.entity.PriceIntelligenceEntity;
 import com.dashboard.repository.ProductRepository;
+import com.dashboard.repository.BestsellerPredictionRepository;
+import com.dashboard.repository.RankingTrendPredictionRepository;
+import com.dashboard.repository.PriceIntelligenceEntityRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +20,7 @@ import lombok.Builder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -31,6 +38,117 @@ public class PredictionController {
     private final PredictionService predictionService;
     private final ProductRepository productRepository;
     private final PredictionCacheService predictionCacheService;
+    private final BestsellerPredictionRepository bestsellerRepo;
+    private final RankingTrendPredictionRepository rankingRepo;
+    private final PriceIntelligenceEntityRepository priceRepo;
+
+
+    @GetMapping("/latest")
+    @Operation(summary = "Get latest predictions from cache (instant)")
+    public ResponseEntity<LatestPredictionsResponse> getLatestPredictions() {
+        log.info(" GET /api/predictions/latest - CACHE ENDPOINT");
+        long start = System.currentTimeMillis();
+
+        LatestPredictionsResponse response = predictionCacheService.getLatestPredictions();
+
+        long duration = System.currentTimeMillis() - start;
+        log.info("Returning {} cached predictions in {}ms", response.getTotalCount(), duration);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh-async")
+    @Operation(summary = "Trigger background prediction refresh")
+    public ResponseEntity<Map<String, Object>> triggerBackgroundRefresh() {
+        log.info(" POST /api/predictions/refresh-async");
+
+        if (predictionCacheService.isRefreshCurrentlyRunning()) {
+            log.info(" Refresh already in progress");
+            return ResponseEntity.ok(Map.of(
+                    "message", "Refresh already in progress",
+                    "status", "RUNNING"
+            ));
+        }
+
+        predictionCacheService.refreshPredictionsInBackground();
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Background refresh started",
+                "status", "STARTED"
+        ));
+    }
+
+    @GetMapping("/refresh-status")
+    @Operation(summary = "Check if refresh is currently running")
+    public ResponseEntity<Map<String, Object>> getRefreshStatus() {
+        boolean isRefreshing = predictionCacheService.isRefreshCurrentlyRunning();
+        return ResponseEntity.ok(Map.of(
+                "isRefreshing", isRefreshing,
+                "status", isRefreshing ? "RUNNING" : "IDLE"
+        ));
+    }
+
+    @GetMapping("/stats/cached")
+    @Operation(summary = "Get prediction statistics from cache (fast)")
+    public ResponseEntity<PredictionStatsDTO> getCachedStats() {
+        log.info("⭐ GET /api/predictions/stats/cached - CACHE STATS");
+        long start = System.currentTimeMillis();
+
+        try {
+            // Read directly from prediction tables - NO ML calls!
+            List<BestsellerPrediction> bestsellers = bestsellerRepo.findAllLatestPredictions();
+            List<RankingTrendPrediction> rankings = rankingRepo.findAllLatestPredictions();
+            List<PriceIntelligenceEntity> prices = priceRepo.findAllLatestIntelligence();
+
+            // Calculate stats from cached data
+            int totalPredictions = Math.max(bestsellers.size(),
+                    Math.max(rankings.size(), prices.size()));
+
+            int potentialBestsellers = (int) bestsellers.stream()
+                    .filter(BestsellerPrediction::isPotentialBestseller)
+                    .count();
+
+            int improvingProducts = (int) rankings.stream()
+                    .filter(r -> r.getPredictedTrend() == RankingTrendPrediction.PredictedTrend.IMPROVING)
+                    .count();
+
+            int priceRecommendations = (int) prices.stream()
+                    .filter(p -> p.getPriceAction() != null &&
+                            !p.getPriceAction().equals("MAINTAIN") &&
+                            !p.getPriceAction().equals("MAINTENIR"))
+                    .count();
+
+            double avgBestsellerProb = bestsellers.stream()
+                    .filter(b -> b.getPredictedProbability() != null)
+                    .mapToDouble(b -> b.getPredictedProbability().doubleValue())
+                    .average()
+                    .orElse(0.0);
+
+            double avgPriceChange = prices.stream()
+                    .filter(p -> p.getPriceChangePercentage() != null)
+                    .mapToDouble(p -> p.getPriceChangePercentage().doubleValue())
+                    .average()
+                    .orElse(0.0);
+
+            PredictionStatsDTO stats = PredictionStatsDTO.builder()
+                    .totalPredictions(totalPredictions)
+                    .potentialBestsellersCount(potentialBestsellers)
+                    .productsWithRankingImprovement(improvingProducts)
+                    .productsWithPriceRecommendation(priceRecommendations)
+                    .averageBestsellerProbability(avgBestsellerProb)
+                    .averagePriceChangeRecommended(avgPriceChange)
+                    .build();
+
+            long duration = System.currentTimeMillis() - start;
+            log.info(" Cached stats calculated in {}ms", duration);
+
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            log.error(" Error getting cached stats: {}", e.getMessage());
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
 
     @GetMapping("/product/{asin}")
     @Operation(summary = "Get complete predictions for a product")
@@ -80,15 +198,16 @@ public class PredictionController {
         }
     }
 
+
     @GetMapping("/all")
-    @Operation(summary = "Get all predictions for all products")
+    @Operation(summary = "Get all predictions for all products (SLOW - prefer /latest)")
     public ResponseEntity<List<ProductPredictionDTO>> getAllPredictions() {
+        log.warn("⚠️ /all endpoint called - this is slow! Consider using /latest instead");
         try {
-            // Get all products from database
             List<Product> products = productRepository.findAll();
 
             List<ProductPredictionDTO> result = products.stream()
-                    .limit(100) // Limit to first 100 for performance
+                    .limit(100)
                     .map(product -> {
                         try {
                             CompletePredictionResponse complete = predictionService.getCompletePrediction(product.getAsin());
@@ -96,7 +215,8 @@ public class PredictionController {
                             return ProductPredictionDTO.builder()
                                     .productId(product.getAsin())
                                     .productName(product.getProductName())
-                                    .category(product.getCategory() != null ? product.getCategory().getName() : "N/A")
+                                    .category(product.getCategory() != null ?
+                                            product.getCategory().getName() : "N/A")
                                     .bestsellerPrediction(mapBestsellerPrediction(complete.getBestseller()))
                                     .rankingPrediction(mapRankingPrediction(complete.getRankingTrend()))
                                     .pricePrediction(mapPricePrediction(complete.getPriceIntelligence()))
@@ -118,8 +238,9 @@ public class PredictionController {
     }
 
     @GetMapping("/bestsellers")
-    @Operation(summary = "Get all potential bestsellers with full product info")
+    @Operation(summary = "Get all potential bestsellers (SLOW - prefer /latest)")
     public ResponseEntity<List<ProductPredictionDTO>> getAllBestsellers() {
+        log.warn("⚠️ /bestsellers endpoint called - this is slow! Consider using /latest instead");
         try {
             List<BestsellerPredictionResponse> bestsellers = predictionService.getAllPotentialBestsellers();
 
@@ -131,13 +252,13 @@ public class PredictionController {
 
                             if (product == null) return null;
 
-                            // Get full predictions
                             CompletePredictionResponse complete = predictionService.getCompletePrediction(bs.getProductId());
 
                             return ProductPredictionDTO.builder()
                                     .productId(product.getAsin())
                                     .productName(product.getProductName())
-                                    .category(product.getCategory() != null ? product.getCategory().getName() : "N/A")
+                                    .category(product.getCategory() != null ?
+                                            product.getCategory().getName() : "N/A")
                                     .bestsellerPrediction(mapBestsellerPrediction(complete.getBestseller()))
                                     .rankingPrediction(mapRankingPrediction(complete.getRankingTrend()))
                                     .pricePrediction(mapPricePrediction(complete.getPriceIntelligence()))
@@ -177,7 +298,8 @@ public class PredictionController {
                             return ProductPredictionDTO.builder()
                                     .productId(product.getAsin())
                                     .productName(product.getProductName())
-                                    .category(product.getCategory() != null ? product.getCategory().getName() : "N/A")
+                                    .category(product.getCategory() != null ?
+                                            product.getCategory().getName() : "N/A")
                                     .bestsellerPrediction(mapBestsellerPrediction(complete.getBestseller()))
                                     .rankingPrediction(mapRankingPrediction(complete.getRankingTrend()))
                                     .pricePrediction(mapPricePrediction(complete.getPriceIntelligence()))
@@ -199,8 +321,9 @@ public class PredictionController {
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "Refresh predictions for all products")
+    @Operation(summary = "Refresh predictions for all products (SLOW - prefer /refresh-async)")
     public ResponseEntity<Void> refreshPredictions() {
+        log.warn("/refresh endpoint called - this is slow! Consider using /refresh-async instead");
         try {
             predictionService.refreshPredictionsForAllProducts();
             return ResponseEntity.ok().build();
@@ -223,53 +346,12 @@ public class PredictionController {
     }
 
     @GetMapping("/stats")
-    @Operation(summary = "Get prediction statistics")
+    @Operation(summary = "Get prediction statistics (redirects to cached)")
     public ResponseEntity<PredictionStatsDTO> getStats() {
-        try {
-            List<Product> products = productRepository.findAll();
-
-            int totalPredictions = products.size();
-            int potentialBestsellers = 0;
-            int improvingProducts = 0;
-            int priceRecommendations = 0;
-
-            for (Product product : products) {
-                try {
-                    CompletePredictionResponse pred = predictionService.getCompletePrediction(product.getAsin());
-
-                    if (pred.getBestseller().getIsPotentialBestseller()) {
-                        potentialBestsellers++;
-                    }
-
-                    if ("IMPROVING".equals(pred.getRankingTrend().getPredictedTrend())) {
-                        improvingProducts++;
-                    }
-
-                    if (!"MAINTAIN".equals(pred.getPriceIntelligence().getPriceAction())) {
-                        priceRecommendations++;
-                    }
-                } catch (Exception e) {
-                    // Skip errors for individual products
-                }
-            }
-
-            PredictionStatsDTO stats = PredictionStatsDTO.builder()
-                    .totalPredictions(totalPredictions)
-                    .potentialBestsellersCount(potentialBestsellers)
-                    .productsWithRankingImprovement(improvingProducts)
-                    .productsWithPriceRecommendation(priceRecommendations)
-                    .averageBestsellerProbability(0.0)
-                    .averagePriceChangeRecommended(0.0)
-                    .build();
-
-            return ResponseEntity.ok(stats);
-        } catch (Exception e) {
-            log.error("Error getting stats: {}", e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
+        log.info(" /stats endpoint called - using cached stats for performance");
+        return getCachedStats();
     }
 
-    // Helper methods
     private String formatDateTime(String dateTime) {
         if (dateTime == null) {
             return LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -278,17 +360,37 @@ public class PredictionController {
     }
 
     private BestsellerPredictionDTO mapBestsellerPrediction(BestsellerPredictionResponse response) {
+        if (response == null) {
+            return BestsellerPredictionDTO.builder()
+                    .bestsellerProbability(0.0)
+                    .isPotentialBestseller(false)
+                    .potentialLevel("FAIBLE")
+                    .recommendation("")
+                    .confidence(0.0)
+                    .build();
+        }
         return BestsellerPredictionDTO.builder()
                 .bestsellerProbability(response.getBestsellerProbability())
                 .isPotentialBestseller(response.getIsPotentialBestseller())
                 .potentialLevel(response.getPotentialLevel())
                 .recommendation(response.getRecommendation())
-                .confidence(response.getConfidenceLevel().equals("HIGH") ? 0.9 :
-                        response.getConfidenceLevel().equals("MEDIUM") ? 0.7 : 0.5)
+                .confidence(response.getConfidenceLevel() != null ?
+                        (response.getConfidenceLevel().equals("HIGH") ? 0.9 :
+                                response.getConfidenceLevel().equals("MEDIUM") ? 0.7 : 0.5) : 0.5)
                 .build();
     }
 
     private RankingPredictionDTO mapRankingPrediction(RankingTrendPredictionResponse response) {
+        if (response == null) {
+            return RankingPredictionDTO.builder()
+                    .predictedRanking(0)
+                    .currentRanking(0)
+                    .rankingChange(0)
+                    .trend("STABLE")
+                    .trendDescription("")
+                    .confidence(0.0)
+                    .build();
+        }
         return RankingPredictionDTO.builder()
                 .predictedRanking(response.getPredictedRank())
                 .currentRanking(response.getCurrentRank())
@@ -300,22 +402,40 @@ public class PredictionController {
     }
 
     private PricePredictionDTO mapPricePrediction(PriceIntelligenceResponse response) {
+        if (response == null) {
+            return PricePredictionDTO.builder()
+                    .recommendedPrice(0.0)
+                    .currentPrice(0.0)
+                    .priceDifference(0.0)
+                    .priceChangePercentage(0.0)
+                    .priceAction("MAINTENIR")
+                    .actionDescription("")
+                    .shouldNotifySeller(false)
+                    .confidence(0.0)
+                    .build();
+        }
+
         String recommendation = "Maintenir le prix actuel";
         if (response.getPriceAction() != null) {
             switch (response.getPriceAction()) {
                 case "INCREASE":
+                case "AUGMENTER":
                     recommendation = "Augmenter le prix";
                     break;
                 case "DECREASE":
+                case "DIMINUER":
                     recommendation = "Diminuer le prix";
                     break;
             }
         }
 
         return PricePredictionDTO.builder()
-                .recommendedPrice(response.getRecommendedPrice().doubleValue())
-                .currentPrice(response.getCurrentPrice().doubleValue())
-                .priceDifference(response.getPriceDifference().doubleValue())
+                .recommendedPrice(response.getRecommendedPrice() != null ?
+                        response.getRecommendedPrice().doubleValue() : 0.0)
+                .currentPrice(response.getCurrentPrice() != null ?
+                        response.getCurrentPrice().doubleValue() : 0.0)
+                .priceDifference(response.getPriceDifference() != null ?
+                        response.getPriceDifference().doubleValue() : 0.0)
                 .priceChangePercentage(response.getPriceChangePercentage())
                 .priceAction(response.getPriceAction())
                 .actionDescription(recommendation)
@@ -323,45 +443,8 @@ public class PredictionController {
                 .confidence(0.85)
                 .build();
     }
-    @GetMapping("/latest")
-    @Operation(summary = "Get latest predictions from cache (instant)")
-    public ResponseEntity<LatestPredictionsResponse> getLatestPredictions() {
-        log.info(" GET /api/predictions/latest - CACHE ENDPOINT");
-        LatestPredictionsResponse response = predictionCacheService.getLatestPredictions();
-        log.info("Returning {} cached predictions", response.getTotalCount());
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/refresh-async")
-    @Operation(summary = "Trigger background prediction refresh")
-    public ResponseEntity<Map<String, Object>> triggerBackgroundRefresh() {
-        log.info("POST /api/predictions/refresh-async");
-
-        if (predictionCacheService.isRefreshCurrentlyRunning()) {
-            return ResponseEntity.ok(Map.of(
-                    "message", "Refresh already in progress",
-                    "status", "RUNNING"
-            ));
-        }
-
-        predictionCacheService.refreshPredictionsInBackground();
-
-        return ResponseEntity.ok(Map.of(
-                "message", "Background refresh started",
-                "status", "STARTED"
-        ));
-    }
-
-    @GetMapping("/refresh-status")
-    @Operation(summary = "Check if refresh is currently running")
-    public ResponseEntity<Map<String, Object>> getRefreshStatus() {
-        boolean isRefreshing = predictionCacheService.isRefreshCurrentlyRunning();
-        return ResponseEntity.ok(Map.of(
-                "isRefreshing", isRefreshing,
-                "status", isRefreshing ? "RUNNING" : "IDLE"
-        ));
-    }
 }
+
 
 @Data
 @Builder
