@@ -5,6 +5,7 @@ import com.dashboard.entity.User;
 import com.dashboard.exception.ResourceNotFoundException;
 import com.dashboard.repository.SellerRevenueRepository;
 import com.dashboard.repository.UserRepository;
+import com.dashboard.service.AdminSellerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +33,10 @@ public class AdminSellerController {
 
     private final UserRepository userRepository;
     private final SellerRevenueRepository sellerRevenueRepository;
+    private final AdminSellerService adminSellerService;
 
     @GetMapping
-    @Operation(summary = "Get all sellers", description = "Returns paginated list of all sellers")
+    @Operation(summary = "Get all sellers", description = "Returns paginated list of all active sellers")
     public ResponseEntity<ApiResponse<Page<Map<String, Object>>>> getAllSellers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -44,9 +46,9 @@ public class AdminSellerController {
         Page<User> sellers;
 
         if (verified != null) {
-            sellers = userRepository.findByRoleAndIsVerifiedSeller(User.Role.SELLER, verified, pageable);
+            sellers = userRepository.findByRoleAndIsVerifiedSellerAndIsActiveTrue(User.Role.SELLER, verified, pageable);
         } else {
-            sellers = userRepository.findByRole(User.Role.SELLER, pageable);
+            sellers = userRepository.findByRoleAndIsActiveTrue(User.Role.SELLER, pageable);
         }
 
         Page<Map<String, Object>> sellerData = sellers.map(this::mapSellerToResponse);
@@ -80,7 +82,7 @@ public class AdminSellerController {
             seller.put("sellerName", row[1]);
             seller.put("storeName", row[2]);
             seller.put("totalRevenue", row[3] != null ? ((BigDecimal) row[3]).doubleValue() : 0.0);
-            seller.put("totalProductsSold", row[4] != null ?  ((Long) row[4]).intValue() : 0);
+            seller.put("totalProductsSold", row[4] != null ? ((Long) row[4]).intValue() : 0);
             seller.put("totalOrders", row[5] != null ? ((Long) row[5]).intValue() : 0);
             return seller;
         }).collect(Collectors.toList());
@@ -89,57 +91,43 @@ public class AdminSellerController {
     }
 
     @PostMapping("/{sellerId}/verify")
-    @Operation(summary = "Verify a seller", description = "Marks a seller as verified")
+    @Operation(summary = "Verify a seller", description = "Marks a seller as verified, allowing them to add products")
     public ResponseEntity<ApiResponse<Map<String, Object>>> verifySeller(@PathVariable Long sellerId) {
+        adminSellerService.verifySeller(sellerId);
+
         User seller = userRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Seller", "id", sellerId));
-
-        if (seller.getRole() != User.Role.SELLER) {
-            throw new ResourceNotFoundException("Seller", "id", sellerId);
-        }
-
-        seller.setIsVerifiedSeller(true);
-        userRepository.save(seller);
-
-        log.info("Seller {} has been verified", seller.getEmail());
 
         return ResponseEntity.ok(ApiResponse.success("Seller verified successfully", mapSellerToResponse(seller)));
     }
 
     @PostMapping("/{sellerId}/unverify")
-    @Operation(summary = "Unverify a seller", description = "Removes verification from a seller")
+    @Operation(summary = "Unverify a seller", description = "Removes verification, hides all products from storefront")
     public ResponseEntity<ApiResponse<Map<String, Object>>> unverifySeller(@PathVariable Long sellerId) {
+        adminSellerService.unverifySeller(sellerId);
+
         User seller = userRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Seller", "id", sellerId));
 
-        if (seller.getRole() != User.Role.SELLER) {
-            throw new ResourceNotFoundException("Seller", "id", sellerId);
-        }
-
-        seller.setIsVerifiedSeller(false);
-        userRepository.save(seller);
-
-        log.info("Seller {} verification has been removed", seller.getEmail());
-
-        return ResponseEntity.ok(ApiResponse.success("Seller unverified successfully", mapSellerToResponse(seller)));
+        return ResponseEntity.ok(ApiResponse.success("Seller unverified successfully.All products are now hidden.", mapSellerToResponse(seller)));
     }
 
     @DeleteMapping("/{sellerId}")
-    @Operation(summary = "Deactivate a seller", description = "Deactivates a seller account")
-    public ResponseEntity<ApiResponse<String>> deactivateSeller(@PathVariable Long sellerId) {
+    @Operation(summary = "Deactivate a seller", description = "Permanently deletes seller account, all products, and bans email")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> deactivateSeller(@PathVariable Long sellerId) {
         User seller = userRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Seller", "id", sellerId));
 
-        if (seller.getRole() != User.Role.SELLER) {
-            throw new ResourceNotFoundException("Seller", "id", sellerId);
-        }
+        String sellerEmail = seller.getEmail();
 
-        seller.setIsActive(false);
-        userRepository.save(seller);
+        adminSellerService.deactivateSeller(sellerId);
 
-        log.info("Seller {} has been deactivated", seller.getEmail());
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "deactivated");
+        response.put("deactivatedEmail", sellerEmail);
+        response.put("message", "Seller account has been permanently deactivated.  All products removed and email banned.");
 
-        return ResponseEntity.ok(ApiResponse.success("Seller deactivated successfully", "deactivated"));
+        return ResponseEntity.ok(ApiResponse. success("Seller deactivated successfully", response));
     }
 
     private Map<String, Object> mapSellerToResponse(User seller) {
@@ -157,4 +145,5 @@ public class AdminSellerController {
         map.put("createdAt", seller.getCreatedAt());
         return map;
     }
+
 }

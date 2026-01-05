@@ -26,6 +26,10 @@ public interface SellerStockRepository extends JpaRepository<SellerStock, Long> 
 
     Optional<SellerStock> findByIdAndSeller(Long id, User seller);
 
+    @Modifying
+    @Query("DELETE FROM SellerStock s WHERE s.seller.id = :sellerId")
+    void deleteBySellerId(@Param("sellerId") Long sellerId);
+
     @Query("SELECT COUNT(s) FROM SellerStock s WHERE s.seller = :seller")
     Long countBySeller(@Param("seller") User seller);
 

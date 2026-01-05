@@ -51,11 +51,14 @@ public class SellerService {
         return user;
     }
 
-    // ========== PRODUCT SUBMISSION ==========
 
     @Transactional
     public SellerProductRequestResponse submitProductForApproval(SellerProductSubmissionRequest request) {
         User seller = getCurrentSeller();
+
+        if (! Boolean.TRUE.equals(seller.getIsVerifiedSeller())) {
+            throw new BadRequestException("You must be verified by admin before adding products.  Please wait for verification or contact support.");
+        }
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
@@ -73,7 +76,7 @@ public class SellerService {
                 .build();
 
         productRequest = productRequestRepository.save(productRequest);
-        log.info("Seller {} submitted product for approval: {}", seller.getEmail(), request.getProductName());
+        log.info("Seller {} submitted product for approval:  {}", seller.getEmail(), request.getProductName());
 
         return convertToProductRequestResponse(productRequest);
     }
@@ -220,18 +223,18 @@ public class SellerService {
     public void deleteMyProduct(String asin) {
         User seller = getCurrentSeller();
 
-        Product product = productRepository. findByAsin(asin)
+        Product product = productRepository.findByAsin(asin)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "asin", asin));
 
         // Verify ownership
-        if (product.getSeller() == null || ! product.getSeller(). getId().equals(seller. getId())) {
+        if (product.getSeller() == null || ! product.getSeller().getId().equals(seller.getId())) {
             throw new BadRequestException("You can only remove your own products");
         }
 
-        // 1. Delete the seller's stock entry for this product
+        // 1.Delete the seller's stock entry for this product
         sellerStockRepository.deleteBySellerAndOriginalProductAsin(seller, asin);
 
-        // 2.  Remove product from seller's store (soft delete)
+        // 2.Remove product from seller's store (soft delete)
         product.setApprovalStatus(Product.ApprovalStatus.REJECTED);
         product.setStockQuantity(0);
         product.setSeller(null);
@@ -427,4 +430,6 @@ public class SellerService {
                 .createdAt(review.getCreatedAt())
                 .build();
     }
+    
+    
 }

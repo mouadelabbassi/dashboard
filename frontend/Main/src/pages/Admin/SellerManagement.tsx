@@ -4,7 +4,7 @@ import Toast from '../../components/common/Toast';
 
 interface Seller {
     id: number;
-    email: string;
+    email:  string;
     fullName: string;
     phone: string;
     storeName: string;
@@ -16,13 +16,14 @@ interface Seller {
     createdAt: string;
 }
 
-const SellerManagement: React.FC = () => {
+const SellerManagement: React. FC = () => {
     const [sellers, setSellers] = useState<Seller[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'verified' | 'unverified'>('all');
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [currentPage, setCurrentPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [deactivatingId, setDeactivatingId] = useState<number | null>(null);
 
     useEffect(() => {
         fetchSellers();
@@ -33,7 +34,7 @@ const SellerManagement: React.FC = () => {
             setLoading(true);
             const token = localStorage.getItem('token');
 
-            let url = `http://localhost:8080/api/admin/sellers? page=${currentPage}&size=10`;
+            let url = `http://localhost:8080/api/admin/sellers?page=${currentPage}&size=10`;
             if (filter === 'verified') {
                 url += '&verified=true';
             } else if (filter === 'unverified') {
@@ -41,27 +42,27 @@ const SellerManagement: React.FC = () => {
             }
 
             const response = await axios.get(url, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers:  { Authorization: `Bearer ${token}` }
             });
 
             const data = response.data?. data;
             setSellers(data?. content || []);
             setTotalPages(data?.totalPages || 0);
         } catch (error) {
-            console. error('Error fetching sellers:', error);
-            setToast({ message: 'Failed to load sellers', type: 'error' });
+            console.error('Error fetching sellers:', error);
+            setToast({ message: 'Failed to load sellers', type:  'error' });
         } finally {
             setLoading(false);
         }
     };
 
-    const handleVerifySeller = async (sellerId: number) => {
+    const handleVerifySeller = async (sellerId:  number) => {
         try {
             const token = localStorage.getItem('token');
             await axios.post(
                 `http://localhost:8080/api/admin/sellers/${sellerId}/verify`,
                 {},
-                { headers: { Authorization: `Bearer ${token}` } }
+                { headers: { Authorization:  `Bearer ${token}` } }
             );
             setToast({ message: 'Seller verified successfully! ', type: 'success' });
             fetchSellers();
@@ -72,32 +73,59 @@ const SellerManagement: React.FC = () => {
 
     const handleUnverifySeller = async (sellerId: number) => {
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage. getItem('token');
             await axios.post(
                 `http://localhost:8080/api/admin/sellers/${sellerId}/unverify`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            setToast({ message: 'Seller unverified successfully!', type: 'success' });
+            setToast({ message: 'Seller unverified.  All products are now hidden.', type: 'success' });
             fetchSellers();
         } catch (error) {
             setToast({ message: 'Failed to unverify seller', type: 'error' });
         }
     };
 
-    const handleDeactivateSeller = async (sellerId: number) => {
-        if (! confirm('Are you sure you want to deactivate this seller?')) return;
+    const handleDeactivateSeller = async (sellerId:  number, sellerName: string, sellerEmail: string) => {
+        const confirmed = window.confirm(
+            `WARNING: This action is PERMANENT!\n\n` +
+            `Deactivating "${sellerName}" (${sellerEmail}) will:\n` +
+            `- Permanently delete their account\n` +
+            `- Remove ALL their products\n` +
+            `- Ban their email from future registration\n` +
+            `- Log them out immediately\n\n` +
+            `Are you absolutely sure? `
+        );
+
+        if (!confirmed) return;
 
         try {
+            setDeactivatingId(sellerId);
             const token = localStorage.getItem('token');
-            await axios.delete(
+
+            const response = await axios.delete(
                 `http://localhost:8080/api/admin/sellers/${sellerId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            setToast({ message: 'Seller deactivated successfully!', type: 'success' });
+
+            const deactivatedEmail = response.data?. data?.deactivatedEmail;
+
+            setSellers(prev => prev.filter(s => s.id !== sellerId));
+
+            setToast({
+                message: `Seller "${sellerName}" has been permanently deactivated. Email ${deactivatedEmail || sellerEmail} is now banned.`,
+                type: 'success'
+            });
+
+        } catch (error:  any) {
+            console.error('Deactivation error:', error);
+            setToast({
+                message: error.response?.data?.message || 'Failed to deactivate seller',
+                type: 'error'
+            });
             fetchSellers();
-        } catch (error) {
-            setToast({ message: 'Failed to deactivate seller', type: 'error' });
+        } finally {
+            setDeactivatingId(null);
         }
     };
 
@@ -111,7 +139,7 @@ const SellerManagement: React.FC = () => {
 
     return (
         <div className="p-6">
-            {toast && <Toast message={toast. message} type={toast.type} onClose={() => setToast(null)} />}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Seller Management</h1>
@@ -122,7 +150,7 @@ const SellerManagement: React.FC = () => {
 
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-4">
                 <div className="flex gap-2">
-                    {(['all', 'verified', 'unverified'] as const). map((status) => (
+                    {(['all', 'verified', 'unverified'] as const).map((status) => (
                         <button
                             key={status}
                             onClick={() => {
@@ -135,8 +163,8 @@ const SellerManagement: React.FC = () => {
                                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
                             }`}
                         >
-                            {status === 'all' ?  'All Sellers' :
-                                status === 'verified' ?  'Verified' : 'Pending Verification'}
+                            {status === 'all' ? 'All Sellers' :
+                                status === 'verified' ? 'Verified' :  'Pending Verification'}
                         </button>
                     ))}
                 </div>
@@ -173,26 +201,26 @@ const SellerManagement: React.FC = () => {
                         </tr>
                         </thead>
                         <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        {sellers.map((seller) => (
-                            <tr key={seller.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        {sellers. map((seller) => (
+                            <tr key={seller.id} className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${deactivatingId === seller.id ?  'opacity-50' : ''}`}>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center">
                                         <div className="flex-shrink-0 h-10 w-10">
-                                            {seller.profileImage ?  (
+                                            {seller.profileImage ? (
                                                 <img
                                                     className="h-10 w-10 rounded-full object-cover"
                                                     src={seller.profileImage}
-                                                    alt={seller.fullName}
+                                                    alt={seller. fullName}
                                                 />
                                             ) : (
                                                 <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-                                                    {seller.fullName?. charAt(0). toUpperCase()}
+                                                    {seller.fullName?. charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
                                         <div className="ml-4">
                                             <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                                {seller. fullName}
+                                                {seller.fullName}
                                             </div>
                                             <div className="text-sm text-gray-500 dark:text-gray-400">
                                                 {seller.email}
@@ -209,14 +237,14 @@ const SellerManagement: React.FC = () => {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    {seller.isVerifiedSeller ? (
+                                    {seller.isVerifiedSeller ?  (
                                         <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                             Verified
-                                            </span>
+                                        </span>
                                     ) : (
                                         <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                             Pending
-                                            </span>
+                                        </span>
                                     )}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -227,23 +255,36 @@ const SellerManagement: React.FC = () => {
                                         {seller.isVerifiedSeller ?  (
                                             <button
                                                 onClick={() => handleUnverifySeller(seller.id)}
-                                                className="px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition text-xs"
+                                                disabled={deactivatingId === seller. id}
+                                                className="px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition text-xs disabled:opacity-50"
                                             >
                                                 Unverify
                                             </button>
                                         ) : (
                                             <button
                                                 onClick={() => handleVerifySeller(seller.id)}
-                                                className="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-xs"
+                                                disabled={deactivatingId === seller.id}
+                                                className="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-xs disabled:opacity-50"
                                             >
                                                 Verify
                                             </button>
                                         )}
                                         <button
-                                            onClick={() => handleDeactivateSeller(seller.id)}
-                                            className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-xs"
+                                            onClick={() => handleDeactivateSeller(seller. id, seller.fullName, seller.email)}
+                                            disabled={deactivatingId === seller. id}
+                                            className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-xs disabled:opacity-50 flex items-center gap-1"
                                         >
-                                            Deactivate
+                                            {deactivatingId === seller.id ? (
+                                                <>
+                                                    <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                                    </svg>
+                                                    Deactivating...
+                                                </>
+                                            ) : (
+                                                'Deactivate'
+                                            )}
                                         </button>
                                     </div>
                                 </td>

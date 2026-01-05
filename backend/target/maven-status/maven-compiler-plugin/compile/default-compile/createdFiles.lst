@@ -21,6 +21,7 @@ com\dashboard\controller\BestsellerPredictionDTO.class
 com\dashboard\dto\response\ReviewResponse.class
 com\dashboard\controller\PredictionController.class
 com\dashboard\dto\request\ForgotPasswordRequest.class
+com\dashboard\exception\AccountDeactivatedException.class
 com\dashboard\entity\Product$ProductBuilder.class
 com\dashboard\controller\AnalystController.class
 com\dashboard\dto\response\CategoryStatsResponse$CategoryStatsResponseBuilder.class
@@ -66,10 +67,12 @@ com\dashboard\service\ReviewService.class
 com\dashboard\dto\response\AuthResponse.class
 com\dashboard\dto\request\ApplyRecommendationRequest.class
 com\dashboard\dto\response\BestsellerPredictionResponse.class
+com\dashboard\dto\response\RefreshStatusResponse$RefreshStatusResponseBuilder.class
 com\dashboard\dto\response\RankingTrendPredictionResponse$RankingTrendPredictionResponseBuilder.class
 com\dashboard\config\AsyncConfig.class
 com\dashboard\entity\SellerProductRequest$RequestStatus.class
 com\dashboard\security\UserDetailsServiceImpl.class
+com\dashboard\service\AdminSellerService.class
 com\dashboard\entity\PredictionRefreshLog$RefreshStatus.class
 com\dashboard\dto\request\ResetPasswordRequest$ResetPasswordRequestBuilder.class
 com\dashboard\entity\OrderItem$OrderItemBuilder.class
@@ -103,6 +106,7 @@ com\dashboard\dto\request\OrderRequest.class
 com\dashboard\dto\response\NotificationResponse$NotificationResponseBuilder.class
 com\dashboard\repository\PredictionRefreshLogRepository.class
 com\dashboard\dto\response\ReviewResponse$ReviewResponseBuilder.class
+com\dashboard\repository\BannedEmailRepository.class
 com\dashboard\dto\request\LoginRequest.class
 com\dashboard\dto\request\ProductRequest$ProductRequestBuilder.class
 com\dashboard\dto\request\StockUpdateRequest.class
@@ -155,6 +159,7 @@ com\dashboard\dto\request\UpdateProfileRequest$UpdateProfileRequestBuilder.class
 com\dashboard\dto\response\OrderResponse$OrderItemResponse.class
 com\dashboard\entity\SellerStock$SellerStockBuilder.class
 com\dashboard\dto\response\PendingProductResponse.class
+com\dashboard\dto\response\RefreshStatusResponse.class
 com\dashboard\entity\StockUpdateRequest$StockUpdateRequestBuilder.class
 com\dashboard\dto\response\SellerProfileResponse.class
 com\dashboard\controller\BestsellerPredictionDTO$BestsellerPredictionDTOBuilder.class
@@ -177,7 +182,9 @@ com\dashboard\controller\AdminStockController.class
 com\dashboard\dto\request\OrderRequest$OrderRequestBuilder.class
 com\dashboard\entity\PlatformRevenue$RevenueType.class
 com\dashboard\controller\CategoryController.class
+com\dashboard\entity\BannedEmail$BannedEmailBuilder.class
 com\dashboard\service\ExportService.class
+com\dashboard\entity\BannedEmail.class
 com\dashboard\exception\ResourceNotFoundException.class
 com\dashboard\repository\OrderRepository.class
 com\dashboard\entity\PredictionRefreshLog$PredictionRefreshLogBuilder.class

@@ -39,5 +39,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query("SELECT n FROM Notification n WHERE n.recipient.id = :recipientId ORDER BY n.createdAt DESC")
     List<Notification> findLatestByRecipientId(@Param("recipientId") Long recipientId, Pageable pageable);
 
+
     void deleteByRecipientAndCreatedAtBefore(User recipient, LocalDateTime before);
+
+    @Modifying
+    @Query("DELETE FROM Notification n WHERE n.recipient.id = : recipientId")
+    void deleteByRecipientId(@Param("recipientId") Long recipientId);
 }

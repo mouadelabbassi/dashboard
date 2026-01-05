@@ -2,7 +2,15 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8080/api/predictions';
 
-
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` })
+        }
+    };
+};
 
 export interface RankingPrediction {
     predictedRanking: number;
@@ -108,41 +116,26 @@ export interface CategoryStats {
     avgPriceChange: number;
 }
 
-export interface ModelMetrics {
-    ranking: {
-        r2_score: number;
-        rmse: number;
-        mae: number;
-        feature_importance: Record<string, number>;
-    };
-    bestseller: {
-        accuracy: number;
-        precision: number;
-        recall: number;
-        f1_score: number;
-        auc_roc: number;
-        feature_importance: Record<string, number>;
-    };
-    price: {
-        r2_score: number;
-        rmse: number;
-        mape: number;
-        feature_importance: Record<string, number>;
-    };
-    metadata: {
-        trained_at: string;
-        version: string;
-        real_data_count: number;
-    };
+export interface LatestPredictionsResponse {
+    bestsellerPredictions: BestsellerPrediction[];
+    rankingPredictions: RankingTrendPrediction[];
+    priceIntelligence: PriceIntelligence[];
+    totalCount: number;
+    lastRefreshedAt: string | null;
+    isRefreshing: boolean;
+    fromCache: boolean;
 }
 
 export interface HealthStatus {
     springBootService: string;
     mlServiceAvailable: boolean;
-    mlServiceStatus?: {
-        models_loaded: boolean;
-        available_models: string[];
-    };
+}
+
+export interface ModelMetrics {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1Score: number;
 }
 
 export interface PredictionCountResponse {
@@ -159,27 +152,6 @@ export interface GenerateSyncResponse {
     remainingProducts: number;
     totalProducts: number;
 }
-
-export interface LatestPredictionsResponse {
-    bestsellerPredictions: BestsellerPrediction[];
-    rankingPredictions: RankingTrendPrediction[];
-    priceIntelligence: PriceIntelligence[];
-    totalCount: number;
-    lastRefreshedAt: string | null;
-    isRefreshing: boolean;
-    fromCache: boolean;
-}
-
-
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    };
-};
 
 const normalizeStats = (data: any): PredictionStats => {
     return {
@@ -213,14 +185,14 @@ const normalizeCategoryStats = (cat: any): CategoryStats => {
 };
 
 export const getLatestPredictions = async (): Promise<LatestPredictionsResponse> => {
-    console.log('📦 Fetching cached predictions from /latest...');
+    console.log('Fetching cached predictions from /latest...');
     const response = await axios.get(`${API_BASE_URL}/latest`, getAuthHeaders());
-    console.log('✅ Cache response received:', response.data);
+    console.log('Cache response received:', response.data);
     return response.data;
 };
 
 export const triggerBackgroundRefresh = async (): Promise<{ message: string; status: string }> => {
-    console.log('🔄 Triggering background refresh...');
+    console.log('Triggering background refresh...');
     const response = await axios.post(`${API_BASE_URL}/refresh-async`, {}, getAuthHeaders());
     return response.data;
 };
@@ -279,20 +251,19 @@ export const getModelMetrics = async (): Promise<ModelMetrics> => {
 };
 
 export const getAllPredictions = async (): Promise<ProductPrediction[]> => {
-    console.warn('⚠️ getAllPredictions() is slow - consider using getLatestPredictions() instead');
+    console.warn('getAllPredictions() is slow - consider using getLatestPredictions() instead');
     const response = await axios.get(`${API_BASE_URL}/all`, getAuthHeaders());
     return response.data;
 };
 
 export const getPredictionStats = async (): Promise<PredictionStats> => {
-    console.warn('⚠️ getPredictionStats() is slow - consider using getCachedStats() instead');
+    console.warn('getPredictionStats() is slow - consider using getCachedStats() instead');
     const response = await axios.get(`${API_BASE_URL}/stats`, getAuthHeaders());
     return normalizeStats(response.data);
 };
 
-
 export const getPotentialBestsellers = async (): Promise<ProductPrediction[]> => {
-    console.warn('⚠️ getPotentialBestsellers() is slow - consider using getLatestPredictions() instead');
+    console.warn('getPotentialBestsellers() is slow - consider using getLatestPredictions() instead');
     const response = await axios.get(`${API_BASE_URL}/bestsellers`, getAuthHeaders());
     return response.data;
 };
@@ -400,50 +371,61 @@ export const generatePredictionsSync = async (batchSize: number = 50): Promise<G
     }
 };
 
-
 export const formatProbability = (probability: number): string => {
     if (probability === undefined || probability === null) return '0.0%';
     const value = probability > 1 ? probability : probability * 100;
     return `${value.toFixed(1)}%`;
 };
 
-export const formatPrice = (price: number): string => {
-    if (price === undefined || price === null) return '$0.00';
+export const formatPrice = (price: number | null | undefined): string => {
+    if (price === null || price === undefined) return '$0.00';
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD'
     }).format(price);
 };
 
-export const formatGeneratedAt = (dateString: string | null): string => {
-    if (!dateString) return 'N/A';
+export const formatGeneratedAt = (dateTime: string | null | undefined): string => {
+    if (!dateTime) return 'Jamais';
     try {
-        const date = new Date(dateString);
-        return new Intl.DateTimeFormat('en-US', {
+        const date = new Date(dateTime);
+        if (isNaN(date.getTime())) return 'Date invalide';
+
+        const now = new Date();
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return 'À l\'instant';
+        if (diffMins < 60) return `Il y a ${diffMins} min`;
+        if (diffHours < 24) return `Il y a ${diffHours}h`;
+        if (diffDays < 7) return `Il y a ${diffDays}j`;
+
+        return date.toLocaleDateString('fr-FR', {
             day: '2-digit',
             month: 'short',
-            year: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
-        }).format(date);
+        });
     } catch {
-        return 'N/A';
+        return 'Date invalide';
     }
 };
 
-export const formatPercentage = (value: number): string => {
-    if (value === undefined || value === null) return '+0.0%';
+export const formatPercentage = (value: number | null | undefined): string => {
+    if (value === null || value === undefined) return '0%';
     const sign = value >= 0 ? '+' : '';
     return `${sign}${value.toFixed(1)}%`;
 };
 
 export const getTrendColor = (trend: string): string => {
     switch (trend) {
-        case 'IMPROVING':
         case 'AMÉLIORATION':
+        case 'IMPROVING':
             return 'text-green-600';
-        case 'DECLINING':
         case 'DÉCLIN':
+        case 'DECLINING':
             return 'text-red-600';
         default:
             return 'text-gray-600';
@@ -452,12 +434,12 @@ export const getTrendColor = (trend: string): string => {
 
 export const getTrendIcon = (trend: string): string => {
     switch (trend) {
-        case 'IMPROVING':
         case 'AMÉLIORATION':
-            return '↗';
-        case 'DECLINING':
+        case 'IMPROVING':
+            return '↑';
         case 'DÉCLIN':
-            return '↘';
+        case 'DECLINING':
+            return '↓';
         default:
             return '→';
     }
@@ -465,11 +447,11 @@ export const getTrendIcon = (trend: string): string => {
 
 export const getPriceActionColor = (action: string): string => {
     switch (action) {
-        case 'INCREASE':
         case 'AUGMENTER':
+        case 'INCREASE':
             return 'text-green-600';
-        case 'DECREASE':
         case 'DIMINUER':
+        case 'DECREASE':
             return 'text-red-600';
         default:
             return 'text-gray-600';
@@ -511,8 +493,6 @@ export const getPotentialLevelColor = (level: string): string => {
     }
 };
 
-
-
 export const calculateAverageConfidence = (predictions: ProductPrediction[]): number => {
     if (!predictions || predictions.length === 0) return 0;
     const total = predictions.reduce((sum, p) => {
@@ -543,21 +523,19 @@ export const getPredictionSummary = (prediction: ProductPrediction): string => {
     }
 
     if (prediction.rankingPrediction?.trend === 'AMÉLIORATION' || prediction.rankingPrediction?.trend === 'IMPROVING') {
-        parts.push(`Amélioration du classement prévue (+${prediction.rankingPrediction.rankingChange} places)`);
+        parts.push(`Amélioration du classement prévue (+${Math.abs(prediction.rankingPrediction.rankingChange || 0)} places)`);
     } else if (prediction.rankingPrediction?.trend === 'DÉCLIN' || prediction.rankingPrediction?.trend === 'DECLINING') {
-        parts.push(`Déclin du classement prévu (${prediction.rankingPrediction.rankingChange} places)`);
+        parts.push(`Déclin du classement prévu (${prediction.rankingPrediction.rankingChange || 0} places)`);
     }
 
     return parts.length > 0 ? parts.join(' • ') : 'Aucune action recommandée';
 };
-
 
 export default {
     getLatestPredictions,
     triggerBackgroundRefresh,
     getRefreshStatus,
     getCachedStats,
-
     checkPredictionServiceHealth,
     getModelMetrics,
     getAllPredictions,
@@ -571,7 +549,6 @@ export default {
     getSellerPredictionAlerts,
     getPredictionCount,
     generatePredictionsSync,
-
     formatProbability,
     formatPrice,
     formatGeneratedAt,
@@ -585,3 +562,7 @@ export default {
     needsAttention,
     getPredictionSummary
 };
+
+export class RefreshStatusResponse {
+    isRefreshing: boolean | undefined;
+}

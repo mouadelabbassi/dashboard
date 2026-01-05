@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { sellerService } from '../../service/sellerService';
 import { Product } from '../../types/product';
 import Toast from '../../components/common/Toast';
+import {useAuth} from "../../context/AuthContext.tsx";
 
-const SellerProducts: React.FC = () => {
+const SellerProducts:  React.FC = () => {
     const navigate = useNavigate();
+    const { user, isVerifiedSeller, refreshUserData } = useAuth();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
@@ -16,6 +18,10 @@ const SellerProducts: React.FC = () => {
     const [deletingAsin, setDeletingAsin] = useState<string | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+
+    useEffect(() => {
+        refreshUserData();
+    }, []);
 
     useEffect(() => {
         fetchProducts();
@@ -40,46 +46,65 @@ const SellerProducts: React.FC = () => {
     };
 
     const getStatusBadge = (status: string) => {
-        const styles: Record<string, string> = {
+        const styles:  Record<string, string> = {
             APPROVED: 'bg-green-100 text-green-800',
             PENDING: 'bg-yellow-100 text-yellow-800',
             REJECTED: 'bg-red-100 text-red-800',
         };
         const labels: Record<string, string> = {
             APPROVED: 'Approved',
-            PENDING: 'Pending',
+            PENDING:  'Pending',
             REJECTED: 'Rejected',
         };
         return (
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100'}`}>
+            <span className={`px-2. 5 py-0.5 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100'}`}>
                 {labels[status] || status}
             </span>
         );
     };
 
     const handleAddProductClick = () => {
+        if (! isVerifiedSeller) {
+            setToast({
+                message: 'Your account must be verified by admin before you can add products.  Please wait for verification. ',
+                type: 'error'
+            });
+            return;
+        }
         setShowAddModal(true);
     };
 
     const handleNewProduct = () => {
+        if (!isVerifiedSeller) {
+            setToast({
+                message: 'Your account must be verified by admin before you can add products. ',
+                type: 'error'
+            });
+            return;
+        }
         setShowAddModal(false);
         navigate('/seller/products/new');
     };
 
     const handleFromStock = () => {
+        if (!isVerifiedSeller) {
+            setToast({
+                message:  'Your account must be verified by admin before you can add products.',
+                type: 'error'
+            });
+            return;
+        }
         setShowAddModal(false);
         navigate('/seller/stock');
     };
 
-    // ✅ NEW: Open delete confirmation modal
     const handleDeleteClick = (product: Product) => {
         setProductToDelete(product);
         setShowDeleteModal(true);
     };
 
-    // ✅ NEW: Confirm delete
     const handleConfirmDelete = async () => {
-        if (! productToDelete) return;
+        if (!productToDelete) return;
 
         try {
             setDeletingAsin(productToDelete.asin);
@@ -87,11 +112,10 @@ const SellerProducts: React.FC = () => {
             setToast({ message: `"${productToDelete.productName}" has been deleted successfully! `, type: 'success' });
             setShowDeleteModal(false);
             setProductToDelete(null);
-            // Refresh the products list
             fetchProducts();
-        } catch (error: any) {
+        } catch (error:  any) {
             setToast({
-                message: error.response?.data?.message || 'Failed to delete product',
+                message: error.response?. data?.message || 'Failed to delete product',
                 type: 'error'
             });
         } finally {
@@ -99,15 +123,31 @@ const SellerProducts: React.FC = () => {
         }
     };
 
+
     return (
         <div className="p-6">
-            {/* Toast Notification */}
             {toast && (
                 <Toast
                     message={toast.message}
                     type={toast.type}
                     onClose={() => setToast(null)}
                 />
+            )}
+
+            {! isVerifiedSeller && user?.role === 'SELLER' && (
+                <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded-lg">
+                    <div className="flex items-start">
+                        <svg className="w-6 h-6 text-yellow-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div>
+                            <h4 className="text-yellow-800 font-semibold">Account Pending Verification</h4>
+                            <p className="text-yellow-700 text-sm mt-1">
+                                Your seller account is awaiting verification by our admin team. You cannot add new products until your account is verified.  This usually takes 1-2 business days.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             )}
 
             <div className="flex justify-between items-center mb-6">
@@ -119,7 +159,13 @@ const SellerProducts: React.FC = () => {
                 </div>
                 <button
                     onClick={handleAddProductClick}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+                    disabled={!isVerifiedSeller}
+                    className={`px-4 py-2 rounded-lg transition flex items-center gap-2 ${
+                        isVerifiedSeller
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                    title={! isVerifiedSeller ? 'Account verification required' : 'Add Product'}
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -128,7 +174,6 @@ const SellerProducts: React.FC = () => {
                 </button>
             </div>
 
-            {/* Filters */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-4">
                 <div className="flex gap-2">
                     {['ALL', 'APPROVED', 'PENDING', 'REJECTED'].map((status) => (
@@ -151,8 +196,6 @@ const SellerProducts: React.FC = () => {
                     ))}
                 </div>
             </div>
-
-            {/* Products Grid */}
             {loading ? (
                 <div className="flex justify-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>

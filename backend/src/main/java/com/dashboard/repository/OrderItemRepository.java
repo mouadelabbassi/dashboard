@@ -36,4 +36,6 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
             "WHERE o.status = 'CONFIRMED' " +
             "AND oi.seller IS NOT NULL")
     Long countSellerSalesFromConfirmedOrders();
+
+    boolean existsByProductAsin(String productAsin);
 }

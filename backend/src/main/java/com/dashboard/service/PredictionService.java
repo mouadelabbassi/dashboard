@@ -1,7 +1,6 @@
 package com.dashboard.service;
 
-
-import com.dashboard.dto.request.*;
+import com.dashboard.dto.request.PredictionRequest;
 import com.dashboard.dto.response.*;
 import com.dashboard.entity.Product;
 import com.dashboard.entity.Category;
@@ -17,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,53 +33,40 @@ public class PredictionService {
 
     public BestsellerPredictionResponse predictBestseller(String asin) {
         log.info("Getting bestseller prediction for product: {}", asin);
-
         Product product = productRepository.findByAsin(asin)
                 .orElseThrow(() -> new RuntimeException("Product not found: " + asin));
-
         PredictionRequest request = buildPredictionRequest(product);
-
         return mlServiceClient.predictBestseller(request);
     }
 
     public RankingTrendPredictionResponse predictRankingTrend(String asin) {
         log.info("Getting ranking trend prediction for product: {}", asin);
-
         Product product = productRepository.findByAsin(asin)
                 .orElseThrow(() -> new RuntimeException("Product not found: " + asin));
-
         PredictionRequest request = buildPredictionRequest(product);
-
         return mlServiceClient.predictRankingTrend(request);
     }
 
     public PriceIntelligenceResponse analyzePricing(String asin) {
         log.info("Getting price intelligence for product: {}", asin);
-
         Product product = productRepository.findByAsin(asin)
                 .orElseThrow(() -> new RuntimeException("Product not found: " + asin));
-
         PredictionRequest request = buildPredictionRequest(product);
-
         return mlServiceClient.analyzePricing(request);
     }
 
     public CompletePredictionResponse getCompletePrediction(String asin) {
         log.info("Getting complete prediction for product: {}", asin);
-
         Product product = productRepository.findByAsin(asin)
                 .orElseThrow(() -> new RuntimeException("Product not found: " + asin));
-
         PredictionRequest request = buildPredictionRequest(product);
-
         return mlServiceClient.predictComplete(request);
     }
 
     @Transactional(readOnly = true)
     public List<BestsellerPredictionResponse> predictBestsellersForCategory(Long categoryId) {
-        log.info("Predicting bestsellers for category: {}", categoryId);
-
-        Pageable pageable = PageRequest.of(0, 300); // Limit to 50
+        log.info("Getting bestseller predictions for category: {}", categoryId);
+        Pageable pageable = PageRequest.of(0, 100);
         Page<Product> productPage = productRepository.findByCategoryId(categoryId, pageable);
         List<Product> products = productPage.getContent();
 
@@ -100,7 +87,6 @@ public class PredictionService {
     @Transactional(readOnly = true)
     public List<BestsellerPredictionResponse> getAllPotentialBestsellers() {
         log.info("Getting all potential bestsellers");
-
         Pageable pageable = PageRequest.of(0, 300);
         Page<Product> productPage = productRepository.findAll(pageable);
         List<Product> products = productPage.getContent();
@@ -122,12 +108,10 @@ public class PredictionService {
 
     public void generatePredictionsAsync(int batchSize) {
         log.info("Starting async prediction generation for {} products", batchSize);
-
         Pageable pageable = PageRequest.of(0, batchSize);
         Page<Product> productPage = productRepository.findAll(pageable);
         List<Product> products = productPage.getContent();
 
-        // Process in parallel
         List<CompletableFuture<Void>> futures = products.stream()
                 .map(product -> CompletableFuture.runAsync(() -> {
                     try {
@@ -140,23 +124,23 @@ public class PredictionService {
                 }, executorService))
                 .collect(Collectors.toList());
 
-        // Wait for all to complete
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-
         log.info("Async prediction generation completed");
     }
 
     public void refreshPredictionsForAllProducts() {
         log.info("Refreshing predictions for all products");
-
         generatePredictionsAsync(500);
-
         log.info("Prediction refresh completed");
     }
 
     public void triggerModelTraining() {
         log.info("Triggering ML model training");
         mlServiceClient.trainAllModels();
+    }
+
+    public Map<String, Object> getMLServiceHealth() {
+        return mlServiceClient.getMLServiceHealth();
     }
 
     private PredictionRequest buildPredictionRequest(Product product) {
@@ -174,38 +158,31 @@ public class PredictionService {
 
         if (product.getCategory() != null) {
             Category category = product.getCategory();
-
-            Pageable pageable = PageRequest.of(0, 300);
-            Page<Product> productPage = productRepository.findByCategoryId(category.getId(), pageable);
-            List<Product> categoryProducts = productPage.getContent();
+            Pageable pageable = PageRequest.of(0, 100);
+            List<Product> categoryProducts = productRepository.findByCategoryId(category.getId(), pageable).getContent();
 
             if (!categoryProducts.isEmpty()) {
-                BigDecimal totalPrice = categoryProducts.stream()
+                BigDecimal avgPrice = categoryProducts.stream()
                         .map(Product::getPrice)
-                        .filter(price -> price != null)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                BigDecimal avgPrice = totalPrice.divide(
-                        BigDecimal.valueOf(categoryProducts.size()),
-                        2,
-                        RoundingMode.HALF_UP
-                );
+                        .filter(p -> p != null)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+                        .divide(BigDecimal.valueOf(categoryProducts.size()), 2, RoundingMode.HALF_UP);
 
                 BigDecimal minPrice = categoryProducts.stream()
                         .map(Product::getPrice)
-                        .filter(price -> price != null)
+                        .filter(p -> p != null)
                         .min(BigDecimal::compareTo)
                         .orElse(BigDecimal.ZERO);
 
                 BigDecimal maxPrice = categoryProducts.stream()
                         .map(Product::getPrice)
-                        .filter(price -> price != null)
+                        .filter(p -> p != null)
                         .max(BigDecimal::compareTo)
                         .orElse(BigDecimal.ZERO);
 
                 Double avgReviews = categoryProducts.stream()
                         .map(Product::getReviewsCount)
-                        .filter(count -> count != null)
+                        .filter(c -> c != null)
                         .mapToDouble(Integer::doubleValue)
                         .average()
                         .orElse(0.0);

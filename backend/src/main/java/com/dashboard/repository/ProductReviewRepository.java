@@ -4,6 +4,7 @@ import com.dashboard.entity.ProductReview;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,6 +22,10 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
     Page<ProductReview> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 
     Long countByProductAsin(String productAsin);
+
+    @Modifying
+    @Query("DELETE FROM ProductReview r WHERE r. product.asin = :asin")
+    void deleteByProductAsin(@Param("asin") String asin);
 
     @Query("SELECT AVG(r.rating) FROM ProductReview r WHERE r.product.asin = :asin")
     Double calculateAverageRating(@Param("asin") String asin);

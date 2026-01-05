@@ -5,6 +5,7 @@ import com.dashboard.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -25,4 +26,7 @@ public interface SellerProductRequestRepository extends JpaRepository<SellerProd
     @Query("SELECT COUNT(spr) FROM SellerProductRequest spr WHERE spr.status = 'PENDING'")
     Long countPendingRequests();
 
+    @Modifying
+    @Query("DELETE FROM SellerProductRequest s WHERE s.seller.id = : sellerId")
+    void deleteBySellerId(@Param("sellerId") Long sellerId);
 }

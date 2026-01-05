@@ -5,6 +5,7 @@ import com.dashboard.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,6 +19,10 @@ public interface SellerRevenueRepository extends JpaRepository<SellerRevenue, Lo
 
     @Query("SELECT COALESCE(SUM(sr.netAmount), 0) FROM SellerRevenue sr WHERE sr.seller = :seller")
     BigDecimal calculateTotalRevenueBySeller(@Param("seller") User seller);
+
+    @Modifying
+    @Query("DELETE FROM SellerRevenue s WHERE s.seller.id = :sellerId")
+    void deleteBySellerId(@Param("sellerId") Long sellerId);
 
     @Query("SELECT COALESCE(SUM(sr.netAmount), 0) FROM SellerRevenue sr WHERE sr.seller = :seller AND sr.revenueDate BETWEEN :startDate AND :endDate")
     BigDecimal calculateRevenueBetweenDates(

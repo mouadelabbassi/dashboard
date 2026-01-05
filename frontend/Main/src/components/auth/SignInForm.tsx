@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -14,12 +14,26 @@ export default function SignInForm() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [deactivationMessage, setDeactivationMessage] = useState<string | null>(null);
 
     const { login } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
 
-    const getRedirectPath = (role: string): string => {
+    useEffect(() => {
+        if (searchParams.get('deactivated') === 'true') {
+            const message = localStorage.getItem('deactivation_message');
+            if (message) {
+                setDeactivationMessage(message);
+                localStorage.removeItem('deactivation_message');
+            } else {
+                setDeactivationMessage('Your account has been deactivated for violating platform policies.');
+            }
+        }
+    }, [searchParams]);
+
+    const getRedirectPath = (role:string):string => {
         switch (role) {
             case 'ADMIN':
                 return '/admin';
@@ -34,9 +48,10 @@ export default function SignInForm() {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e:React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setDeactivationMessage(null);
         setIsLoading(true);
 
         try {
@@ -46,12 +61,17 @@ export default function SignInForm() {
             if (storedUser) {
                 const userData = JSON.parse(storedUser);
                 const redirectPath = location.state?.from?.pathname || getRedirectPath(userData.role);
-                navigate(redirectPath, { replace: true });
+                navigate(redirectPath, { replace:true });
             } else {
-                navigate('/signin', { replace: true });
+                navigate('/signin', { replace:true });
             }
-        } catch (err: any) {
-            setError(err.message || "Login failed. Please check your credentials.");
+        } catch (err:any) {
+            const message = err.message || "Login failed. Please check your credentials.";
+            if (message.includes('deactivated') || message.includes('violating')) {
+                setDeactivationMessage(message);
+            } else {
+                setError(message);
+            }
         } finally {
             setIsLoading(false);
         }
@@ -77,7 +97,21 @@ export default function SignInForm() {
                             </div>
                         </div>
 
-                        {error && (
+                        {deactivationMessage && (
+                            <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg">
+                                <div className="flex items-start">
+                                    <svg className="w-6 h-6 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <div>
+                                        <h4 className="text-red-800 dark:text-red-400 font-semibold">Account Deactivated</h4>
+                                        <p className="text-sm text-red-700 dark:text-red-300 mt-1">{deactivationMessage}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {error && ! deactivationMessage && (
                             <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                                 <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
                             </div>
@@ -102,7 +136,7 @@ export default function SignInForm() {
                                     </Label>
                                     <div className="relative">
                                         <Input
-                                            type={showPassword ? "text" : "password"}
+                                            type={showPassword ? "text" :"password"}
                                             placeholder="Enter your password"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
@@ -113,7 +147,7 @@ export default function SignInForm() {
                                         >
                                             {showPassword ? (
                                                 <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                                            ) : (
+                                            ) :(
                                                 <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
                                             )}
                                         </span>
@@ -140,7 +174,7 @@ export default function SignInForm() {
                                         type="submit"
                                         disabled={isLoading}
                                     >
-                                        {isLoading ? "Signing in..." : "Sign in"}
+                                        {isLoading ? "Signing in..." :"Sign in"}
                                     </Button>
                                 </div>
                             </div>

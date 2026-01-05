@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -101,5 +102,17 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
 
     @Query("SELECT COUNT(p) FROM Product p WHERE p.approvalStatus != 'REJECTED' OR p.approvalStatus IS NULL")
     Long countAllExcludingRejected();
+
+    @Modifying
+    @Query("UPDATE Product p SET p.approvalStatus = :status WHERE p.seller.id = :sellerId")
+    void updateApprovalStatusBySellerId(@Param("sellerId") Long sellerId, @Param("status") Product.ApprovalStatus status);
+
+    @Modifying
+    @Query("DELETE FROM Product p WHERE p.seller. id = :sellerId")
+    void deleteAllBySellerId(@Param("sellerId") Long sellerId);
+
+    Page<Product> findBySellerAndApprovalStatus(User seller, Product.ApprovalStatus status, Pageable pageable);
+
+    long countBySellerIdAndApprovalStatus(Long sellerId, Product.ApprovalStatus status);
 
 }

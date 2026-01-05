@@ -6,7 +6,9 @@ import com.dashboard.dto.request.SellerRegisterRequest;
 import com.dashboard.dto.response.AuthResponse;
 import com.dashboard.entity.User;
 import com.dashboard.exception.BadRequestException;
+import com.dashboard.exception.AccountDeactivatedException;
 import com.dashboard.repository.UserRepository;
+import com.dashboard.repository.BannedEmailRepository;
 import com.dashboard.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +31,16 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final BannedEmailRepository bannedEmailRepository;
+
+    private static final String DEACTIVATION_MESSAGE = "Your account has been deactivated for violating platform policies.";
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
+        if (bannedEmailRepository.existsByEmail(request.getEmail())) {
+            throw new AccountDeactivatedException(DEACTIVATION_MESSAGE);
+        }
+
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email already in use");
         }
@@ -55,7 +64,7 @@ public class AuthService {
                 .securityQuestion(request.getSecurityQuestion())
                 .securityAnswer(passwordEncoder.encode(request.getSecurityAnswer().toLowerCase()));
 
-        if (role == User.Role.SELLER && request.getStoreName() != null && !request.getStoreName().trim().isEmpty()) {
+        if (role == User.Role.SELLER && request.getStoreName() != null && ! request.getStoreName().trim().isEmpty()) {
             userBuilder.storeName(request.getStoreName().trim());
             userBuilder.isVerifiedSeller(false);
         }
@@ -63,7 +72,7 @@ public class AuthService {
         User user = userBuilder.build();
         user = userRepository.save(user);
 
-        log.info("User registered: {} with role {}, storeName: {}",
+        log.info("User registered:  {} with role {}, storeName: {}",
                 user.getEmail(), user.getRole(), user.getStoreName());
 
         String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name());
@@ -76,11 +85,16 @@ public class AuthService {
                 .fullName(user.getFullName())
                 .role(user.getRole().name())
                 .storeName(user.getStoreName())
+                .isVerifiedSeller(user.getIsVerifiedSeller())
                 .build();
     }
 
     @Transactional
     public AuthResponse registerSeller(SellerRegisterRequest request) {
+        if (bannedEmailRepository.existsByEmail(request.getEmail())) {
+            throw new AccountDeactivatedException(DEACTIVATION_MESSAGE);
+        }
+
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email already in use");
         }
@@ -112,18 +126,27 @@ public class AuthService {
                 .fullName(user.getFullName())
                 .role(user.getRole().name())
                 .storeName(user.getStoreName())
+                .isVerifiedSeller(false)
                 .build();
     }
 
     public AuthResponse login(LoginRequest request) {
+        if (bannedEmailRepository.existsByEmail(request.getEmail())) {
+            throw new AccountDeactivatedException(DEACTIVATION_MESSAGE);
+        }
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("Invalid email or password"));
+
+        if (!user.getIsActive()) {
+            throw new AccountDeactivatedException(DEACTIVATION_MESSAGE);
+        }
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("User not found"));
 
         String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name());
 
@@ -137,10 +160,15 @@ public class AuthService {
                 .fullName(user.getFullName())
                 .role(user.getRole().name())
                 .storeName(user.getStoreName())
+                .isVerifiedSeller(user.getIsVerifiedSeller())
                 .build();
     }
 
     public Map<String, String> getSecurityQuestion(String email) {
+        if (bannedEmailRepository.existsByEmail(email)) {
+            throw new AccountDeactivatedException(DEACTIVATION_MESSAGE);
+        }
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found with this email"));
 
@@ -149,10 +177,14 @@ public class AuthService {
 
     @Transactional
     public void resetPassword(String email, String securityAnswer, String newPassword) {
+        if (bannedEmailRepository.existsByEmail(email)) {
+            throw new AccountDeactivatedException(DEACTIVATION_MESSAGE);
+        }
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
-        if (! passwordEncoder.matches(securityAnswer.toLowerCase(), user.getSecurityAnswer())) {
+        if (!passwordEncoder.matches(securityAnswer.toLowerCase(), user.getSecurityAnswer())) {
             throw new BadRequestException("Incorrect security answer");
         }
 
@@ -166,8 +198,16 @@ public class AuthService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
+        if (bannedEmailRepository.existsByEmail(email)) {
+            throw new AccountDeactivatedException(DEACTIVATION_MESSAGE);
+        }
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
+
+        if (!user.getIsActive()) {
+            throw new AccountDeactivatedException(DEACTIVATION_MESSAGE);
+        }
 
         String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name());
 
@@ -179,6 +219,7 @@ public class AuthService {
                 .fullName(user.getFullName())
                 .role(user.getRole().name())
                 .storeName(user.getStoreName())
+                .isVerifiedSeller(user.getIsVerifiedSeller())
                 .build();
     }
 

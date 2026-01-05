@@ -18,40 +18,50 @@ export default function ForgotPasswordForm() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [step, setStep] = useState(1); // 1: email, 2: security question, 3: new password
+    const [step, setStep] = useState(1);
+    const [isBannedEmail, setIsBannedEmail] = useState(false);
 
-    const handleEmailSubmit = async (e: React.FormEvent) => {
+    const handleEmailSubmit = async (e:React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setIsBannedEmail(false);
         setIsLoading(true);
 
         try {
             const response = await fetch(
-                `${API_BASE_URL}/auth/forgot-password?email=${encodeURIComponent(email)}`,
+                `${API_BASE_URL}/auth/forgot-password? email=${encodeURIComponent(email)}`,
                 {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
+                    method:"POST",
+                    headers:{
+                        "Content-Type":"application/json",
                     },
                 }
             );
 
             const data = await response.json();
 
-            if (!response.ok) {
-                throw new Error(data.message || "Email not found");
+            if (! response.ok) {
+                const message = data.message || "Email not found";
+                if (message.includes('deactivated') || message.includes('violating') || message.includes('banned')) {
+                    setIsBannedEmail(true);
+                }
+                throw new Error(message);
             }
 
             setSecurityQuestion(data.data.securityQuestion);
             setStep(2);
-        } catch (err: any) {
-            setError(err.message || "Email not found. Please check and try again.");
+        } catch (err:any) {
+            const message = err.message || "Email not found.Please check and try again.";
+            if (message.includes('deactivated') || message.includes('violating') || message.includes('banned')) {
+                setIsBannedEmail(true);
+            }
+            setError(message);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handlePasswordReset = async (e: React.FormEvent) => {
+    const handlePasswordReset = async (e:React.FormEvent) => {
         e.preventDefault();
         setError("");
 
@@ -69,11 +79,11 @@ export default function ForgotPasswordForm() {
 
         try {
             const response = await fetch(
-                `${API_BASE_URL}/auth/reset-password?email=${encodeURIComponent(email)}&securityAnswer=${encodeURIComponent(securityAnswer)}&newPassword=${encodeURIComponent(newPassword)}`,
+                `${API_BASE_URL}/auth/reset-password? email=${encodeURIComponent(email)}&securityAnswer=${encodeURIComponent(securityAnswer)}&newPassword=${encodeURIComponent(newPassword)}`,
                 {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
+                    method:"POST",
+                    headers:{
+                        "Content-Type":"application/json",
                     },
                 }
             );
@@ -81,16 +91,30 @@ export default function ForgotPasswordForm() {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || "Failed to reset password");
+                const message = data.message || "Failed to reset password";
+                if (message.includes('deactivated') || message.includes('violating') || message.includes('banned')) {
+                    setIsBannedEmail(true);
+                }
+                throw new Error(message);
             }
 
             setSuccess("Password reset successfully! You can now sign in with your new password.");
             setStep(3);
-        } catch (err: any) {
-            setError(err.message || "Failed to reset password. Please check your answer and try again.");
+        } catch (err:any) {
+            const message = err.message || "Failed to reset password.Please check your answer and try again.";
+            if (message.includes('deactivated') || message.includes('violating') || message.includes('banned')) {
+                setIsBannedEmail(true);
+            }
+            setError(message);
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleEmailChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+        setEmail(e.target.value);
+        setIsBannedEmail(false);
+        setError("");
     };
 
     return (
@@ -114,7 +138,21 @@ export default function ForgotPasswordForm() {
                             </div>
                         </div>
 
-                        {error && (
+                        {isBannedEmail && error && (
+                            <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg">
+                                <div className="flex items-start">
+                                    <svg className="w-6 h-6 text-red-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                    </svg>
+                                    <div>
+                                        <h4 className="text-red-800 dark:text-red-400 font-semibold">Account Deactivated</h4>
+                                        <p className="text-sm text-red-700 dark:text-red-300 mt-1">{error}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {error && ! isBannedEmail && (
                             <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                                 <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
                             </div>
@@ -126,7 +164,6 @@ export default function ForgotPasswordForm() {
                             </div>
                         )}
 
-                        {/* Step 1: Enter Email */}
                         {step === 1 && (
                             <form onSubmit={handleEmailSubmit}>
                                 <div className="space-y-6">
@@ -138,7 +175,7 @@ export default function ForgotPasswordForm() {
                                             type="email"
                                             placeholder="Enter your email address"
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            onChange={handleEmailChange}
                                         />
                                     </div>
                                     <div>
@@ -146,16 +183,15 @@ export default function ForgotPasswordForm() {
                                             className="w-full"
                                             size="sm"
                                             type="submit"
-                                            disabled={isLoading || !email}
+                                            disabled={isLoading || ! email || isBannedEmail}
                                         >
-                                            {isLoading ? "Verifying..." : "Continue"}
+                                            {isLoading ? "Verifying..." :"Continue"}
                                         </Button>
                                     </div>
                                 </div>
                             </form>
                         )}
 
-                        {/* Step 2: Answer Security Question and Set New Password */}
                         {step === 2 && (
                             <form onSubmit={handlePasswordReset}>
                                 <div className="space-y-6">
@@ -179,7 +215,7 @@ export default function ForgotPasswordForm() {
                                         </Label>
                                         <div className="relative">
                                             <Input
-                                                type={showPassword ? "text" : "password"}
+                                                type={showPassword ? "text" :"password"}
                                                 placeholder="Enter new password"
                                                 value={newPassword}
                                                 onChange={(e) => setNewPassword(e.target.value)}
@@ -190,7 +226,7 @@ export default function ForgotPasswordForm() {
                                             >
                                                 {showPassword ? (
                                                     <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                                                ) : (
+                                                ) :(
                                                     <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
                                                 )}
                                             </span>
@@ -202,7 +238,7 @@ export default function ForgotPasswordForm() {
                                         </Label>
                                         <div className="relative">
                                             <Input
-                                                type={showConfirmPassword ? "text" : "password"}
+                                                type={showConfirmPassword ?  "text" :"password"}
                                                 placeholder="Confirm new password"
                                                 value={confirmPassword}
                                                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -213,7 +249,7 @@ export default function ForgotPasswordForm() {
                                             >
                                                 {showConfirmPassword ? (
                                                     <EyeIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
-                                                ) : (
+                                                ) :(
                                                     <EyeCloseIcon className="fill-gray-500 dark:fill-gray-400 size-5" />
                                                 )}
                                             </span>
@@ -231,6 +267,7 @@ export default function ForgotPasswordForm() {
                                                 setNewPassword("");
                                                 setConfirmPassword("");
                                                 setError("");
+                                                setIsBannedEmail(false);
                                             }}
                                         >
                                             Back
@@ -239,16 +276,15 @@ export default function ForgotPasswordForm() {
                                             className="flex-1"
                                             size="sm"
                                             type="submit"
-                                            disabled={isLoading || !securityAnswer || !newPassword || !confirmPassword}
+                                            disabled={isLoading || ! securityAnswer || !newPassword || ! confirmPassword}
                                         >
-                                            {isLoading ? "Resetting..." : "Reset Password"}
+                                            {isLoading ? "Resetting..." :"Reset Password"}
                                         </Button>
                                     </div>
                                 </div>
                             </form>
                         )}
 
-                        {/* Step 3: Success */}
                         {step === 3 && success && (
                             <div className="text-center">
                                 <div className="mb-6">

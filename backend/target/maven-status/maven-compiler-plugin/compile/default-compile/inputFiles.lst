@@ -14,10 +14,13 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controlle
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\ProductController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\SellerProductSubmissionRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ApplyRecommendationRequest.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\BannedEmail.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\SellerStockController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ListFromStockRequest.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\controller\PublicController.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\request\ReviewRequest.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\BannedEmailRepository.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\AdminSellerService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\config\MLServiceConfig.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\ApiResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\SellerStock.java
@@ -74,9 +77,11 @@ C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\Be
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\repository\StockUpdateRequestRepository.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\SellerRevenue.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\OrderService.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\RefreshStatusResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\security\JwtAuthenticationFilter.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\CompletePredictionResponse.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\dto\response\SellerReviewSummary.java
+C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\exception\AccountDeactivatedException.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\entity\PredictionRefreshLog.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\AuthService.java
 C:\Users\mouad\Downloads\dashboard\backend\src\main\java\com\dashboard\service\PredictionCacheService.java
