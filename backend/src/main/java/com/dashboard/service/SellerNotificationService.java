@@ -15,9 +15,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Service for sending prediction-related notifications to sellers.
- */
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -27,9 +25,6 @@ public class SellerNotificationService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
 
-    /**
-     * Send alert when a product is identified as potential bestseller.
-     */
     @Transactional
     public void sendBestsellerAlert(Long sellerId, String productId, BigDecimal confidence) {
         log.info("Sending bestseller alert for seller {} product {}", sellerId, productId);
@@ -45,7 +40,7 @@ public class SellerNotificationService {
         User seller = sellerOpt.get();
         Product product = productOpt.get();
 
-        String title = "🎯 Potentiel Bestseller Détecté!";
+        String title = " Potentiel Bestseller Détecté!";
         String message = String.format(
                 "Votre produit '%s' a une probabilité de %.0f%% de devenir un bestseller! " +
                         "Envisagez de le mettre en avant dans vos promotions.",
@@ -67,9 +62,7 @@ public class SellerNotificationService {
         log.info("Bestseller alert sent to seller {}", seller.getEmail());
     }
 
-    /**
-     * Send alert when a product's ranking is predicted to decline.
-     */
+
     @Transactional
     public void sendDeclineTrendAlert(Long sellerId, String productId, BigDecimal confidence) {
         log.info("Sending decline trend alert for seller {} product {}", sellerId, productId);
@@ -84,7 +77,7 @@ public class SellerNotificationService {
         User seller = sellerOpt.get();
         Product product = productOpt.get();
 
-        String title = "⚠️ Alerte: Tendance à la Baisse";
+        String title = " Alerte: Tendance à la Baisse";
         String message = String.format(
                 "Le classement de votre produit '%s' risque de baisser. " +
                         "Envisagez d'ajuster le prix ou d'améliorer la description.",
@@ -104,9 +97,8 @@ public class SellerNotificationService {
         notificationRepository.save(notification);
     }
 
-    /**
-     * Send alert when price optimization is recommended.
-     */
+
+
     @Transactional
     public void sendPriceOpportunityAlert(Long sellerId, String productId,
                                           BigDecimal currentPrice, BigDecimal recommendedPrice, BigDecimal changePercentage) {
@@ -141,16 +133,13 @@ public class SellerNotificationService {
                 .notificationType(PredictionNotification.NotificationType.PRICE_OPPORTUNITY)
                 .title(title)
                 .message(message)
-                .confidenceScore(new BigDecimal("0.85")) // Statistical analysis confidence
+                .confidenceScore(new BigDecimal("0.85"))
                 .actionUrl("/seller/products/" + productId + "/edit")
                 .build();
 
         notificationRepository.save(notification);
     }
 
-    /**
-     * Send alert when ranking improvement is predicted.
-     */
     @Transactional
     public void sendRankingImprovementAlert(Long sellerId, String productId,
                                             int estimatedImprovement, BigDecimal confidence) {
@@ -185,25 +174,17 @@ public class SellerNotificationService {
         notificationRepository.save(notification);
     }
 
-    /**
-     * Get unread notifications for a seller.
-     */
+
     @Transactional(readOnly = true)
     public List<PredictionNotification> getUnreadNotifications(Long sellerId) {
         return notificationRepository.findByUserIdAndIsReadFalseOrderByCreatedAtDesc(sellerId);
     }
 
-    /**
-     * Get all notifications for a seller.
-     */
     @Transactional(readOnly = true)
     public List<PredictionNotification> getAllNotifications(Long sellerId) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(sellerId);
     }
 
-    /**
-     * Mark notification as read.
-     */
     @Transactional
     public void markAsRead(Long notificationId) {
         notificationRepository.findById(notificationId)
@@ -213,9 +194,6 @@ public class SellerNotificationService {
                 });
     }
 
-    /**
-     * Mark all notifications as read for a seller.
-     */
     @Transactional
     public void markAllAsRead(Long sellerId) {
         List<PredictionNotification> unread = notificationRepository
@@ -225,9 +203,7 @@ public class SellerNotificationService {
         notificationRepository.saveAll(unread);
     }
 
-    /**
-     * Get count of unread notifications.
-     */
+
     @Transactional(readOnly = true)
     public long getUnreadCount(Long sellerId) {
         return notificationRepository.countByUserIdAndIsReadFalse(sellerId);

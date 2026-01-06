@@ -19,7 +19,7 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
         productName:'',
         description:'',
         price:'',
-        stockQuantity:'',  // ← NEW FIELD
+        stockQuantity:'',
         imageUrl:'',
         productLink:'',
         categoryId:''
@@ -42,7 +42,7 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                 productName:product.productName || '',
                 description:product.description || '',
                 price:product.price?.toString() || '',
-                stockQuantity:product.stockQuantity?.toString() || '0',  // ← POPULATE STOCK
+                stockQuantity:product.stockQuantity?.toString() || '0',
                 imageUrl:product.imageUrl || '',
                 productLink:product.productLink || '',
                 categoryId:product.categoryId?.toString() || ''
@@ -54,7 +54,7 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                 productName:'',
                 description:'',
                 price:'',
-                stockQuantity:'0',  // ← DEFAULT TO 0
+                stockQuantity:'0',
                 imageUrl:'',
                 productLink:'',
                 categoryId:''
@@ -92,7 +92,7 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                     productName:formData.productName,
                     description:formData.description || undefined,
                     price:parseFloat(formData.price),
-                    stockQuantity:parseInt(formData.stockQuantity) || 0,  // ← INCLUDE STOCK
+                    stockQuantity:parseInt(formData.stockQuantity) || 0,
                     imageUrl:formData.imageUrl || undefined,
                     productLink:formData.productLink || undefined,
                     categoryId:parseInt(formData.categoryId)
@@ -104,7 +104,7 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                     productName:formData.productName,
                     description:formData.description || undefined,
                     price:parseFloat(formData.price),
-                    stockQuantity:parseInt(formData.stockQuantity) || 0,  // ← INCLUDE STOCK
+                    stockQuantity:parseInt(formData.stockQuantity) || 0,
                     imageUrl:formData.imageUrl || undefined,
                     productLink:formData.productLink || undefined,
                     categoryId:parseInt(formData.categoryId)
@@ -133,7 +133,6 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
 
             <div className="flex min-h-full items-center justify-center p-4">
                 <div className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-xl">
-                    {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                             {isEditMode ? '✏️ Edit Product' :'➕ Add New Product'}
@@ -148,7 +147,6 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                         </button>
                     </div>
 
-                    {/* Form */}
                     <form onSubmit={handleSubmit} className="p-6">
                         {error && (
                             <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -157,9 +155,7 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Left Column */}
                             <div className="space-y-4">
-                                {/* ASIN */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         ASIN {! isEditMode && <span className="text-red-500">*</span>}
@@ -190,7 +186,6 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                                     )}
                                 </div>
 
-                                {/* Product Name */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Product Name <span className="text-red-500">*</span>
@@ -206,7 +201,6 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                                     />
                                 </div>
 
-                                {/* Description */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Description
@@ -221,9 +215,7 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                                     />
                                 </div>
 
-                                {/* Price & Stock Row */}
                                 <div className="grid grid-cols-2 gap-4">
-                                    {/* Price */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Price ($) <span className="text-red-500">*</span>
@@ -241,7 +233,6 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                                         />
                                     </div>
 
-                                    {/* ✨ NEW:Stock Quantity */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Stock Quantity <span className="text-red-500">*</span>
@@ -260,7 +251,6 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                                     </div>
                                 </div>
 
-                                {/* Stock Status Indicator */}
                                 <div className={`p-3 rounded-lg flex items-center gap-2 ${
                                     parseInt(formData.stockQuantity) > 10
                                         ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
@@ -293,7 +283,6 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                                     </span>
                                 </div>
 
-                                {/* Category */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Category <span className="text-red-500">*</span>
@@ -315,9 +304,7 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                                 </div>
                             </div>
 
-                            {/* Right Column */}
                             <div className="space-y-4">
-                                {/* Image URL */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Image URL
@@ -335,7 +322,6 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                                     </p>
                                 </div>
 
-                                {/* Image Preview */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Image Preview
@@ -359,7 +345,6 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                                     </div>
                                 </div>
 
-                                {/* Product Link */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                         Product Link
@@ -374,7 +359,7 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                                     />
                                 </div>
 
-                                {/* Info Box for Edit Mode */}
+
                                 {isEditMode && (
                                     <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                                         <h4 className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
@@ -402,7 +387,7 @@ const ProductModal:React.FC<ProductModalProps> = ({ isOpen, onClose, product, on
                             </div>
                         </div>
 
-                        {/* Footer */}
+
                         <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                             <button
                                 type="button"

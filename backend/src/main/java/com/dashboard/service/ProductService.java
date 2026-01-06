@@ -146,7 +146,6 @@ public class ProductService {
 //        Product product = productRepository.findByAsin(asin)
 //                .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + asin));
 //
-//        // ✅ FIXED: Track price changes BEFORE updating
 //        if (updateRequest.getPrice() != null &&
 //                updateRequest.getPrice().compareTo(product.getPrice()) != 0) {
 //
@@ -158,7 +157,6 @@ public class ProductService {
 //            );
 //        }
 //
-//        // Update fields
 //        if (updateRequest.getPrice() != null) {
 //            product.setPrice(updateRequest.getPrice());
 //        }
@@ -181,7 +179,7 @@ public class ProductService {
 //        }
 //
 //        Product updatedProduct = productRepository.save(product);
-//        log.info("✅ Product updated successfully: {}", asin);
+//        log.info("Product updated successfully: {}", asin);
 //
 //        return convertToResponse(product);
 //    }

@@ -42,7 +42,6 @@ const SellerStockManagement: React.FC = () => {
     const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
     const [showListModal, setShowListModal] = useState(false);
 
-    // List from stock form
     const [listForm, setListForm] = useState({
         quantity: 1,
         price: 0,
@@ -155,7 +154,6 @@ const SellerStockManagement: React.FC = () => {
         <div className="p-6">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-            {/* Header */}
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Stock Management</h1>
                 <p className="text-gray-600 dark:text-gray-400 mt-2">
@@ -163,7 +161,6 @@ const SellerStockManagement: React.FC = () => {
                 </p>
             </div>
 
-            {/* Dashboard Cards */}
             {dashboard && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
@@ -191,7 +188,6 @@ const SellerStockManagement: React.FC = () => {
                 </div>
             )}
 
-            {/* Search and Actions */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 mb-6">
                 <div className="flex flex-col md:flex-row gap-4 justify-between">
                     <div className="flex-1 max-w-md">
@@ -221,7 +217,6 @@ const SellerStockManagement: React.FC = () => {
                 </div>
             </div>
 
-            {/* Stock Grid */}
             {loading ? (
                 <div className="flex justify-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -303,7 +298,6 @@ const SellerStockManagement: React.FC = () => {
                 </div>
             )}
 
-            {/* Pagination */}
             {totalPages > 1 && (
                 <div className="flex justify-center mt-8 gap-2">
                     <button
@@ -326,7 +320,6 @@ const SellerStockManagement: React.FC = () => {
                 </div>
             )}
 
-            {/* List from Stock Modal */}
             {showListModal && selectedItem && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg mx-4 p-6">
@@ -429,7 +422,6 @@ const SellerStockManagement: React.FC = () => {
                                 />
                             </div>
 
-                            {/* Profit Preview */}
                             <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
                                 <p className="text-sm text-green-700 dark:text-green-300">
                                     <strong>Profit per unit:</strong> ${(listForm.price - selectedItem.purchasePrice).toFixed(2)}

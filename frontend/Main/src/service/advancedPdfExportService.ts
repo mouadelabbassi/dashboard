@@ -2,10 +2,6 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { reportService } from './reportService';
 
-// ============================================
-// 🎨 COLOR PALETTE & CONSTANTS
-// ============================================
-
 const COLORS = {
     primary: [37, 99, 235] as [number, number, number],
     primaryDark: [29, 78, 216] as [number, number, number],
@@ -33,10 +29,6 @@ const CHART_COLORS:  [number, number, number][] = [
     [132, 204, 22],   // Lime
 ];
 
-// ============================================
-// 📊 HELPER FUNCTIONS
-// ============================================
-
 const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -54,9 +46,6 @@ const truncateText = (text: string, maxLength: number): string => {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 };
 
-// ============================================
-// 📈 CHART DRAWING FUNCTIONS
-// ============================================
 
 const drawBarChart = (
     doc: jsPDF,
@@ -214,7 +203,6 @@ export const generateAdvancedPDF = async (): Promise<void> => {
     const pageHeight = doc.internal.pageSize.getHeight();
     let pageNumber = 0;
 
-    // ==================== PAGE 1: COVER ====================
     pageNumber++;
 
     // Gradient background
@@ -291,7 +279,6 @@ export const generateAdvancedPDF = async (): Promise<void> => {
     doc.setFontSize(8);
     doc.text('Confidential Business Report', pageWidth / 2, pageHeight - 20, { align: 'center' });
 
-    // ==================== PAGE 2: EXECUTIVE SUMMARY ====================
     doc.addPage();
     pageNumber++;
 
@@ -481,7 +468,6 @@ export const generateAdvancedPDF = async (): Promise<void> => {
     doc.setTextColor(...COLORS.gray);
     doc.text(`MouadVision Analytics Report | Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
 
-    // ==================== PAGE 3: REVENUE ANALYTICS ====================
     doc.addPage();
     pageNumber++;
 
@@ -594,7 +580,6 @@ export const generateAdvancedPDF = async (): Promise<void> => {
     doc.setTextColor(...COLORS.gray);
     doc.text(`MouadVision Analytics Report | Generated:  ${new Date().toLocaleDateString()}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
 
-    // ==================== PAGE 4: TOP PRODUCTS ====================
     doc.addPage();
     pageNumber++;
 
@@ -610,7 +595,6 @@ export const generateAdvancedPDF = async (): Promise<void> => {
 
     yPos = 50;
 
-    // Most Sold Products Table
     yPos = drawSectionHeader(doc, 'Most Sold Products', 14, yPos);
 
     if (data.mostSoldProducts && data.mostSoldProducts.length > 0) {
@@ -652,7 +636,6 @@ export const generateAdvancedPDF = async (): Promise<void> => {
         yPos = (doc as any).lastAutoTable.finalY + 18;
     }
 
-    // Product Performance Summary
     yPos = drawSectionHeader(doc, 'Product Performance Summary', 14, yPos);
 
     const totalProducts = data.mostSoldProducts?.length || 0;
@@ -694,7 +677,6 @@ export const generateAdvancedPDF = async (): Promise<void> => {
     doc.setTextColor(...COLORS.gray);
     doc.text(`MouadVision Analytics Report | Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
 
-    // ==================== PAGE 5: SELLER ANALYTICS ====================
     doc.addPage();
     pageNumber++;
 
@@ -786,7 +768,6 @@ export const generateAdvancedPDF = async (): Promise<void> => {
     doc.setTextColor(...COLORS.gray);
     doc.text(`MouadVision Analytics Report | Generated: ${new Date().toLocaleDateString()}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
 
-    // ==================== PAGE 6: ORDER STATUS & INSIGHTS ====================
     doc.addPage();
     pageNumber++;
 

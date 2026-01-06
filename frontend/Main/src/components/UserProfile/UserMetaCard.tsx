@@ -6,7 +6,6 @@ import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useAuth } from "../../context/AuthContext";
 
-// Admin profile data (static for Mouad El Abbassi)
 const ADMIN_PROFILE = {
     email: "elabbassimouaad0@gmail.com",
     fullName: "Mouad El Abbassi",
@@ -27,10 +26,8 @@ export default function UserMetaCard() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // Check if current user is admin (Mouad)
     const isAdmin = user?.email === ADMIN_PROFILE.email;
 
-    // Form states
     const nameParts = user?.fullName?.split(' ') || ['', ''];
     const [firstName, setFirstName] = useState(nameParts[0] || '');
     const [lastName, setLastName] = useState(nameParts.slice(1).join(' ') || '');
@@ -62,7 +59,6 @@ export default function UserMetaCard() {
         }
     };
 
-    // Get role display text
     const getRoleDisplay = (role: string) => {
         switch (role) {
             case 'ADMIN': return 'Administrator';
@@ -72,7 +68,6 @@ export default function UserMetaCard() {
         }
     };
 
-    // Display data based on user type
     const displayData = isAdmin ? {
         fullName: ADMIN_PROFILE.fullName,
         title: ADMIN_PROFILE.title,
@@ -118,8 +113,6 @@ export default function UserMetaCard() {
                                 )}
                             </div>
                         </div>
-
-                        {/* Social links - only show for admin */}
                         {isAdmin && (
                             <div className="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
                                 <a
@@ -196,7 +189,6 @@ export default function UserMetaCard() {
                 </div>
             </div>
 
-            {/* Edit Modal for non-admin users */}
             <Modal isOpen={isOpen} onClose={closeModal} className="max-w-[700px] m-4">
                 <div className="no-scrollbar relative w-full max-w-[700px] overflow-y-auto rounded-3xl bg-white p-4 dark:bg-gray-900 lg:p-11">
                     <div className="px-2 pr-14">

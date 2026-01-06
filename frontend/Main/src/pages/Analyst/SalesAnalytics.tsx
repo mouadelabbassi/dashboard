@@ -74,7 +74,6 @@ const SalesAnalytics:React.FC = () => {
         }).format(value);
     };
 
-    // Revenue Trend Chart
     const trendChartData = {
         labels:salesTrend.map(d => {
             const date = new Date(d.date);

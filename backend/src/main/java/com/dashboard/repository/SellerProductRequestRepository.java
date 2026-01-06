@@ -26,7 +26,4 @@ public interface SellerProductRequestRepository extends JpaRepository<SellerProd
     @Query("SELECT COUNT(spr) FROM SellerProductRequest spr WHERE spr.status = 'PENDING'")
     Long countPendingRequests();
 
-    @Modifying
-    @Query("DELETE FROM SellerProductRequest s WHERE s.seller.id = : sellerId")
-    void deleteBySellerId(@Param("sellerId") Long sellerId);
 }

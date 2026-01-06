@@ -78,7 +78,6 @@ const CategoryAnalysis: React.FC = () => {
         }).format(value);
     };
 
-    // Revenue Contribution Chart
     const contributionChartData = {
         labels: revenueContribution.slice(0, 8).map(c => c.name),
         datasets: [
@@ -160,7 +159,6 @@ const CategoryAnalysis: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                     Category Analysis

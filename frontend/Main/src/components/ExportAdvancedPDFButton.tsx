@@ -95,7 +95,6 @@ const ExportAdvancedPDFButton: React.FC<ExportAdvancedPDFButtonProps> = ({
                 )}
             </button>
 
-            {/* Error Toast */}
             {error && (
                 <div className="absolute top-full mt-2 left-0 right-0 z-50">
                     <div className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm flex items-center gap-2">
@@ -107,7 +106,6 @@ const ExportAdvancedPDFButton: React.FC<ExportAdvancedPDFButtonProps> = ({
                 </div>
             )}
 
-            {/* Success Toast */}
             {success && (
                 <div className="absolute top-full mt-2 left-0 right-0 z-50">
                     <div className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg text-sm flex items-center gap-2">

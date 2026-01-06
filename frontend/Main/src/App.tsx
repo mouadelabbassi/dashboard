@@ -43,7 +43,6 @@ import SellerManagement from './pages/Admin/SellerManagement';
 import NotFound from './pages/OtherPage/NotFound';
 import AnalystManagement from "./pages/Admin/AnalystManagement.tsx";
 
-// Auth Guard
 interface PrivateRouteProps {
     children: React.ReactNode;
     allowedRoles: string[];
@@ -84,7 +83,6 @@ function App() {
                         <Route path="/explore" element={<PublicShopPage />} />
                         <Route path="/about" element={<AboutPage />} />
 
-                        {/* Auth Routes */}
                         <Route path="/signin" element={<SignIn />} />
                         <Route path="/signup" element={<SignUp />} />
                         <Route path="/forgot-password" element={<ForgotPassword />} />

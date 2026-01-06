@@ -65,7 +65,6 @@ const CartPage: React.FC = () => {
             <p className="text-gray-500 dark:text-gray-400 mb-8">{items.length} item(s) in your cart</p>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Cart Items */}
                 <div className="lg:col-span-2 space-y-4">
                     {items.map((item) => {
                         const maxStock = item.product.stockQuantity || 0;
@@ -78,7 +77,6 @@ const CartPage: React.FC = () => {
                                 className={`bg-white dark:bg-gray-800 rounded-xl shadow p-6 ${isOutOfStock ? 'opacity-60 border-2 border-red-500' : ''}`}
                             >
                                 <div className="flex items-center gap-6">
-                                    {/* Product Image */}
                                     <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden flex-shrink-0">
                                         {item.product.imageUrl ?  (
                                             <img
@@ -93,7 +91,6 @@ const CartPage: React.FC = () => {
                                         )}
                                     </div>
 
-                                    {/* Product Info */}
                                     <div className="flex-1">
                                         <h3 className="font-semibold text-gray-900 dark:text-white">
                                             {item.product.productName}
@@ -102,10 +99,9 @@ const CartPage: React.FC = () => {
                                             ${item.product.price.toFixed(2)} each
                                         </p>
 
-                                        {/* Stock Warning */}
                                         {isOutOfStock ?  (
                                             <p className="text-sm text-red-500 font-medium mt-1">
-                                                ⚠️ Out of Stock - Please remove
+                                                 Out of Stock - Please remove
                                             </p>
                                         ) : maxStock <= 5 ? (
                                             <p className="text-sm text-orange-500 mt-1">
@@ -113,7 +109,6 @@ const CartPage: React.FC = () => {
                                             </p>
                                         ) : null}
 
-                                        {/* Quantity Controls */}
                                         <div className="flex items-center gap-4 mt-3">
                                             <div className="flex items-center border dark:border-gray-600 rounded-lg">
                                                 <button
@@ -148,7 +143,6 @@ const CartPage: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Price */}
                                     <div className="text-right">
                                         <span className="text-xl font-bold text-gray-900 dark:text-white">
                                             ${(item.product.price * item.quantity).toFixed(2)}
@@ -160,7 +154,6 @@ const CartPage: React.FC = () => {
                     })}
                 </div>
 
-                {/* Order Summary */}
                 <div className="lg:col-span-1">
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 sticky top-4">
                         <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-white">Order Summary</h2>

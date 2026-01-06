@@ -48,11 +48,9 @@ public class SellerStockService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public SellerStock addToStock(User seller, Product product, Order order, int quantity, BigDecimal purchasePrice) {
-        // Check if seller already has this product in stock
         Optional<SellerStock> existingStock = stockRepository.findBySellerAndOriginalProductAsin(seller, product.getAsin());
 
         if (existingStock.isPresent()) {
-            // Update existing stock entry
             SellerStock stock = existingStock.get();
             int oldQuantity = stock.getQuantity();
             int oldAvailable = stock.getAvailableQuantity();
@@ -60,7 +58,6 @@ public class SellerStockService {
             stock.setQuantity(oldQuantity + quantity);
             stock.setAvailableQuantity(oldAvailable + quantity);
 
-            // Update purchase price to average if different
             if (purchasePrice != null && stock.getPurchasePrice() != null) {
                 BigDecimal totalOldValue = stock.getPurchasePrice().multiply(BigDecimal.valueOf(oldQuantity));
                 BigDecimal totalNewValue = purchasePrice.multiply(BigDecimal.valueOf(quantity));
@@ -69,7 +66,6 @@ public class SellerStockService {
                 stock.setPurchasePrice(averagePrice);
             }
 
-            // Update status based on available quantity
             if (stock.getAvailableQuantity() > 0) {
                 if (stock.getAvailableQuantity() < stock.getQuantity()) {
                     stock.setStatus(SellerStock.StockStatus.PARTIALLY_LISTED);
@@ -84,7 +80,6 @@ public class SellerStockService {
 
             return stock;
         } else {
-            // Create new stock entry
             SellerStock stock = SellerStock.builder()
                     .seller(seller)
                     .originalProductAsin(product.getAsin())
@@ -108,9 +103,6 @@ public class SellerStockService {
         }
     }
 
-    /**
-     * Get stock dashboard statistics
-     */
     @Transactional(readOnly = true)
     public StockDashboardResponse getStockDashboard() {
         User seller = getCurrentSeller();
@@ -120,7 +112,6 @@ public class SellerStockService {
         Long totalUnits = stockRepository.sumAvailableQuantityBySeller(seller);
         BigDecimal totalInvestment = stockRepository.calculateTotalInvestmentBySeller(seller);
 
-        // Calculate estimated value (25% markup)
         BigDecimal estimatedValue = totalInvestment != null
                 ? totalInvestment.multiply(BigDecimal.valueOf(1.25))
                 : BigDecimal.ZERO;
@@ -139,9 +130,7 @@ public class SellerStockService {
                 .build();
     }
 
-    /**
-     * Get all stock items
-     */
+
     @Transactional(readOnly = true)
     public Page<SellerStockResponse> getMyStock(Pageable pageable) {
         User seller = getCurrentSeller();
@@ -149,9 +138,7 @@ public class SellerStockService {
                 .map(SellerStockResponse::fromEntity);
     }
 
-    /**
-     * Get available stock items (for listing)
-     */
+
     @Transactional(readOnly = true)
     public List<SellerStockResponse> getAvailableStock() {
         User seller = getCurrentSeller();
@@ -161,9 +148,6 @@ public class SellerStockService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Get stock item by ID
-     */
     @Transactional(readOnly = true)
     public SellerStockResponse getStockById(Long stockId) {
         User seller = getCurrentSeller();
@@ -172,9 +156,6 @@ public class SellerStockService {
         return SellerStockResponse.fromEntity(stock);
     }
 
-    /**
-     * List product from stock for sale
-     */
     @Transactional
     public SellerProductRequest listFromStock(ListFromStockRequest request) {
         User seller = getCurrentSeller();
@@ -188,19 +169,15 @@ public class SellerStockService {
                             stock.getAvailableQuantity(), request.getQuantity()));
         }
 
-        // Validate price (must be higher than purchase price for profit)
         if (request.getPrice().compareTo(stock.getPurchasePrice()) < 0) {
             log.warn("Seller {} listing product below purchase price", seller.getEmail());
         }
 
-        // Get category
         Category category = stock.getCategory();
         if (request.getCategoryId() != null) {
             category = categoryRepository.findById(request.getCategoryId())
                     .orElse(stock.getCategory());
         }
-
-        // Create product submission request
         SellerProductRequest productRequest = SellerProductRequest.builder()
                 .seller(seller)
                 .productName(request.getCustomProductName() != null
@@ -220,23 +197,16 @@ public class SellerStockService {
                 .build();
 
         productRequest = productRequestRepository.save(productRequest);
-
-        // Decrease available quantity in stock
         stock.decreaseAvailableQuantity(request.getQuantity());
         stockRepository.save(stock);
 
         log.info("Seller {} listed {} units from stock {} at price {}",
                 seller.getEmail(), request.getQuantity(), stock.getId(), request.getPrice());
-
-        // Notify admins about new product submission
         notificationService.notifyAdminsNewProductSubmission(productRequest);
 
         return productRequest;
     }
 
-    /**
-     * Search stock items
-     */
     @Transactional(readOnly = true)
     public Page<SellerStockResponse> searchStock(String query, Pageable pageable) {
         User seller = getCurrentSeller();
@@ -244,9 +214,6 @@ public class SellerStockService {
                 .map(SellerStockResponse::fromEntity);
     }
 
-    /**
-     * Return stock quantity (if product listing is rejected)
-     */
     @Transactional
     public void returnToStock(Long stockId, int quantity) {
         SellerStock stock = stockRepository.findById(stockId)

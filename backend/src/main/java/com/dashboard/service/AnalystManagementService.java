@@ -28,18 +28,13 @@ public class AnalystManagementService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    /**
-     * Get current admin user
-     */
     private User getCurrentAdmin() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
     }
 
-    /**
-     * Verify current user is admin
-     */
+
     private void verifyAdmin() {
         User admin = getCurrentAdmin();
         if (admin.getRole() != User.Role.ADMIN) {
@@ -47,9 +42,6 @@ public class AnalystManagementService {
         }
     }
 
-    /**
-     * Get all analysts with pagination
-     */
     @Transactional(readOnly = true)
     public Page<AnalystResponse> getAllAnalysts(Pageable pageable) {
         verifyAdmin();
@@ -59,9 +51,7 @@ public class AnalystManagementService {
         return analysts.map(this::convertToResponse);
     }
 
-    /**
-     * Get all analysts (no pagination)
-     */
+
     @Transactional(readOnly = true)
     public List<AnalystResponse> getAllAnalysts() {
         verifyAdmin();
@@ -73,9 +63,7 @@ public class AnalystManagementService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Get analyst by ID
-     */
+
     @Transactional(readOnly = true)
     public AnalystResponse getAnalystById(Long analystId) {
         verifyAdmin();
@@ -91,9 +79,6 @@ public class AnalystManagementService {
         return convertToResponse(analyst);
     }
 
-    /**
-     * Create new analyst
-     */
     @Transactional
     public AnalystResponse createAnalyst(AnalystRequest request) {
         verifyAdmin();

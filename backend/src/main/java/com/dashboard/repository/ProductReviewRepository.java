@@ -23,9 +23,6 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, Lo
 
     Long countByProductAsin(String productAsin);
 
-    @Modifying
-    @Query("DELETE FROM ProductReview r WHERE r. product.asin = :asin")
-    void deleteByProductAsin(@Param("asin") String asin);
 
     @Query("SELECT AVG(r.rating) FROM ProductReview r WHERE r.product.asin = :asin")
     Double calculateAverageRating(@Param("asin") String asin);

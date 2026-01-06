@@ -43,7 +43,6 @@ const AdminStockManagement:React.FC = () => {
     const [newQuantity, setNewQuantity] = useState<number>(0);
     const [showEditModal, setShowEditModal] = useState(false);
 
-    // Notify modal
     const [showNotifyModal, setShowNotifyModal] = useState(false);
     const [notifyingProduct, setNotifyingProduct] = useState<ProductStock | null>(null);
     const [notifyMessage, setNotifyMessage] = useState('');
@@ -218,7 +217,6 @@ const AdminStockManagement:React.FC = () => {
         <div className="space-y-6">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-            {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Stock Management</h1>
@@ -237,7 +235,6 @@ const AdminStockManagement:React.FC = () => {
                 </button>
             </div>
 
-            {/* Dashboard Cards */}
             {dashboard && (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 border-l-4 border-blue-500">
@@ -271,9 +268,7 @@ const AdminStockManagement:React.FC = () => {
                 </div>
             )}
 
-            {/* Filters */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4 space-y-4">
-                {/* Owner Filter */}
                 <div className="flex flex-wrap gap-2">
                     <span className="text-sm text-gray-500 dark:text-gray-400 self-center mr-2">Owner:</span>
                     {[
@@ -295,7 +290,6 @@ const AdminStockManagement:React.FC = () => {
                     ))}
                 </div>
 
-                {/* Stock Status Filter */}
                 <div className="flex flex-wrap gap-2">
                     <span className="text-sm text-gray-500 dark:text-gray-400 self-center mr-2">Status:</span>
                     {[
@@ -322,14 +316,12 @@ const AdminStockManagement:React.FC = () => {
                 </div>
             </div>
 
-            {/* Info */}
             <div className="text-sm text-gray-500 dark:text-gray-400">
                 Showing {products.length} of {totalElements} products
                 {ownerFilter === 'mouadvision' && <span className="ml-2 text-purple-600">(MouadVision - Editable)</span>}
                 {ownerFilter === 'sellers' && <span className="ml-2 text-cyan-600">(Seller Products - Notify Only)</span>}
             </div>
 
-            {/* Products Table */}
             {loading ?  (
                 <div className="flex justify-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -424,7 +416,6 @@ const AdminStockManagement:React.FC = () => {
                 </div>
             )}
 
-            {/* Pagination */}
             {totalPages > 1 && (
                 <div className="flex justify-center gap-2">
                     <button
@@ -447,7 +438,6 @@ const AdminStockManagement:React.FC = () => {
                 </div>
             )}
 
-            {/* Edit Modal (MouadVision Only) */}
             {showEditModal && editingProduct && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6">
@@ -497,7 +487,6 @@ const AdminStockManagement:React.FC = () => {
                 </div>
             )}
 
-            {/* Notify Seller Modal */}
             {showNotifyModal && notifyingProduct && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6">

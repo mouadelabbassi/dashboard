@@ -57,10 +57,8 @@ const SellerReviews: React.FC = () => {
                 </p>
             </div>
 
-            {/* Summary Cards */}
             {summary && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    {/* Average Rating */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                         <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Note Moyenne</h3>
                         <div className="mt-2 flex items-center gap-3">
@@ -74,7 +72,6 @@ const SellerReviews: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Rating Distribution */}
                     <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                         <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">Distribution des Notes</h3>
                         <div className="space-y-2">
@@ -101,7 +98,6 @@ const SellerReviews: React.FC = () => {
                 </div>
             )}
 
-            {/* Reviews List */}
             {loading ? (
                 <div className="flex justify-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -157,7 +153,6 @@ const SellerReviews: React.FC = () => {
                         </div>
                     ))}
 
-                    {/* Pagination */}
                     {totalPages > 1 && (
                         <div className="flex justify-center mt-8 gap-2">
                             <button

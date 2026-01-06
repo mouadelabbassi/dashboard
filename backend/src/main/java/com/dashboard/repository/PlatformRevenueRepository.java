@@ -24,7 +24,5 @@ public interface PlatformRevenueRepository extends JpaRepository<PlatformRevenue
     @Query("SELECT COALESCE(SUM(pr.grossAmount), 0) FROM PlatformRevenue pr WHERE pr.revenueType = 'COMMISSION'")
     BigDecimal calculateCommissionRevenue();
 
-    @Query("SELECT COALESCE(SUM(pr.grossAmount), 0) FROM PlatformRevenue pr WHERE pr.revenueDate BETWEEN :startDate AND :endDate")
-    BigDecimal calculateRevenueBetweenDates(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
 }

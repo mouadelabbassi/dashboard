@@ -24,7 +24,6 @@ const EcommerceMetrics: React.FC = () => {
         fetchStats();
     }, []);
 
-    // Removed "Platform Revenue" since it's already shown in the admin quick stats
     const metrics = [
         {
             title: 'Total Products',

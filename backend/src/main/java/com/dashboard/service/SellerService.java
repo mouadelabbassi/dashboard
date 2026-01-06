@@ -101,7 +101,6 @@ public class SellerService {
         return convertToProductRequestResponse(request);
     }
 
-    // ========== SELLER PRODUCTS ==========
 
     @Transactional(readOnly = true)
     public Page<ProductResponse> getMyProducts(Pageable pageable) {
@@ -158,7 +157,6 @@ public class SellerService {
         return convertToProductResponse(product);
     }
 
-    // ========== SELLER DASHBOARD ==========
 
     @Transactional(readOnly = true)
     public SellerDashboardResponse getDashboard() {
@@ -167,26 +165,22 @@ public class SellerService {
         LocalDate thirtyDaysAgo = today.minusDays(30);
         LocalDate sevenDaysAgo = today.minusDays(7);
 
-        // Product stats
         Long totalProducts = productRepository.countBySeller(seller);
         Long approvedProducts = productRepository.countBySellerAndApprovalStatus(seller, Product.ApprovalStatus.APPROVED);
         Long pendingProducts = productRepository.countBySellerAndApprovalStatus(seller, Product.ApprovalStatus.PENDING);
         Long totalSalesCount = productRepository.countTotalSalesBySeller(seller);
 
-        // Revenue stats (ONLY from completed purchases)
         BigDecimal totalRevenue = revenueRepository.calculateTotalRevenueBySeller(seller);
         BigDecimal monthlyRevenue = revenueRepository.calculateRevenueBetweenDates(seller, thirtyDaysAgo, today);
         BigDecimal weeklyRevenue = revenueRepository.calculateRevenueBetweenDates(seller, sevenDaysAgo, today);
         BigDecimal todayRevenue = revenueRepository.calculateDailyRevenue(seller.getId(), today);
         Long totalUnitsSold = revenueRepository.countTotalUnitsSold(seller);
 
-        // Revenue trend (last 30 days)
         List<Object[]> dailyRevenue = revenueRepository.getDailyRevenueBreakdown(seller, thirtyDaysAgo, today);
         List<SellerDashboardResponse.DailyRevenuePoint> revenueTrend = dailyRevenue.stream()
                 .map(row -> new SellerDashboardResponse.DailyRevenuePoint((LocalDate) row[0], (BigDecimal) row[1]))
                 .collect(Collectors.toList());
 
-        // Top products by revenue
         List<Object[]> topProductsData = revenueRepository.getProductRevenueBreakdown(seller, PageRequest.of(0, 5));
         List<SellerDashboardResponse.TopProductRevenue> topProducts = topProductsData.stream()
                 .map(row -> new SellerDashboardResponse.TopProductRevenue(
@@ -197,7 +191,6 @@ public class SellerService {
                 ))
                 .collect(Collectors.toList());
 
-        // Pending requests count
         Long pendingRequests = productRequestRepository.countBySellerAndStatus(seller, SellerProductRequest.RequestStatus.PENDING);
 
         return SellerDashboardResponse.builder()
@@ -226,15 +219,12 @@ public class SellerService {
         Product product = productRepository.findByAsin(asin)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "asin", asin));
 
-        // Verify ownership
         if (product.getSeller() == null || ! product.getSeller().getId().equals(seller.getId())) {
             throw new BadRequestException("You can only remove your own products");
         }
 
-        // 1.Delete the seller's stock entry for this product
         sellerStockRepository.deleteBySellerAndOriginalProductAsin(seller, asin);
 
-        // 2.Remove product from seller's store (soft delete)
         product.setApprovalStatus(Product.ApprovalStatus.REJECTED);
         product.setStockQuantity(0);
         product.setSeller(null);
@@ -243,7 +233,6 @@ public class SellerService {
         log.info("Seller {} removed product {} from their store and stock", seller.getEmail(), asin);
     }
 
-    // ========== SELLER ORDERS ==========
 
     @Transactional(readOnly = true)
     public Page<SellerOrderResponse> getMySoldOrders(Pageable pageable) {
@@ -252,7 +241,6 @@ public class SellerService {
         return orderItems.map(this::convertToSellerOrderResponse);
     }
 
-    // ========== SELLER REVIEWS ==========
 
     @Transactional(readOnly = true)
     public Page<ReviewResponse> getMyProductReviews(Pageable pageable) {
@@ -302,7 +290,6 @@ public class SellerService {
                 .build();
     }
 
-    // ========== SELLER PROFILE ==========
 
     @Transactional(readOnly = true)
     public SellerProfileResponse getMyProfile() {
@@ -312,7 +299,6 @@ public class SellerService {
         BigDecimal totalRevenue = revenueRepository.calculateTotalRevenueBySeller(seller);
         Long totalSales = revenueRepository.countTotalUnitsSold(seller);
 
-        // Calculate average rating across all products
         List<Product> myProducts = productRepository.findBySellerOrderByCreatedAtDesc(seller, Pageable.unpaged()).getContent();
         List<String> productAsins = myProducts.stream().map(Product::getAsin).collect(Collectors.toList());
         Double avgRating = productAsins.isEmpty() ? 0.0 : reviewRepository.calculateAverageRatingForProducts(productAsins);
@@ -355,7 +341,6 @@ public class SellerService {
         return getMyProfile();
     }
 
-    // ========== CONVERTERS ==========
 
     private SellerProductRequestResponse convertToProductRequestResponse(SellerProductRequest request) {
         return SellerProductRequestResponse.builder()

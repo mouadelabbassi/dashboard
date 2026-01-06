@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="MouadVision ML Service",
-    description="Predictive Analytics API for E-commerce Platform",
+    description="Predictive Analytics",
     version="1.0.0"
 )
 
@@ -35,7 +35,7 @@ app.include_router(training.router, prefix="/train", tags=["Training"])
 @app.on_event("startup")
 async def startup_event():
     logger.info("=" * 60)
-    logger.info("MouadVision ML Service Starting")
+    logger.info("MouadVision Starting")
     logger.info("=" * 60)
     logger.info(f"Service URL: http://{settings.ML_SERVICE_HOST}:{settings.ML_SERVICE_PORT}")
     logger.info(f"Database: {settings.DB_NAME}")
@@ -45,7 +45,7 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    logger.info("MouadVision ML Service Shutting Down")
+    logger.info("MouadVision Shutting Down")
 
 
 if __name__ == "__main__":

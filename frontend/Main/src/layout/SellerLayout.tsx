@@ -44,10 +44,8 @@ const SellerLayout: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex">
-            {/* Sidebar */}
             <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="flex flex-col h-full">
-                    {/* Logo */}
                     <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-800">
                         <Link to="/seller/dashboard" className="flex items-center gap-2">
                             <img src="/images/logo/logo.png" alt="Logo" className="h-8 w-auto" />
@@ -63,9 +61,7 @@ const SellerLayout: React.FC = () => {
                         </button>
                     </div>
 
-                    {/* Navigation */}
                     <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                        {/* Seller Section */}
                         <p className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                             Seller
                         </p>
@@ -102,7 +98,6 @@ const SellerLayout: React.FC = () => {
                         ))}
                     </nav>
 
-                    {/* User Info */}
                     <div className="p-4 border-t border-gray-200 dark:border-gray-800">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
@@ -130,12 +125,9 @@ const SellerLayout: React.FC = () => {
                 </div>
             </aside>
 
-            {/* Main Content */}
             <div className="flex-1 lg:ml-64">
-                {/* Header */}
                 <header className="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
                     <div className="h-16 flex items-center justify-between px-4 lg:px-6 gap-4">
-                        {/* Left - Menu Button */}
                         <button
                             onClick={() => setIsSidebarOpen(true)}
                             className="lg:hidden text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -146,9 +138,7 @@ const SellerLayout: React.FC = () => {
                         </button>
 
 
-                        {/* Right Actions */}
                         <div className="flex items-center gap-3">
-                            {/* Mobile Search Toggle */}
                             <button
                                 onClick={() => setShowMobileSearch(!showMobileSearch)}
                                 className="md:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
@@ -158,7 +148,6 @@ const SellerLayout: React.FC = () => {
                                 </svg>
                             </button>
 
-                            {/* Cart Icon */}
                             <Link
                                 to="/seller/shop/cart"
                                 className="relative p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -173,7 +162,6 @@ const SellerLayout: React.FC = () => {
                                 )}
                             </Link>
 
-                            {/* Theme Toggle */}
                             <button
                                 onClick={() => setIsDark(!isDark)}
                                 className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -185,13 +173,11 @@ const SellerLayout: React.FC = () => {
 
                 </header>
 
-                {/* Page Content */}
                 <main className="p-4 lg:p-6">
                     <Outlet />
                 </main>
             </div>
 
-            {/* Overlay */}
             {isSidebarOpen && (
                 <div
                     className="fixed inset-0 z-40 bg-black/50 lg:hidden"

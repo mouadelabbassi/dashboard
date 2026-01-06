@@ -31,16 +31,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByRole(User.Role role);
 
-    Page<User> findByRoleAndIsVerifiedSeller(User.Role role, Boolean isVerifiedSeller, Pageable pageable);
-
     Page<User> findByRoleAndIsActiveTrue(User.Role role, Pageable pageable);
 
     Page<User> findByRoleAndIsVerifiedSellerAndIsActiveTrue(User.Role role, Boolean isVerifiedSeller, Pageable pageable);
 
-    @Query("SELECT u FROM User u WHERE LOWER(u.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%'))")
-    Page<User> searchUsers(@Param("query") String query, Pageable pageable);
-
-    @Modifying
-    @Query("DELETE FROM User u WHERE u.id = :userId")
-    void deleteUserById(@Param("userId") Long userId);
 }

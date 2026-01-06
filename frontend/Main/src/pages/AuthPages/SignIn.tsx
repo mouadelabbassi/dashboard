@@ -6,7 +6,7 @@ export default function SignIn() {
   return (
     <>
       <PageMeta
-        title="JAVA"
+        title="MouadVision"
         description=""
       />
       <AuthLayout>

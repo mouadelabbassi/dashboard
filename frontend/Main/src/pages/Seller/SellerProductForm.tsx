@@ -133,7 +133,6 @@ const SellerProductForm: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Product Name */}
                     <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Nom du Produit *
@@ -227,7 +226,6 @@ const SellerProductForm: React.FC = () => {
                         />
                     </div>
 
-                    {/* Image Preview */}
                     {formData.imageUrl && (
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -245,7 +243,6 @@ const SellerProductForm: React.FC = () => {
                     )}
                 </div>
 
-                {/* Submit Buttons */}
                 <div className="mt-8 flex justify-end gap-4">
                     <button
                         type="button"

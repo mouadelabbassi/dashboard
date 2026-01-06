@@ -77,7 +77,6 @@ const NotificationsPage:React.FC = () => {
             STOCK_ALERT:{ icon:'📊', bg:'bg-orange-100 dark:bg-orange-900/30' },
             SYSTEM: { icon:'🔔', bg:'bg-gray-100 dark:bg-gray-700' },
             PROMOTION:{ icon:'🎉', bg:'bg-pink-100 dark:bg-pink-900/30' },
-            // 🔮 PREDICTION NOTIFICATIONS - NEW! 
             PREDICTION_BESTSELLER:{
                 icon:'🔮',
                 bg:'bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30',
@@ -118,7 +117,6 @@ const NotificationsPage:React.FC = () => {
     const predictionNotificationsCount = notifications.filter(n => isPredictionNotification(n.type)).length;
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
-    // Check if current user is a seller
     const isSeller = user?.role === 'SELLER';
     const sellerId = user?.id;
 

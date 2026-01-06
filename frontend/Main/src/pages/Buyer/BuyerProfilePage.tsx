@@ -31,7 +31,6 @@ const BuyerProfilePage: React.FC = () => {
 
     return (
         <div className="max-w-2xl mx-auto">
-            {/* Header */}
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                     My Profile
@@ -41,9 +40,7 @@ const BuyerProfilePage: React.FC = () => {
                 </p>
             </div>
 
-            {/* Profile Card */}
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-                {/* Header Section */}
                 <div className="bg-gray-800 dark:bg-gray-800 px-8 py-12">
                     <div className="flex items-center gap-6">
                         <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-4xl font-bold text-gray-800 shadow-lg">
@@ -59,7 +56,6 @@ const BuyerProfilePage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Form Section */}
                 <div className="p-8">
                     {message && (
                         <div className={`mb-6 p-4 rounded-lg ${
@@ -72,7 +68,6 @@ const BuyerProfilePage: React.FC = () => {
                     )}
 
                     <form onSubmit={handleSubmit}>
-                        {/* Full Name */}
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Full Name
@@ -90,7 +85,6 @@ const BuyerProfilePage: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Email (Read-only) */}
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Email Address
@@ -98,7 +92,6 @@ const BuyerProfilePage: React.FC = () => {
                             <p className="text-gray-900 dark:text-white py-3">{user?.email}</p>
                         </div>
 
-                        {/* Phone */}
                         <div className="mb-6">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Phone Number
@@ -118,7 +111,6 @@ const BuyerProfilePage: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Bio */}
                         <div className="mb-8">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 Bio
@@ -138,7 +130,6 @@ const BuyerProfilePage: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Actions */}
                         <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
                             {isEditing ? (
                                 <div className="flex gap-3">

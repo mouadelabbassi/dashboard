@@ -21,7 +21,6 @@ public class SellerRevenueService {
     private final SellerRevenueRepository revenueRepository;
     private final PlatformRevenueRepository platformRevenueRepository;
 
-    // Platform takes 10% commission from seller products
     private static final BigDecimal PLATFORM_FEE_RATE = new BigDecimal("0.10");
 
     @Transactional
@@ -35,7 +34,6 @@ public class SellerRevenueService {
                     item.getProduct().getAsin(),
                     item.getSeller() != null ? item.getSeller().getEmail() : "PLATFORM (MouadVision)");
 
-            // Skip if already processed
             if (Boolean.TRUE.equals(item.getSellerRevenueCalculated())) {
                 log.info("Skipping item {} - already processed", item.getId());
                 continue;
@@ -45,7 +43,6 @@ public class SellerRevenueService {
                 BigDecimal grossAmount = item.getSubtotal();
 
                 if (item.getSeller() == null) {
-                    // ====== PLATFORM PRODUCT (MouadVision) - 100% revenue to platform ======
                     log.info("Processing PLATFORM product - 100% revenue to MouadVision");
 
                     PlatformRevenue platformRevenue = PlatformRevenue.builder()
@@ -66,10 +63,8 @@ public class SellerRevenueService {
                             grossAmount);
 
                 } else {
-                    // ====== SELLER PRODUCT - 10% to platform, 90% to seller ======
                     log.info("Processing SELLER product - 10% commission to platform");
 
-                    // Check if revenue already exists
                     if (revenueRepository.existsByOrderItemId(item.getId())) {
                         log.info("Skipping item {} - seller revenue already exists", item.getId());
                         item.setSellerRevenueCalculated(true);
@@ -81,7 +76,6 @@ public class SellerRevenueService {
                             .setScale(2, RoundingMode.HALF_UP);
                     BigDecimal sellerNetAmount = grossAmount.subtract(platformFee);
 
-                    // Create seller revenue record (90%)
                     SellerRevenue sellerRevenue = SellerRevenue.builder()
                             .seller(item.getSeller())
                             .product(item.getProduct())
@@ -98,7 +92,6 @@ public class SellerRevenueService {
 
                     revenueRepository.save(sellerRevenue);
 
-                    // Create platform commission record (10%)
                     PlatformRevenue platformCommission = PlatformRevenue.builder()
                             .order(order)
                             .orderItem(item)

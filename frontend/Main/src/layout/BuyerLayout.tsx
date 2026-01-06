@@ -8,7 +8,7 @@ const BuyerLayout: React.FC = () => {
     const { getItemCount } = useCart();
     const location = useLocation();
     const navigate = useNavigate();
-    const [isDark, setIsDark] = useState(false); // Default to light for shopping
+    const [isDark, setIsDark] = useState(false);
     const itemCount = getItemCount();
 
     useEffect(() => {
@@ -93,7 +93,7 @@ const BuyerLayout: React.FC = () => {
                                 )}
                             </button>
 
-                            {/* Logout */}
+
                             <button
                                 onClick={handleLogout}
                                 className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-700 dark:text-neutral-300 text-sm font-semibold rounded-xl transition-all"
@@ -104,7 +104,7 @@ const BuyerLayout: React.FC = () => {
                                 <span>Logout</span>
                             </button>
 
-                            {/* Mobile Menu */}
+
                             <button className="lg:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -114,7 +114,6 @@ const BuyerLayout: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Mobile Navigation */}
                 <nav className="lg:hidden border-t border-neutral-200 dark:border-neutral-800 px-2 py-2 flex justify-around bg-white dark:bg-neutral-900">
                     {navLinks.map(link => (
                         <Link

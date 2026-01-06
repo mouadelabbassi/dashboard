@@ -10,7 +10,6 @@ const api = axios.create({
     },
 });
 
-// Add auth token to requests
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -39,8 +38,8 @@ export interface DashboardStats {
     avgPrice: number;
     avgRating: number;
     totalReviews: number;
-    totalRevenue: number;      // AJOUTE SI MANQUANT
-    totalSales: number;        // AJOUTE CETTE LIGNE
+    totalRevenue: number;
+    totalSales: number;
     totalInventoryValue: number;
 }
 
@@ -62,7 +61,6 @@ export interface Product {
     isBestseller?: boolean;
     createdAt?: string;
     updatedAt?: string;
-    // NEW: Add these seller fields
     sellerId?: number;
     sellerName?: string;
     stockQuantity?: number;
@@ -234,7 +232,6 @@ export interface OrderResponse {
     createdAt: string;
 }
 
-// Notification Types
 export interface NotificationResponse {
     id: number;
     type: string;
@@ -361,7 +358,6 @@ export const submitProductForApproval = async (product: SellerProductSubmission)
     await api.post('/seller/products/submit', product);
 };
 
-// Get My Products (Seller)
 export const getMySellerProducts = async (page: number = 0, size: number = 10): Promise<PagedResponse<ProductWithSeller>> => {
     const response = await api.get<ApiResponse<PagedResponse<ProductWithSeller>>>('/seller/products', {
         params: { page, size }

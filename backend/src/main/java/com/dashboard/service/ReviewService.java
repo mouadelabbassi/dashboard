@@ -64,16 +64,13 @@ public class ReviewService {
                 userReview = convertToResponse(review.get());
             }
         } catch (Exception e) {
-            // User not authenticated
         }
 
-        // Stats
         Double avgRating = reviewRepository.calculateAverageRating(asin);
         Long totalReviews = reviewRepository.countByProductAsin(asin);
         Long likesCount = reviewRepository.countLikesByProductAsin(asin);
         Long dislikesCount = reviewRepository.countDislikesByProductAsin(asin);
 
-        // Rating distribution
         Map<Integer, Long> ratingDistribution = new HashMap<>();
         for (int i = 1; i <= 5; i++) {
             ratingDistribution.put(i, 0L);
@@ -83,7 +80,6 @@ public class ReviewService {
             ratingDistribution.put((Integer) row[0], (Long) row[1]);
         }
 
-        // Recent reviews
         Page<ProductReview> recentReviewsPage = reviewRepository
                 .findByProductAsinOrderByCreatedAtDesc(asin, PageRequest.of(0, 5));
         List<ReviewResponse> recentReviews = recentReviewsPage.getContent().stream()
@@ -110,7 +106,6 @@ public class ReviewService {
                 .dislikesCount(dislikesCount)
                 .ratingDistribution(ratingDistribution)
                 .recentReviews(recentReviews)
-                // Seller info
                 .sellerName(product.getSellerName())
                 .sellerId(product.getSeller() != null ? product.getSeller().getId() : null)
                 .isMouadVisionProduct(product.getSeller() == null)
@@ -149,7 +144,6 @@ public class ReviewService {
         review = reviewRepository.save(review);
         updateProductStats(product);
 
-        // Notify seller about new review (only for new reviews, not updates)
         if (isNewReview && product.getSeller() != null) {
             notificationService.notifySellerNewReview(product.getSeller(), product, review);
         }
@@ -159,7 +153,6 @@ public class ReviewService {
 
 
 
-    // This method signature matches what ReviewController expects
     @Transactional
     public void updateLikeStatus(String productAsin, boolean isLiked) {
         User user = getCurrentUser();
@@ -202,7 +195,6 @@ public class ReviewService {
         log.info("Deleted review for product {} by user {}", productAsin, user.getEmail());
     }
 
-    // This method matches what ReviewController expects
     @Transactional(readOnly = true)
     public List<ReviewResponse> getUserReviews() {
         User user = getCurrentUser();

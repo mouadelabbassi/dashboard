@@ -261,7 +261,6 @@ const SellerProducts:  React.FC = () => {
                                     <span>{product.salesCount || 0} sales</span>
                                 </div>
 
-                                {/* ✅ MODIFIED: Buttons with Delete */}
                                 <div className="flex gap-2">
                                     <Link
                                         to={`/seller/products/${product.asin}/edit`}
@@ -275,7 +274,6 @@ const SellerProducts:  React.FC = () => {
                                     >
                                         Edit
                                     </Link>
-                                    {/* ✅ NEW: Delete Button */}
                                     <button
                                         onClick={() => handleDeleteClick(product)}
                                         disabled={deletingAsin === product.asin}
@@ -297,7 +295,6 @@ const SellerProducts:  React.FC = () => {
                 </div>
             )}
 
-            {/* Pagination */}
             {totalPages > 1 && (
                 <div className="flex justify-center mt-8 gap-2">
                     <button
@@ -320,7 +317,6 @@ const SellerProducts:  React.FC = () => {
                 </div>
             )}
 
-            {/* Add Product Modal */}
             {showAddModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -397,7 +393,6 @@ const SellerProducts:  React.FC = () => {
                 </div>
             )}
 
-            {/* ✅ NEW: Delete Confirmation Modal */}
             {showDeleteModal && productToDelete && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">

@@ -31,7 +31,6 @@ const SellerOrders: React.FC = () => {
         }
     };
 
-    // ✅ FIX: Add manual refresh
     const handleRefresh = () => {
         fetchOrders();
     };
@@ -70,7 +69,6 @@ const SellerOrders: React.FC = () => {
                     </p>
                 </div>
 
-                {/* ✅ FIX: Add refresh button */}
                 <button
                     onClick={handleRefresh}
                     disabled={loading}
@@ -175,7 +173,6 @@ const SellerOrders: React.FC = () => {
                         </table>
                     </div>
 
-                    {/* Pagination */}
                     {totalPages > 1 && (
                         <div className="px-6 py-4 border-t dark:border-gray-700 flex items-center justify-between">
               <span className="text-sm text-gray-500">

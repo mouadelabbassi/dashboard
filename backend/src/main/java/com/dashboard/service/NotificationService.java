@@ -144,7 +144,6 @@ public class NotificationService {
         );
     }
 
-    // Admin notifications - FIXED: Use getId() instead of getAsin()
     @Transactional
     public void notifyAdminsNewProductSubmission(SellerProductRequest productRequest) {
         List<User> admins = userRepository.findByRoleAndIsActiveTrue(User.Role.ADMIN);
@@ -165,7 +164,6 @@ public class NotificationService {
         }
     }
 
-    // Overloaded method for Product entity
     @Transactional
     public void notifyAdminsNewProductSubmission(Product product) {
         List<User> admins = userRepository.findByRoleAndIsActiveTrue(User.Role.ADMIN);

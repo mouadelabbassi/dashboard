@@ -26,7 +26,7 @@ const CategoryDistributionChart: React.FC = () => {
                             count: count as number
                         }))
                         .sort((a, b) => b.count - a.count)
-                        .slice(0, 8); // Top 8 categories
+                        .slice(0, 8);
 
                     setCategoryData(formattedData);
                 }

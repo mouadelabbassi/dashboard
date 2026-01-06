@@ -32,7 +32,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         localStorage.setItem('cart', JSON.stringify(items));
     }, [items]);
 
-    // Get maximum quantity available for a product
     const getMaxQuantity = (asin: string): number => {
         const item = items.find(item => item.product.asin === asin);
         if (item) {
@@ -41,7 +40,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return 0;
     };
 
-    // Check if we can add more of this product
     const canAddMore = (asin: string): boolean => {
         const item = items.find(item => item.product.asin === asin);
         if (!item) return true;
@@ -52,7 +50,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const addToCart = (product: Product, quantity: number = 1): boolean => {
         const stockQuantity = product.stockQuantity || 0;
 
-        // Don't allow adding if out of stock
         if (stockQuantity <= 0) {
             return false;
         }
@@ -66,12 +63,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 const currentQuantity = existingItem.quantity;
                 const newQuantity = currentQuantity + quantity;
 
-                // Don't exceed stock
                 if (newQuantity > stockQuantity) {
-                    // Can only add up to stock limit
                     if (currentQuantity >= stockQuantity) {
                         added = false;
-                        return prevItems; // Already at max
+                        return prevItems;
                     }
                     added = true;
                     return prevItems.map(item =>
@@ -89,7 +84,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 );
             }
 
-            // New item - respect stock limit
+
             const addQuantity = Math.min(quantity, stockQuantity);
             added = true;
             return [...prevItems, { product, quantity: addQuantity }];
@@ -118,7 +113,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             const newQuantity = Math.min(quantity, maxStock);
 
             if (newQuantity !== quantity) {
-                updated = false; // Couldn't update to requested quantity
+                updated = false;
             } else {
                 updated = true;
             }

@@ -99,7 +99,6 @@ const SellerProfile: React.FC = () => {
                 </div>
             )}
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
                     <p className="text-sm text-gray-500">Produits en Vente</p>
@@ -121,7 +120,6 @@ const SellerProfile: React.FC = () => {
                 </div>
             </div>
 
-            {/* Profile Form */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
                 <div className="p-6 border-b dark:border-gray-700 flex justify-between items-center">
                     <div>
@@ -144,7 +142,6 @@ const SellerProfile: React.FC = () => {
 
                 <form onSubmit={handleSubmit} className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Profile Image */}
                         <div className="md:col-span-2 flex items-center gap-6">
                             <div className="w-24 h-24 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center overflow-hidden">
                                 {formData.profileImage ?  (
@@ -175,7 +172,6 @@ const SellerProfile: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Personal Info */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Nom Complet
@@ -229,7 +225,6 @@ const SellerProfile: React.FC = () => {
               </span>
                         </div>
 
-                        {/* Bio */}
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Bio
@@ -247,14 +242,12 @@ const SellerProfile: React.FC = () => {
                             )}
                         </div>
 
-                        {/* Divider */}
                         <div className="md:col-span-2 border-t dark:border-gray-700 pt-6 mt-2">
                             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                                 Informations de la Boutique
                             </h3>
                         </div>
 
-                        {/* Store Info */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 Nom de la Boutique
@@ -305,7 +298,6 @@ const SellerProfile: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Form Actions */}
                     {editing && (
                         <div className="mt-8 flex justify-end gap-4">
                             <button

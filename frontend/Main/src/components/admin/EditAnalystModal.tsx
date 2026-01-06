@@ -16,7 +16,7 @@ const EditAnalystModal: React.FC<EditAnalystModalProps> = ({ analyst, onClose, o
         department: analyst.department || '',
         specialization: analyst.specialization || '',
         isActive: analyst.isActive,
-        password: '', // Optional: only if changing password
+        password: '',
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -27,7 +27,6 @@ const EditAnalystModal: React.FC<EditAnalystModalProps> = ({ analyst, onClose, o
         setLoading(true);
 
         try {
-            // Remove password if not provided
             const updateData = { ...formData };
             if (!updateData.password) {
                 delete updateData.password;

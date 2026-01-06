@@ -99,13 +99,11 @@ const PredictiveDashboard: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-            {/* Header */}
             <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Predictive Analysis</h1>
-                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">AI-powered insights and price recommendations</p>
                         </div>
                         <button
                             onClick={fetchProducts}
@@ -121,7 +119,6 @@ const PredictiveDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Stats Cards */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
@@ -149,7 +146,6 @@ const PredictiveDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Filters */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
                 <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4">
                     <div className="flex flex-col md:flex-row gap-4">
@@ -183,7 +179,6 @@ const PredictiveDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Error State */}
             {error && (
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
                     <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
@@ -195,7 +190,6 @@ const PredictiveDashboard: React.FC = () => {
                 </div>
             )}
 
-            {/* Empty State */}
             {filteredProducts.length === 0 && !loading && (
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
                     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-12 text-center">
@@ -210,15 +204,13 @@ const PredictiveDashboard: React.FC = () => {
                 </div>
             )}
 
-            {/* Products Grid */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {filteredProducts.map((product) => (
                         <div
                             key={product.asin}
                             className="group bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-lg hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300"
                         >
-                            {/* Image */}
                             <div className="relative h-64 bg-gray-100 dark:bg-gray-800 overflow-hidden">
                                 {product.imageUrl ? (
                                     <img
@@ -243,20 +235,16 @@ const PredictiveDashboard: React.FC = () => {
                                 )}
                             </div>
 
-                            {/* Content */}
                             <div className="p-5 space-y-4">
-                                {/* Category & Seller */}
                                 <div className="flex items-center justify-between text-xs">
                                     <span className="text-blue-600 dark:text-blue-400 font-medium">{product.categoryName}</span>
                                     <span className="text-gray-500 dark:text-gray-400">{product.sellerName}</span>
                                 </div>
 
-                                {/* Title */}
                                 <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-2 leading-snug">
                                     {product.productName}
                                 </h3>
 
-                                {/* Rating */}
                                 <div className="flex items-center gap-2">
                                     <div className="flex items-center">
                                         <svg className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
@@ -267,7 +255,6 @@ const PredictiveDashboard: React.FC = () => {
                                     <span className="text-xs text-gray-500 dark:text-gray-400">({product.reviewsCount || 0})</span>
                                 </div>
 
-                                {/* Pricing */}
                                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3 border border-gray-200 dark:border-gray-700">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -321,7 +308,6 @@ const PredictiveDashboard: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* Predictions */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 text-center">
                                         <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Bestseller</div>
@@ -350,7 +336,6 @@ const PredictiveDashboard: React.FC = () => {
                                     </div>
                                 </div>
 
-                                {/* Footer */}
                                 <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
                                     <span className="text-xs text-gray-500 dark:text-gray-400">Positioning</span>
                                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${

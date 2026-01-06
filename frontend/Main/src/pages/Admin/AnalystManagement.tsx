@@ -89,7 +89,6 @@ const AnalystManagement: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -110,7 +109,6 @@ const AnalystManagement: React.FC = () => {
                 </button>
             </div>
 
-            {/* Summary Cards */}
             {summary && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
@@ -163,7 +161,6 @@ const AnalystManagement: React.FC = () => {
                 </div>
             )}
 
-            {/* Search and Filter */}
             <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                 <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1">
@@ -215,7 +212,6 @@ const AnalystManagement: React.FC = () => {
                 </div>
             </div>
 
-            {/* Analysts Grid */}
             {loading ? (
                 <div className="flex items-center justify-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -326,7 +322,6 @@ const AnalystManagement: React.FC = () => {
                 </div>
             )}
 
-            {/* Modals */}
             {showCreateModal && (
                 <CreateAnalystModal
                     onClose={() => setShowCreateModal(false)}

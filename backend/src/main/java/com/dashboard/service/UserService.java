@@ -34,7 +34,6 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
-        // Update allowed fields only (not email or password)
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
         user.setBio(request.getBio());

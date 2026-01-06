@@ -21,7 +21,6 @@ const BestsellerCards: React.FC = () => {
         fetchBestsellers();
     }, []);
 
-    // Medal configuration for top 3
     const medalConfig = [
         {
             borderColor: 'border-yellow-500',

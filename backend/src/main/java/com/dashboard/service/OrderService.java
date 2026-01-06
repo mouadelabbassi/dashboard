@@ -194,7 +194,6 @@ public class OrderService {
             } catch (Exception e) {
                 log. error("Failed to add product {} to seller stock: {}",
                         item.getProduct().getAsin(), e.getMessage(), e);
-                // Don't throw - continue with other items and don't rollback the order
             }
         }
     }
@@ -205,7 +204,6 @@ public class OrderService {
         for (OrderItem item : order.getItems()) {
             Product product = item.getProduct();
 
-            // Notify the seller if product has a seller
             if (product.getSeller() != null) {
                 log.info("Sending notification to seller: {} for product: {}",
                         product.getSeller().getEmail(), product.getAsin());
@@ -217,7 +215,6 @@ public class OrderService {
                 );
             }
 
-            // Notify admins
             notificationService.notifyAdminProductPurchased(
                     product,
                     order,
@@ -259,7 +256,6 @@ public class OrderService {
             throw new BadRequestException("Cannot cancel a delivered order");
         }
 
-        // Restore stock
         for (OrderItem item : order.getItems()) {
             Product product = item.getProduct();
             product.setStockQuantity(product.getStockQuantity() + item.getQuantity());

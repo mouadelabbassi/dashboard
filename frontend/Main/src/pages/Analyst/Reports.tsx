@@ -39,19 +39,15 @@ const Reports:React.FC = () => {
             setLoading(false);
         }
     };
-
-    // Enhanced CSV export with proper escaping and BOM for Excel compatibility
     const exportToCSV = (data:any[], filename:string, columns?:{ key:string; header:string }[]) => {
         if (!data || data.length === 0) {
             alert('No data to export');
             return;
         }
 
-        // Use provided columns or extract from data
         const headers = columns ? columns.map(c => c.header) :Object.keys(data[0]);
         const keys = columns ? columns.map(c => c.key) :Object.keys(data[0]);
 
-        // Add BOM for Excel UTF-8 compatibility
         const BOM = '\uFEFF';
 
         const csvContent = [
@@ -60,12 +56,10 @@ const Reports:React.FC = () => {
                 keys.map(key => {
                     let value = row[key];
 
-                    // Handle null/undefined
                     if (value === null || value === undefined) {
                         return '';
                     }
 
-                    // Format dates
                     if (key.toLowerCase().includes('date') || key.toLowerCase().includes('at')) {
                         if (value) {
                             const date = new Date(value);
@@ -81,7 +75,6 @@ const Reports:React.FC = () => {
                         }
                     }
 
-                    // Format currency fields
                     if (key.toLowerCase().includes('price') ||
                         key.toLowerCase().includes('amount') ||
                         key.toLowerCase().includes('revenue') ||
@@ -91,7 +84,6 @@ const Reports:React.FC = () => {
                         }
                     }
 
-                    // Convert to string and escape
                     const stringValue = String(value);
                     if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
                         return `"${stringValue.replace(/"/g, '""')}"`;
@@ -119,7 +111,6 @@ const Reports:React.FC = () => {
         const headers = columns ? columns.map(c => c.header) :Object.keys(data[0]);
         const keys = columns ?  columns.map(c => c.key) :Object.keys(data[0]);
 
-        // Create HTML table for Excel
         let html = `
             <html xmlns:o="urn:schemas-microsoft-com:office:office" 
                   xmlns:x="urn:schemas-microsoft-com:office:excel">
@@ -181,7 +172,6 @@ const Reports:React.FC = () => {
         URL.revokeObjectURL(link.href);
     };
 
-    // Sales Export - Comprehensive order data
     const handleExportSales = async () => {
         try {
             setExportLoading('sales');
@@ -197,7 +187,6 @@ const Reports:React.FC = () => {
                 { key:'status', header:'Order Status' },
             ];
 
-            // Add summary row
             const totalRevenue = data.reduce((sum:number, row:any) => sum + (row.totalAmount || 0), 0);
             const totalOrders = data.length;
             const totalItems = data.reduce((sum:number, row:any) => sum + (row.totalItems || 0), 0);
@@ -226,7 +215,6 @@ const Reports:React.FC = () => {
         }
     };
 
-    // Products Export - Complete product catalog
     const handleExportProducts = async () => {
         try {
             setExportLoading('products');
@@ -245,7 +233,6 @@ const Reports:React.FC = () => {
                 { key:'revenue', header:'Total Revenue ($)' },
             ];
 
-            // Calculate revenue for each product and add summary
             const enrichedData = data.map((product:any) => ({
                 ...product,
                 revenue:(product.price || 0) * (product.salesCount || 0),
@@ -281,7 +268,6 @@ const Reports:React.FC = () => {
         }
     };
 
-    // Sellers Export - Seller performance data
     const handleExportSellers = async () => {
         try {
             setExportLoading('sellers');
@@ -298,7 +284,6 @@ const Reports:React.FC = () => {
                 { key:'performanceScore', header:'Performance Score' },
             ];
 
-            // Enrich data with calculated fields
             const enrichedData = data.map((seller:any) => ({
                 ...seller,
                 avgOrderValue:seller.totalOrders > 0 ? (seller.totalRevenue / seller.totalOrders).toFixed(2) :0,
@@ -333,7 +318,6 @@ const Reports:React.FC = () => {
         }
     };
 
-    // Calculate seller performance score
     const calculatePerformanceScore = (seller:any):string => {
         const revenueScore = Math.min((seller.totalRevenue || 0) / 10000, 40);
         const ordersScore = Math.min((seller.totalOrders || 0) * 2, 30);
@@ -346,7 +330,6 @@ const Reports:React.FC = () => {
         return `${total} 🆕 New`;
     };
 
-    // Preview data before export
     const handlePreview = async (type:'sales' | 'products' | 'sellers') => {
         try {
             setExportLoading(type);
@@ -383,11 +366,10 @@ const Reports:React.FC = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        📊 Reports & Export
+                        Reports & Export
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
                         Generate professional reports and export data for analysis
@@ -396,7 +378,6 @@ const Reports:React.FC = () => {
                 <ExportAdvancedPDFButton variant="gradient" />
             </div>
 
-            {/* Date Range Selector */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                     📅 Select Date Range
@@ -445,7 +426,6 @@ const Reports:React.FC = () => {
                     </button>
                 </div>
 
-                {/* Quick Date Presets */}
                 <div className="flex flex-wrap gap-2 mt-4">
                     {[
                         { label:'Last 7 days', days:7 },
@@ -477,7 +457,6 @@ const Reports:React.FC = () => {
                 </div>
             </div>
 
-            {/* Export Format Toggle */}
             <div className="flex items-center gap-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                     📁 Data Export Center
@@ -579,7 +558,6 @@ const Reports:React.FC = () => {
                     </div>
                 </div>
 
-                {/* Products Export Card */}
                 <div className="bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl shadow-xl p-6 text-white relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
@@ -652,7 +630,6 @@ const Reports:React.FC = () => {
                     </div>
                 </div>
 
-                {/* Sellers Export Card */}
                 <div className="bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl shadow-xl p-6 text-white relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
                     <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-12 -mb-12"></div>
@@ -726,7 +703,6 @@ const Reports:React.FC = () => {
                 </div>
             </div>
 
-            {/* Data Preview Modal */}
             {previewData && (
                 <div className="fixed inset-0 z-50 overflow-y-auto">
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setPreviewData(null)} />
@@ -803,7 +779,6 @@ const Reports:React.FC = () => {
                 </div>
             )}
 
-            {/* Report Summary */}
             {reportData && (
                 <div className="space-y-6">
                     <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 text-white">

@@ -12,7 +12,7 @@ import xgboost as xgb
 from config import settings, MODEL_CONFIG, CONFIDENCE_THRESHOLDS
 from app.ml.data_loader import DataLoader
 from app.ml.feature_engineering import FeatureEngineer
-from app.core.exceptions import ModelNotTrainedException, ModelNotLoadedException
+from app.core.exceptions import ModelNotLoadedException
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +27,7 @@ class BestsellerModel:
         self._is_loaded = False
 
     def train(self) -> dict:
-        logger.info("=" * 60)
         logger.info("Training Bestseller Model")
-        logger.info("=" * 60)
 
         loader = DataLoader()
         df = loader.load_training_data(use_cache=False)

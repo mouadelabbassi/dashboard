@@ -71,7 +71,6 @@ const NotificationsPanel: React.FC = () => {
                 setUnreadCount(data.data?. count || 0);
             }
         } catch (err) {
-            // Silently fail
         }
     };
 
@@ -124,14 +123,12 @@ const NotificationsPanel: React.FC = () => {
 
     return (
         <div className="relative" ref={panelRef}>
-            {/* 🔔 Bell Button - FIXED SIZE & OVERFLOW */}
             <button
                 onClick={handleToggle}
                 type="button"
                 aria-label="Notifications"
                 className="relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
             >
-                {/* Bell SVG - Simple & Clear */}
                 <svg
                     width="20"
                     height="20"
@@ -144,7 +141,6 @@ const NotificationsPanel: React.FC = () => {
                     />
                 </svg>
 
-                {/* Badge - Unread Count */}
                 {unreadCount > 0 && (
                     <span className="absolute -right-0.5 -top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white">
                         {unreadCount > 9 ? '9+' : unreadCount}
@@ -152,13 +148,11 @@ const NotificationsPanel: React.FC = () => {
                 )}
             </button>
 
-            {/* Dropdown Panel */}
             {isOpen && (
                 <div
                     className="absolute right-0 mt-2 w-80 origin-top-right rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800 sm:w-96"
                     style={{ zIndex: 99999 }}
                 >
-                    {/* Header */}
                     <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
                         <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -180,7 +174,6 @@ const NotificationsPanel: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Content */}
                     <div className="max-h-80 overflow-y-auto">
                         {loading ? (
                             <div className="flex items-center justify-center py-8">
@@ -244,7 +237,6 @@ const NotificationsPanel: React.FC = () => {
                         )}
                     </div>
 
-                    {/* Footer */}
                     <div className="border-t border-gray-200 p-3 dark:border-gray-700">
                         <button
                             onClick={() => setIsOpen(false)}

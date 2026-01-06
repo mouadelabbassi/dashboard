@@ -104,7 +104,6 @@ const ProductApprovals: React.FC = () => {
                         >
                             <div className="p-6">
                                 <div className="flex flex-col lg:flex-row gap-6">
-                                    {/* Product Image */}
                                     <div className="lg:w-48 flex-shrink-0">
                                         <img
                                             src={product. imageUrl || '/placeholder-product. png'}
@@ -113,7 +112,6 @@ const ProductApprovals: React.FC = () => {
                                         />
                                     </div>
 
-                                    {/* Product Details */}
                                     <div className="flex-1">
                                         <div className="flex justify-between items-start">
                                             <div>
@@ -148,7 +146,6 @@ const ProductApprovals: React.FC = () => {
                                             </div>
                                         </div>
 
-                                        {/* Seller Info */}
                                         <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                             <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                                 Informations Vendeur
@@ -171,7 +168,6 @@ const ProductApprovals: React.FC = () => {
                                             </div>
                                         </div>
 
-                                        {/* Action Buttons */}
                                         <div className="mt-6 flex gap-3">
                                             <button
                                                 onClick={() => openModal(product, 'approve')}
@@ -198,7 +194,6 @@ const ProductApprovals: React.FC = () => {
                         </div>
                     ))}
 
-                    {/* Pagination */}
                     {totalPages > 1 && (
                         <div className="flex justify-center mt-6 gap-2">
                             <button
@@ -223,7 +218,6 @@ const ProductApprovals: React.FC = () => {
                 </div>
             )}
 
-            {/* Approval/Rejection Modal */}
             {showModal && selectedProduct && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full">

@@ -7,7 +7,6 @@ import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useAuth } from "../../context/AuthContext";
 
-// Admin profile data (static for Mouad El Abbassi)
 const ADMIN_PROFILE = {
     email: "elabbassimouaad0@gmail.com",
     firstName: "Mouad",
@@ -22,10 +21,8 @@ export default function UserInfoCard() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    // Check if current user is admin (Mouad)
     const isAdmin = user?.email === ADMIN_PROFILE.email;
 
-    // Parse fullName into firstName and lastName
     const nameParts = user?.fullName?.split(' ') || ['', ''];
     const [firstName, setFirstName] = useState(nameParts[0] || '');
     const [lastName, setLastName] = useState(nameParts.slice(1).join(' ') || '');
@@ -57,7 +54,6 @@ export default function UserInfoCard() {
         }
     };
 
-    // Display data based on user type
     const displayData = isAdmin ? {
         firstName: ADMIN_PROFILE.firstName,
         lastName: ADMIN_PROFILE.lastName,

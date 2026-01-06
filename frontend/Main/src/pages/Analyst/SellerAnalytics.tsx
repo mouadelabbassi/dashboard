@@ -44,7 +44,6 @@ const SellerAnalytics: React.FC = () => {
     const [selectedSeller, setSelectedSeller] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    // Zoom state
     const [zoomLevel, setZoomLevel] = useState<'months' | 'weeks' | 'days'>('months');
     const growthChartRef = useRef<any>(null);
 
@@ -97,7 +96,6 @@ const SellerAnalytics: React.FC = () => {
 
             let newSellersThisDay = 0;
             if (monthlyTotal > 0) {
-                // Simple distribution: add sellers on specific days
                 const sellersPerDay = monthlyTotal / daysInMonth;
                 if (Math.random() < sellersPerDay || (dayOfMonth === daysInMonth && cumulativeCount < monthlyTotal)) {
                     newSellersThisDay = Math.random() < 0.3 ? Math.ceil(sellersPerDay * 3) : 0;
@@ -105,7 +103,6 @@ const SellerAnalytics: React.FC = () => {
                 }
             }
 
-            // For demo purposes, use actual monthly data on first day of month
             if (dayOfMonth === 1) {
                 newSellersThisDay = monthlyNewSellers[monthKey] || 0;
             } else {
@@ -126,7 +123,6 @@ const SellerAnalytics: React.FC = () => {
         return dataPoints;
     }, [sellerGrowthRaw]);
 
-    // Get aggregated data based on zoom level
     const getAggregatedData = useCallback(() => {
         const dailyData = generateDailyGrowthData();
 
@@ -163,7 +159,6 @@ const SellerAnalytics: React.FC = () => {
                 cumulative: sortedKeys.map(k => weeklyData[k].cumulative),
             };
         } else {
-            // Monthly aggregation
             const monthlyData:  { [key: string]: { newSellers: number; cumulative:  number } } = {};
 
             dailyData.forEach(d => {
@@ -204,7 +199,6 @@ const SellerAnalytics: React.FC = () => {
         }).format(value);
     };
 
-    // Zoom controls
     const handleZoomIn = () => {
         if (zoomLevel === 'months') setZoomLevel('weeks');
         else if (zoomLevel === 'weeks') setZoomLevel('days');
@@ -219,7 +213,6 @@ const SellerAnalytics: React.FC = () => {
         setZoomLevel('months');
     };
 
-    // Sellers Revenue Chart
     const revenueChartData = {
         labels: sellersRanking.map(s => s.storeName || s.sellerName),
         datasets: [
@@ -232,7 +225,6 @@ const SellerAnalytics: React.FC = () => {
         ],
     };
 
-    // Enhanced Seller Growth Chart Data
     const aggregatedData = getAggregatedData();
 
     const growthChartData = {
@@ -265,7 +257,6 @@ const SellerAnalytics: React.FC = () => {
         ],
     };
 
-    // Format date labels based on zoom level
     const formatDateLabel = (dateStr: string): string => {
         const date = new Date(dateStr);
         if (zoomLevel === 'days') {
@@ -516,9 +507,7 @@ const SellerAnalytics: React.FC = () => {
                 </div>
             )}
 
-            {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Top Sellers by Revenue */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
                     <h3 className="text-lg font-semibold text-gray-900 dark: text-white mb-4">
                         Top Sellers by Revenue
@@ -549,7 +538,6 @@ const SellerAnalytics: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Enhanced Seller Growth Chart with Zoom */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark: border-gray-700">
                     <div className="flex items-center justify-between mb-4">
                         <div>
