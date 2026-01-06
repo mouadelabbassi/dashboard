@@ -95,6 +95,7 @@ com\dashboard\entity\BestsellerPrediction$BestsellerPredictionBuilder.class
 com\dashboard\service\AuthService.class
 com\dashboard\entity\PlatformRevenue$PlatformRevenueBuilder.class
 com\dashboard\entity\User$Role.class
+com\dashboard\service\MLServiceClient$RetryableOperation.class
 com\dashboard\service\PredictionService.class
 com\dashboard\entity\Notification$NotificationType.class
 com\dashboard\service\SellerService.class

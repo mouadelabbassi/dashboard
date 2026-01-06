@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from datetime import datetime
 import logging
+from typing import Optional
 
 from app.core.schemas import (
     ProductInput, BestsellerPrediction, RankingTrendPrediction,
@@ -21,16 +22,47 @@ ranking_model = RankingModel()
 
 @router.on_event("startup")
 async def load_models():
-    logger.info("Loading ML models")
-    bestseller_model.load()
-    ranking_model.load()
+    logger.info("=" * 60)
+    logger.info("Loading ML models on startup")
+    try:
+        bestseller_model.load()
+        logger.info("✓ Bestseller model loaded successfully")
+    except Exception as e:
+        logger.error(f"✗ Failed to load bestseller model: {e}")
+
+    try:
+        ranking_model.load()
+        logger.info("✓ Ranking model loaded successfully")
+    except Exception as e:
+        logger.error(f"✗ Failed to load ranking model: {e}")
+
+    logger.info("=" * 60)
+
+
+def validate_product_input(product: ProductInput) -> Optional[str]:
+    if not product.asin or len(product.asin.strip()) == 0:
+        return "ASIN is required"
+    if not product.product_name or len(product.product_name.strip()) == 0:
+        return "Product name is required"
+    if product.price is not None and product.price < 0:
+        return "Price cannot be negative"
+    if product.rating is not None and (product.rating < 0 or product.rating > 5):
+        return "Rating must be between 0 and 5"
+    if product.reviews_count is not None and product.reviews_count < 0:
+        return "Reviews count cannot be negative"
+    return None
 
 
 @router.post("/bestseller", response_model=BestsellerPrediction)
 async def predict_bestseller(product: ProductInput):
     try:
-        product_dict = product.dict()
+        validation_error = validate_product_input(product)
+        if validation_error:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=validation_error)
 
+        logger.info(f"Bestseller prediction request: {product.asin}")
+
+        product_dict = product.dict()
         result = bestseller_model.predict(product_dict)
 
         response = BestsellerPrediction(
@@ -45,38 +77,59 @@ async def predict_bestseller(product: ProductInput):
         )
 
         save_bestseller_prediction(product.asin, result)
+        logger.info(f"✓ Bestseller prediction completed: {product.asin} - Prob: {result['bestseller_probability']:.4f}")
 
         return response
 
     except ModelNotLoadedException as e:
-        raise HTTPException(status_code=503, detail=str(e))
+        logger.error(f"Model not loaded: {e}")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                            detail="Model not loaded. Please train the model first.")
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Bestseller prediction error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Bestseller prediction error for {product.asin}: {e}", exc_info=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Prediction failed: {str(e)}")
 
 
 @router.post("/bestseller/batch", response_model=BatchPredictionResponse)
 async def predict_bestseller_batch(request: BatchPredictionRequest):
     try:
+        logger.info(f"Batch bestseller prediction request: {len(request.products)} products")
         predictions = []
+        failed_count = 0
 
         for product in request.products:
-            product_dict = product.dict()
-            result = bestseller_model.predict(product_dict)
+            try:
+                validation_error = validate_product_input(product)
+                if validation_error:
+                    logger.warning(f"Skipping invalid product {product.asin}: {validation_error}")
+                    failed_count += 1
+                    continue
 
-            prediction = BestsellerPrediction(
-                product_id=product.asin,
-                product_name=product.product_name,
-                bestseller_probability=result['bestseller_probability'],
-                is_potential_bestseller=result['is_potential_bestseller'],
-                confidence_level=result['confidence_level'],
-                potential_level=result['potential_level'],
-                recommendation=result['recommendation'],
-                predicted_at=datetime.now()
-            )
+                product_dict = product.dict()
+                result = bestseller_model.predict(product_dict)
 
-            predictions.append(prediction)
-            save_bestseller_prediction(product.asin, result)
+                prediction = BestsellerPrediction(
+                    product_id=product.asin,
+                    product_name=product.product_name,
+                    bestseller_probability=result['bestseller_probability'],
+                    is_potential_bestseller=result['is_potential_bestseller'],
+                    confidence_level=result['confidence_level'],
+                    potential_level=result['potential_level'],
+                    recommendation=result['recommendation'],
+                    predicted_at=datetime.now()
+                )
+
+                predictions.append(prediction)
+                save_bestseller_prediction(product.asin, result)
+
+            except Exception as e:
+                logger.error(f"Failed to predict for {product.asin}: {e}")
+                failed_count += 1
+
+        logger.info(f"✓ Batch prediction completed: {len(predictions)} succeeded, {failed_count} failed")
 
         return BatchPredictionResponse(
             predictions=predictions,
@@ -85,17 +138,22 @@ async def predict_bestseller_batch(request: BatchPredictionRequest):
         )
 
     except ModelNotLoadedException as e:
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
     except Exception as e:
-        logger.error(f"Batch prediction error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Batch prediction error: {e}", exc_info=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @router.post("/ranking", response_model=RankingTrendPrediction)
 async def predict_ranking(product: ProductInput):
     try:
-        product_dict = product.dict()
+        validation_error = validate_product_input(product)
+        if validation_error:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=validation_error)
 
+        logger.info(f"Ranking prediction request: {product.asin}")
+
+        product_dict = product.dict()
         result = ranking_model.predict(product_dict)
 
         response = RankingTrendPrediction(
@@ -112,21 +170,29 @@ async def predict_ranking(product: ProductInput):
         )
 
         save_ranking_prediction(product.asin, result)
+        logger.info(f"✓ Ranking prediction completed: {product.asin} - Trend: {result['predicted_trend']}")
 
         return response
 
     except ModelNotLoadedException as e:
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Ranking prediction error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Ranking prediction error for {product.asin}: {e}", exc_info=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @router.post("/price-intelligence", response_model=PriceIntelligence)
 async def analyze_price(product: ProductInput):
     try:
-        product_dict = product.dict()
+        validation_error = validate_product_input(product)
+        if validation_error:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=validation_error)
 
+        logger.info(f"Price intelligence request: {product.asin}")
+
+        product_dict = product.dict()
         result = PriceOptimizer.analyze(product_dict)
 
         response = PriceIntelligence(
@@ -147,17 +213,26 @@ async def analyze_price(product: ProductInput):
         )
 
         save_price_intelligence(product.asin, result)
+        logger.info(f"✓ Price intelligence completed: {product.asin} - Action: {result['price_action']}")
 
         return response
 
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Price intelligence error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Price intelligence error for {product.asin}: {e}", exc_info=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 @router.post("/complete", response_model=CompletePrediction)
 async def predict_complete(product: ProductInput):
     try:
+        validation_error = validate_product_input(product)
+        if validation_error:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=validation_error)
+
+        logger.info(f"Complete prediction request: {product.asin}")
+
         product_dict = product.dict()
 
         bestseller_result = bestseller_model.predict(product_dict)
@@ -209,6 +284,8 @@ async def predict_complete(product: ProductInput):
         save_ranking_prediction(product.asin, ranking_result)
         save_price_intelligence(product.asin, price_result)
 
+        logger.info(f"✓ Complete prediction done: {product.asin}")
+
         return CompletePrediction(
             product_id=product.asin,
             product_name=product.product_name,
@@ -219,7 +296,9 @@ async def predict_complete(product: ProductInput):
         )
 
     except ModelNotLoadedException as e:
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Complete prediction error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Complete prediction error for {product.asin}: {e}", exc_info=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

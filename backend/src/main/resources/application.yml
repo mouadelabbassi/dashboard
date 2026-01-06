@@ -61,7 +61,13 @@ cors:
 ml:
   service:
     url: http://localhost:5001
-      timeout:30
+    timeout: 30
+    max-connections: 50
+    connection-timeout: 5000
+    read-timeout: 30000
+    retry:
+      max-attempts: 3
+      delay: 1000
 
 csv:
   import:

@@ -1,6 +1,6 @@
-Write-Host "=================================="
+
 Write-Host "ML Service API Test Script"
-Write-Host "=================================="
+
 
 Write-Host "`n1. Health Check"
 $health = Invoke-RestMethod http://localhost:5001/health
@@ -72,6 +72,5 @@ try {
     Write-Host "Error: $($_.Exception.Message)"
 }
 
-Write-Host "`n=================================="
+
 Write-Host "API Test Complete"
-Write-Host "=================================="
